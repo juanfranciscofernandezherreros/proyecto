@@ -1,5 +1,19 @@
 # Orquestador de CSV de baloncesto
 
+## Configuración
+
+Todas las rutas, el JDK, las URLs de los servicios y las credenciales están en
+`config\basketball.env`, y la leen igual los `.bat`, los `.ps1` y los `.py`.
+
+- Para cambiar algo **solo en esta máquina** (otra carpeta de datos, contraseñas
+  reales…), crea `config\basketball.local.env` con las claves que quieras
+  sobrescribir. Está fuera de git.
+- Una variable de entorno con el mismo nombre tiene prioridad sobre ambos ficheros.
+- Si `JAVA_HOME` está vacío o apunta a una carpeta que no existe, se usa el JDK 21
+  más reciente instalado.
+
+## Orquestador de competiciones
+
 Este documento describe el orquestador `python\orchestrate_competition.py`.
 Los scripts de uso diario están en `1_EJECUTAR\`; los que estos usan, en `scripts\`
 (por función) y `python\`.

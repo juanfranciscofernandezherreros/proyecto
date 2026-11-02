@@ -13,31 +13,27 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-function Get-Setting([string]$Name, [string]$Default) {
-    $value = [Environment]::GetEnvironmentVariable($Name)
-    if ([string]::IsNullOrWhiteSpace($value)) { return $Default }
-    return $value
-}
-
-$workspace = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
-$batchRoot = Join-Path $workspace 'csv-extra-batch'
-$reportDir = Get-Setting 'REPORT_DIR' 'C:\data\basketball\reports\orchestrator'
-$javaExe = Get-Setting 'JAVA_EXE' 'C:\Program Files\Eclipse Adoptium\jdk-21.0.12.101-hotspot\bin\java.exe'
-$dockerDesktop = Get-Setting 'DOCKER_DESKTOP' 'C:\Program Files\Docker\Docker\Docker Desktop.exe'
-$composeFile = Get-Setting 'COMPOSE_FILE' (Join-Path $workspace 'local-validation\docker-compose.yml')
-$auditUrl = Get-Setting 'AUDIT_URL' 'http://localhost:8090/fixtures-processing-audit'
-$launcherUrl = (Get-Setting 'LAUNCHER_URL' 'http://localhost:8088/').TrimEnd('/') + '/'
-$competitionsDir = Get-Setting 'COMPETITIONS_DIR' 'C:\data\basketball\competitions'
-$readyDir = Get-Setting 'READY_DIR' 'C:\data\basketball-ready\current'
+# Rutas, JDK, URLs y credenciales: config\basketball.env (via scripts\config.ps1).
+. (Join-Path $PSScriptRoot '..\config.ps1')
+$workspace = $Config.WORKSPACE
+$batchRoot = $Config.BATCH_ROOT
+$reportDir = $Config.REPORT_DIR
+$javaExe = $Config.JAVA_EXE
+$dockerDesktop = $Config.DOCKER_DESKTOP
+$composeFile = $Config.COMPOSE_FILE
+$auditUrl = $Config.AUDIT_URL
+$launcherUrl = $Config.LAUNCHER_URL.TrimEnd('/') + '/'
+$competitionsDir = $Config.COMPETITIONS_DIR
+$readyDir = $Config.READY_DIR
 # Los importadores envian CSV de competitions\ y el pipeline por match_id de basketball-ready\;
 # el launcher comun admite ambos para no tener que reiniciarlo segun quien lo use.
-$launcherAllowedRoot = Get-Setting 'LAUNCHER_CSV_ALLOWED_ROOT' 'C:\data'
+$launcherAllowedRoot = $Config.LAUNCHER_CSV_ALLOWED_ROOT
 # Marca en la linea de comandos del launcher arrancado con esta configuracion comun.
 $launcherMarker = '-Dbasketball.launcher.config=comun-v1'
 
-$grafanaUrl = (Get-Setting 'GRAFANA_URL' 'http://localhost:8084').TrimEnd('/')
-$grafanaUser = Get-Setting 'GRAFANA_USER' 'admin'
-$grafanaPassword = Get-Setting 'GRAFANA_PASSWORD' 'local-dashboard-admin'
+$grafanaUrl = $Config.GRAFANA_URL.TrimEnd('/')
+$grafanaUser = $Config.GRAFANA_USER
+$grafanaPassword = $Config.GRAFANA_PASSWORD
 $grafanaContainer = 'basketball-grafana'
 $pendingDashboardFile = Join-Path $batchRoot 'observability\fixtures-pending-dashboard.json'
 $pendingDashboardUid = 'fixtures-audit-live'

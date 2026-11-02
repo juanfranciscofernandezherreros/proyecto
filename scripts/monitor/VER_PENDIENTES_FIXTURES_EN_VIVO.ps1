@@ -1,5 +1,6 @@
 $ErrorActionPreference = 'Continue'
-$uri = 'http://localhost:8090/fixtures-processing-audit/latest'
+. (Join-Path $PSScriptRoot '..\config.ps1')
+$uri = "$($Config.AUDIT_URL)/latest"
 
 while ($true) {
     try {

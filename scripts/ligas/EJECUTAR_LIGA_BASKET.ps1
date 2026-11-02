@@ -47,10 +47,11 @@ if ([string]::IsNullOrWhiteSpace($League)) {
     if (-not $leagueDefinition) { throw "Liga no configurada: $League" }
 }
 
-$python = 'C:\Develop\basketball\python-pyppeter\.venv\Scripts\python.exe'
-$scraper = 'C:\Develop\basketball\python-pyppeter\flashscore.py'
+. (Join-Path $PSScriptRoot '..\config.ps1')
+$python = $Config.PYTHON
+$scraper = $Config.SCRAPER
 $chromeDriver = Join-Path $desktopRoot '.tools\chromedriver\chromedriver-win64\chromedriver.exe'
-$competitionRoot = "C:\data\basketball\competitions\$($leagueDefinition.country)\$($leagueDefinition.competition)"
+$competitionRoot = Join-Path $Config.COMPETITIONS_DIR "$($leagueDefinition.country)\$($leagueDefinition.competition)"
 $output = Join-Path $competitionRoot 'RESULTS.csv'
 $logDirectory = Join-Path $desktopRoot 'logs'
 $logPath = Join-Path $logDirectory ("extraccion_{0}_{1:yyyyMMdd_HHmmss}.log" -f $leagueDefinition.code, (Get-Date))

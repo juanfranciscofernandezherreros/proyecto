@@ -9,11 +9,12 @@ param(
 # Selenium/Pyppeteer may write warnings to stderr. In Windows PowerShell 5
 # those arrive as ErrorRecord, so rely on $LASTEXITCODE after each extractor.
 $ErrorActionPreference = 'Continue'
-$root = 'C:\Develop\basketball\python-pyppeter'
+. (Join-Path $PSScriptRoot '..\config.ps1')
+$root = $Config.SCRAPER_DIR
 $python = Join-Path $root '.venv\Scripts\python.exe'
 $scraper = Join-Path $root 'flashscore.py'
 $resolver = Join-Path $PSScriptRoot '..\..\python\resolve_flashscore_redirect.py'
-$competitionRoot = "C:\data\basketball\competitions\$Country\$Competition"
+$competitionRoot = Join-Path $Config.COMPETITIONS_DIR "$Country\$Competition"
 $reportRoot = Join-Path $PSScriptRoot '..\..\logs'
 $datasetLabels = @{
     'score_summary.csv' = 'MATCH_SUMMARY'

@@ -1,5 +1,6 @@
 param([string]$League)
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot '..\config.ps1')
 $root = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
 $cfg = @(Get-Content -Raw (Join-Path $root 'LIGAS_BASKET.json') | ConvertFrom-Json)
 if ([string]::IsNullOrWhiteSpace($League)) {
@@ -18,10 +19,10 @@ $csvPath = $result.CsvPath
 $matchIds = @(Import-Csv -LiteralPath $csvPath | ForEach-Object { if ($_.matchId) {$_.matchId} else {$_.match_id} } | Where-Object { $_ -match '^[A-Za-z0-9_-]+$' } | Select-Object -Unique)
 if (-not $matchIds.Count) { throw "No hay partidos válidos en $csvPath" }
 
-$python = 'C:\Develop\basketball\python-pyppeter\.venv\Scripts\python.exe'
-$scraper = 'C:\Develop\basketball\python-pyppeter\flashscore.py'
-$competitionRoot = "C:\data\basketball\competitions\$($leagueDef.country)\$($leagueDef.competition)"
-$reportRoot = "C:\data\basketball\reports\$($leagueDef.country)\$($leagueDef.competition)"
+$python = $Config.PYTHON
+$scraper = $Config.SCRAPER
+$competitionRoot = Join-Path $Config.COMPETITIONS_DIR "$($leagueDef.country)\$($leagueDef.competition)"
+$reportRoot = Join-Path $Config.REPORTS_DIR "$($leagueDef.country)\$($leagueDef.competition)"
 if (-not (Test-Path $python) -or -not (Test-Path $scraper)) { throw 'No se encuentra el scraper Python.' }
 New-Item -ItemType Directory -Force -Path $reportRoot | Out-Null
 $runLog = Join-Path $reportRoot ("last-matches-{0}.log" -f (Get-Date -Format yyyyMMddHHmmss))
@@ -32,7 +33,7 @@ foreach ($id in $matchIds) {
 }
 
 # Importa los CSV de la jornada en el orden que exige el launcher.
-$batchRoot = 'C:\Develop\basketball\csv-extra-batch'
+$batchRoot = $Config.BATCH_ROOT
 $launcherRoot = Join-Path $batchRoot 'launcher'
 & (Join-Path $PSScriptRoot '..\arranque\ASEGURAR_SERVICIOS.ps1') -Servicios postgres,launcher
 if ($LASTEXITCODE -ne 0) { throw 'No se pudieron asegurar los servicios: postgres,launcher.' }
@@ -44,8 +45,8 @@ foreach ($id in $matchIds) {
     foreach ($prefix in $prefixes) {
         $file=Get-ChildItem $dir -File -Filter "$prefix*.csv" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending | Select-Object -First 1
         if (-not $file) { if ($prefix -eq 'POINT_BY_POINT_') { Write-Warning "Sin PBP para $id"; continue }; throw "Falta $prefix para $id" }
-        $req=Invoke-RestMethod -Method Post -Uri 'http://localhost:8088/batch-launches' -ContentType 'application/json' -Body (@{file=$file.FullName}|ConvertTo-Json -Compress)
-        do { Start-Sleep 2; $req=Invoke-RestMethod -Uri "http://localhost:8088/batch-launches/$($req.requestId)" } while ($req.status -in @('QUEUED','RUNNING'))
+        $req=Invoke-RestMethod -Method Post -Uri "$($Config.LAUNCHER_URL)/batch-launches" -ContentType 'application/json' -Body (@{file=$file.FullName}|ConvertTo-Json -Compress)
+        do { Start-Sleep 2; $req=Invoke-RestMethod -Uri "$($Config.LAUNCHER_URL)/batch-launches/$($req.requestId)" } while ($req.status -in @('QUEUED','RUNNING'))
         $report += [pscustomobject]@{MatchId=$id;Type=$types[$prefix];File=$file.Name;Status=$req.status}
         if ($req.status -ne 'COMPLETED') { throw "Falló $($file.Name): $($req.status)" }
     }

@@ -4,11 +4,12 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$workspace = 'C:\Develop\basketball'
-$reportRoot = 'C:\data\basketball\reports\orchestrator'
+. (Join-Path $PSScriptRoot '..\config.ps1')
+$workspace = $Config.WORKSPACE
+$reportRoot = $Config.REPORT_DIR
 $python = Join-Path $workspace 'python-pyppeter\.venv\Scripts\python.exe'
 $pipeline = Join-Path $workspace 'python\process_pending_match_csvs.py'
-$auditRunUri = 'http://localhost:8090/fixtures-processing-audit/run'
+$auditRunUri = "$($Config.AUDIT_URL)/run"
 $runId = Get-Date -Format 'yyyyMMddHHmmss'
 
 function Get-LatestPendingRows {

@@ -1,5 +1,6 @@
 $ErrorActionPreference = 'Continue'
-$container = 'local-validation-postgres-1'
+. (Join-Path $PSScriptRoot '..\config.ps1')
+$container = $Config.POSTGRES_CONTAINER
 $sql = @"
 WITH active AS (
     SELECT request_id, batch_type, status, file_path, created_at, started_at, finished_at, error
@@ -22,7 +23,7 @@ FROM selected;
 
 while ($true) {
     try {
-        $json = & docker exec $container psql -U test -d basketball -X -A -t -c $sql 2>$null
+        $json = & docker exec $container psql -U $Config.DB_USER -d $Config.DB_NAME -X -A -t -c $sql 2>$null
         if ($LASTEXITCODE -ne 0) { throw 'No se pudo consultar batch_launch_request en PostgreSQL.' }
         $items = @((($json -join '').Trim()) | ConvertFrom-Json)
         Clear-Host

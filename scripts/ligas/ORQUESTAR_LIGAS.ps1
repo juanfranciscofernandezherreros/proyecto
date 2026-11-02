@@ -8,7 +8,8 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$workspace = 'C:\Develop\basketball'
+. (Join-Path $PSScriptRoot '..\config.ps1')
+$workspace = $Config.WORKSPACE
 $python = Join-Path $workspace 'python-pyppeter\.venv\Scripts\python.exe'
 $scraper = Join-Path $workspace 'python-pyppeter\flashscore.py'
 $leagues = @(Get-Content -Raw -LiteralPath $ConfigPath | ConvertFrom-Json)
@@ -27,7 +28,7 @@ function Invoke-Bat([string]$Name, [string[]]$Arguments) {
 
 if ($Mode -in @('results', 'todo')) {
     foreach ($item in $selected) {
-        $root = "C:\data\basketball\competitions\$($item.country)\$($item.competition)"
+        $root = Join-Path $Config.COMPETITIONS_DIR "$($item.country)\$($item.competition)"
         New-Item -ItemType Directory -Force -Path $root | Out-Null
         $started = Get-Date
         Write-Host "RESULTS [$($item.code)]" -ForegroundColor Cyan

@@ -9,16 +9,18 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-$root = 'C:\Develop\basketball'
+# Rutas, JDK, URLs y credenciales: config\basketball.env (via scripts\config.ps1).
+. (Join-Path $PSScriptRoot '..\config.ps1')
+$root = $Config.WORKSPACE
 $pythonRoot = Join-Path $root 'python-pyppeter'
 $batchRoot = Join-Path $root 'csv-extra-batch'
 $launcherRoot = Join-Path $batchRoot 'launcher'
 $python = Join-Path $pythonRoot '.venv\Scripts\python.exe'
-$competitionRoot = "C:\data\basketball\competitions\$Country\$Competition"
-$reportRoot = "C:\data\basketball\reports\$Country\$Competition"
+$competitionRoot = Join-Path $Config.COMPETITIONS_DIR "$Country\$Competition"
+$reportRoot = Join-Path $Config.REPORTS_DIR "$Country\$Competition"
 $composeFile = Join-Path $root 'local-validation\docker-compose.yml'
 $runId = Get-Date -Format 'yyyyMMddHHmmss'
-$launcherUrl = 'http://localhost:8088'
+$launcherUrl = $Config.LAUNCHER_URL
 
 function Get-CsvType([string]$name) {
     if ($name -match '^RESULTS_') { return 'RESULTS' }
@@ -99,7 +101,7 @@ $matchIds = @(Import-Csv -LiteralPath $csv.FullName | ForEach-Object {
 if ($matchIds.Count -eq 0) { throw 'No se pudieron leer match IDs para verificar la importacion.' }
 $sqlIds = ($matchIds | ForEach-Object { "'$_'" }) -join ','
 $query = "SELECT COUNT(DISTINCT match_id) FROM results.results WHERE country = '$Country' AND competition = '$Competition' AND match_id IN ($sqlIds);"
-$databaseCount = & docker compose -f $composeFile exec -T postgres psql -U test -d basketball --no-psqlrc --tuples-only --no-align --command $query
+$databaseCount = & docker compose -f $composeFile exec -T postgres psql -U $Config.DB_USER -d $Config.DB_NAME --no-psqlrc --tuples-only --no-align --command $query
 if ($LASTEXITCODE -ne 0) { throw 'La importacion se completo, pero fallo la consulta de verificacion en PostgreSQL.' }
 $databaseCount = [int](($databaseCount | Select-Object -Last 1).Trim())
 Write-Host "Verificacion PostgreSQL: $databaseCount de $($matchIds.Count) partidos del CSV encontrados en results.results para $Country/$Competition."

@@ -7,10 +7,11 @@ param(
 # Windows PowerShell 5 wraps native stderr as an ErrorRecord. Pyppeter sends
 # deprecation notices there, so use its exit code to detect actual failures.
 $ErrorActionPreference = 'Continue'
-$root = 'C:\Develop\basketball\python-pyppeter'
+. (Join-Path $PSScriptRoot '..\config.ps1')
+$root = $Config.SCRAPER_DIR
 $python = Join-Path $root '.venv\Scripts\python.exe'
 $scraper = Join-Path $root 'flashscore.py'
-$competitionRoot = "C:\data\basketball\competitions\$Country\$Competition"
+$competitionRoot = Join-Path $Config.COMPETITIONS_DIR "$Country\$Competition"
 $reportRoot = Join-Path $PSScriptRoot '..\..\logs'
 $chromeDriver = Join-Path $PSScriptRoot '..\..\.tools\chromedriver\chromedriver-win64\chromedriver.exe'
 foreach ($path in @($python, $scraper, $competitionRoot, $chromeDriver)) {

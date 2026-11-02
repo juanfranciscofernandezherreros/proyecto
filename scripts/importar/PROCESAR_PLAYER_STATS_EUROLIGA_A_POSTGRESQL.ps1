@@ -7,15 +7,17 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-$root = 'C:\Develop\basketball'
+# Rutas, JDK, URLs y credenciales: config\basketball.env (via scripts\config.ps1).
+. (Join-Path $PSScriptRoot '..\config.ps1')
+$root = $Config.WORKSPACE
 $batchRoot = Join-Path $root 'csv-extra-batch'
 $launcherRoot = Join-Path $batchRoot 'launcher'
-$competitionRoot = "C:\data\basketball\competitions\$Country\$Competition"
-$reportRoot = "C:\data\basketball\reports\$Country\$Competition"
+$competitionRoot = Join-Path $Config.COMPETITIONS_DIR "$Country\$Competition"
+$reportRoot = Join-Path $Config.REPORTS_DIR "$Country\$Competition"
 $composeFile = Join-Path $root 'local-validation\docker-compose.yml'
-$java = 'C:\Program Files\Eclipse Adoptium\jdk-21.0.12.101-hotspot\bin\java.exe'
+$java = $Config.JAVA_EXE
 $launcherJar = Join-Path $launcherRoot 'target\csv-batch-launcher.jar'
-$launcherUrl = 'http://localhost:8088'
+$launcherUrl = $Config.LAUNCHER_URL
 $runId = Get-Date -Format 'yyyyMMddHHmmss'
 
 function Submit-And-Wait([System.IO.FileInfo]$File) {

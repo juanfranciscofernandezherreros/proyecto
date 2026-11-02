@@ -16,6 +16,8 @@ import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
+
+from proyecto_config import CONFIG, path
 from urllib.parse import parse_qs, urlparse
 from urllib.error import HTTPError, URLError
 from urllib.request import urlopen
@@ -25,8 +27,8 @@ WORKSPACE = Path(__file__).resolve().parents[1]
 SCRAPER = WORKSPACE / "python-pyppeter"
 RESOLVER = WORKSPACE / "python" / "resolve_flashscore_redirect.py"
 CONSOLIDATOR = SCRAPER / "consolidate_csv.py"
-DATA_ROOT = Path(r"C:\data\basketball")
-READY_ROOT = Path(r"C:\data\basketball-ready")
+DATA_ROOT = path("DATA_DIR")
+READY_ROOT = path("READY_ROOT")
 MATCH_ID = re.compile(r"^[A-Za-z0-9]+$")
 SLUG = re.compile(r"^[a-z0-9][a-z0-9-]*$")
 
@@ -115,7 +117,7 @@ def publish_results_csv(run_dir: Path, match_id: str, country: str, competition:
 
 def verify_projected_match(match_id: str, timeout_seconds: int = 120) -> None:
     """Wait for the projector and require the API detail endpoint to expose it."""
-    url = f"http://localhost:8082/api/v1/matches/{match_id}"
+    url = f"{CONFIG['API_URL']}/api/v1/matches/{match_id}"
     deadline = time.monotonic() + timeout_seconds
     last_error = "not projected yet"
     while time.monotonic() < deadline:
@@ -180,7 +182,7 @@ def main() -> int:
     )
     command(
         sys.executable, str(SCRAPER / "run_all_csv_batches.py"),
-        "--root", str(staged_match_dir), "--launcher-url", "http://localhost:8088",
+        "--root", str(staged_match_dir), "--launcher-url", CONFIG["LAUNCHER_URL"],
         "--timeout-seconds", str(args.timeout_seconds),
     )
     # Restrict quarter reconciliation to the match just published.  The

@@ -3,11 +3,16 @@
 import json
 import time
 from pathlib import Path
+
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "python"))
+from proyecto_config import CONFIG, path as config_path  # noqa: E402
 from urllib.request import Request, urlopen
 
 
-ROOT = Path(r"C:\data\basketball-ready\current")
-LAUNCHER = "http://localhost:8088"
+ROOT = config_path("READY_DIR")
+LAUNCHER = CONFIG["LAUNCHER_URL"]
 FILES = (
     "RESULTS_20261026085554_europe_euroleague.csv",
     "SCORE_SUMMARY_20261026085554_all.csv",

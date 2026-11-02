@@ -1,4 +1,9 @@
 from pathlib import Path
+
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "python"))
+from proyecto_config import path  # noqa: E402
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER
 from reportlab.lib.pagesizes import A4
@@ -6,7 +11,7 @@ from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import cm
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak, KeepTogether
 
-OUT = Path(r"C:\Develop\basketball\outputs\pdf\flujo_operativo_basketball.pdf")
+OUT = path("WORKSPACE") / "outputs" / "pdf" / "flujo_operativo_basketball.pdf"
 OUT.parent.mkdir(parents=True, exist_ok=True)
 
 styles = getSampleStyleSheet()

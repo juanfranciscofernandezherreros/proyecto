@@ -8,18 +8,20 @@ import subprocess
 import sys
 from pathlib import Path
 
+from proyecto_config import CONFIG, path
+
 
 WORKSPACE = Path(__file__).resolve().parents[1]
 SCRAPER = WORKSPACE / "python-pyppeter"
-DATA_ROOT = Path(r"C:\data\basketball")
-READY_ROOT = Path(r"C:\data\basketball-ready")
+DATA_ROOT = path("DATA_DIR")
+READY_ROOT = path("READY_ROOT")
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("country")
     parser.add_argument("competition")
-    parser.add_argument("--launcher-url", default="http://localhost:8088")
+    parser.add_argument("--launcher-url", default=CONFIG["LAUNCHER_URL"])
     parser.add_argument("--match-id", action="append", default=[], help="Only ingest these match IDs; repeatable")
     args = parser.parse_args()
     raw = DATA_ROOT / "competitions" / args.country / args.competition

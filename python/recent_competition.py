@@ -10,11 +10,13 @@ import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from pathlib import Path
+
+from proyecto_config import CONFIG, path
 from urllib.parse import parse_qs, urlparse
 
 WORKSPACE = Path(__file__).resolve().parents[1]
 SCRAPER = WORKSPACE / "python-pyppeter"
-DATA_ROOT = Path(r"C:\data\basketball")
+DATA_ROOT = path("DATA_DIR")
 SCORE = re.compile(r"^\s*\d+\s*-\s*\d+\s*$")
 DATASETS = {"match_details.csv": "MATCH_DETAILS", "score_summary.csv": "SCORE_SUMMARY", "player_stats.csv": "PLAYER_STATS", "stats_all_periods.csv": "STATS_ALL_PERIODS", "point_by_point.csv": "POINT_BY_POINT", "h2h.csv": "H2H", "odds_home_away.csv": "ODDS_HOME_AWAY", "odds_1x2.csv": "ODDS_1X2", "odds_over_under.csv": "ODDS_OVER_UNDER", "odds_asian_handicap.csv": "ODDS_ASIAN_HANDICAP"}
 

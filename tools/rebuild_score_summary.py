@@ -3,9 +3,14 @@
 import csv
 from pathlib import Path
 
+import sys
 
-SOURCE = Path(r"C:\data\basketball\competitions\europe\euroleague")
-TARGET = Path(r"C:\data\basketball-ready\current\SCORE_SUMMARY_retry.csv")
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "python"))
+from proyecto_config import path as config_path  # noqa: E402
+
+
+SOURCE = config_path("COMPETITIONS_DIR") / "europe" / "euroleague"
+TARGET = config_path("READY_DIR") / "SCORE_SUMMARY_retry.csv"
 
 rows: dict[tuple[str, str], dict[str, str]] = {}
 fieldnames: list[str] | None = None

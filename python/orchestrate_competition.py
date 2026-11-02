@@ -18,14 +18,16 @@ from datetime import datetime, timezone
 from threading import Thread
 from pathlib import Path
 
+from proyecto_config import CONFIG, path
+
 
 WORKSPACE = Path(__file__).resolve().parents[1]
 SCRAPER = WORKSPACE / "python-pyppeter"
-DATA_ROOT = Path(r"C:\data\basketball")
-READY_ROOT = Path(r"C:\data\basketball-ready")
+DATA_ROOT = path("DATA_DIR")
+READY_ROOT = path("READY_ROOT")
 ANTIBLOQUEO = WORKSPACE / "scripts" / "arranque" / "MANTENER_DESPIERTO.bat"
 WATCHER = WORKSPACE / "scripts" / "monitor" / "watch_csv_imports.bat"
-POSTGRES_CONTAINER = "local-validation-postgres-1"
+POSTGRES_CONTAINER = CONFIG["POSTGRES_CONTAINER"]
 DATABASE_COUNT_QUERY = """
 SELECT 'results', count(*) FROM results.results
 UNION ALL SELECT 'fixtures', count(*) FROM fixtures.fixtures
@@ -97,7 +99,7 @@ def write_audit(path: Path, payload: dict) -> None:
 def database_snapshot() -> dict[str, int]:
     """Return global PostgreSQL table counts using a read-only query."""
     command = [
-        "docker", "exec", POSTGRES_CONTAINER, "psql", "-U", "test", "-d", "basketball",
+        "docker", "exec", POSTGRES_CONTAINER, "psql", "-U", CONFIG["DB_USER"], "-d", CONFIG["DB_NAME"],
         "-At", "-F", "|", "-c", DATABASE_COUNT_QUERY,
     ]
     result = subprocess.run(command, text=True, capture_output=True, check=True)

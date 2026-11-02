@@ -11,10 +11,12 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from pathlib import Path
 
+from proyecto_config import CONFIG, path
+
 from recent_competition import DATASETS, SCORE, SCRAPER, WORKSPACE, completed_matches, extract_bundle, match_id, missing_datasets, invoke
 
 
-DATA_ROOT = Path(r"C:\data\basketball")
+DATA_ROOT = path("DATA_DIR")
 URL = "https://www.flashscore.com/basketball/usa/nba/results/"
 DATE = re.compile(r"\b(\d{1,2}\.\d{1,2}\.)")
 

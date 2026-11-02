@@ -16,6 +16,8 @@ import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
+
+from proyecto_config import CONFIG, path
 from typing import Any
 
 from mcp.server.fastmcp import FastMCP
@@ -23,8 +25,8 @@ from mcp.server.fastmcp import FastMCP
 
 WORKSPACE = Path(__file__).resolve().parents[1]
 SCRAPER = WORKSPACE / "python-pyppeter"
-DATA_ROOT = Path(r"C:\data\basketball")
-READY_ROOT = Path(r"C:\data\basketball-ready\current")
+DATA_ROOT = path("DATA_DIR")
+READY_ROOT = path("READY_DIR")
 REPORTS_ROOT = DATA_ROOT / "reports"
 ANTIBLOQUEO = WORKSPACE / "scripts" / "arranque" / "MANTENER_DESPIERTO.bat"
 WATCHER = WORKSPACE / "scripts" / "monitor" / "watch_csv_imports.bat"
@@ -401,7 +403,7 @@ def run_batch_ingestion(timeout_seconds: int = 3600) -> dict[str, Any]:
     if not 60 <= timeout_seconds <= 14400:
         raise ValueError("timeout_seconds must be between 60 and 14400")
     stamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
-    return _start([sys.executable, str(SCRAPER / "run_all_csv_batches.py"), "--root", str(READY_ROOT), "--launcher-url", "http://localhost:8088", "--timeout-seconds", str(timeout_seconds)], REPORTS_ROOT / "batch" / f"mcp-batch-{stamp}.log")
+    return _start([sys.executable, str(SCRAPER / "run_all_csv_batches.py"), "--root", str(READY_ROOT), "--launcher-url", CONFIG["LAUNCHER_URL"], "--timeout-seconds", str(timeout_seconds)], REPORTS_ROOT / "batch" / f"mcp-batch-{stamp}.log")
 
 
 @mcp.tool()
@@ -409,7 +411,7 @@ def query_postgres(sql: str) -> dict[str, Any]:
     """Execute one read-only SELECT/WITH/EXPLAIN query against basketball on localhost:55432."""
     if not READ_ONLY_SQL.match(sql) or ";" in sql.rstrip().rstrip(";"):
         raise ValueError("Only one read-only SELECT, WITH, or EXPLAIN statement is permitted")
-    command = ["docker", "exec", "local-validation-postgres-1", "psql", "-U", "test", "-d", "basketball", "-v", "ON_ERROR_STOP=1", "-P", "pager=off", "-c", f"SET TRANSACTION READ ONLY; {sql}"]
+    command = ["docker", "exec", CONFIG["POSTGRES_CONTAINER"], "psql", "-U", CONFIG["DB_USER"], "-d", CONFIG["DB_NAME"], "-v", "ON_ERROR_STOP=1", "-P", "pager=off", "-c", f"SET TRANSACTION READ ONLY; {sql}"]
     completed = subprocess.run(command, text=True, capture_output=True, check=False)
     return {"returncode": completed.returncode, "stdout": completed.stdout, "stderr": completed.stderr}
 
@@ -422,8 +424,8 @@ def get_euroleague_all_tables() -> dict[str, Any]:
         raise FileNotFoundError(f"The canonical query file is missing: {query_path}")
     query = query_path.read_text(encoding="utf-8")
     command = [
-        "docker", "exec", "local-validation-postgres-1", "psql",
-        "-X", "-U", "test", "-d", "basketball", "--csv", "-v",
+        "docker", "exec", CONFIG["POSTGRES_CONTAINER"], "psql",
+        "-X", "-U", CONFIG["DB_USER"], "-d", CONFIG["DB_NAME"], "--csv", "-v",
         "ON_ERROR_STOP=1", "-c", query,
     ]
     completed = subprocess.run(
@@ -501,7 +503,7 @@ def runtime_services_status() -> dict[str, Any]:
     completed = subprocess.run(["docker", "ps", "--format", "{{.Names}}|{{.Status}}"], text=True, capture_output=True, check=True)
     services = [line.split("|", 1) for line in completed.stdout.splitlines() if "|" in line]
     try:
-        launcher = subprocess.run(["powershell.exe", "-NoProfile", "-Command", "(Invoke-WebRequest -UseBasicParsing http://localhost:8088 -TimeoutSec 3).StatusCode"], text=True, capture_output=True, timeout=5).returncode == 0
+        launcher = subprocess.run(["powershell.exe", "-NoProfile", "-Command", f"(Invoke-WebRequest -UseBasicParsing {CONFIG['LAUNCHER_URL']} -TimeoutSec 3).StatusCode"], text=True, capture_output=True, timeout=5).returncode == 0
     except (OSError, subprocess.TimeoutExpired):
         launcher = False
     return {"containers": [{"name": name, "status": status} for name, status in services], "batch_launcher_reachable": launcher}
@@ -518,7 +520,7 @@ def start_runtime_services() -> dict[str, Any]:
 @mcp.tool()
 def start_batch_launcher() -> dict[str, Any]:
     """Start the host batch launcher with Java 21 and canonical PostgreSQL/JAR configuration."""
-    java = Path(r"C:\Program Files\Eclipse Adoptium\jdk-21.0.12.101-hotspot\bin\java.exe")
+    java = path("JAVA_EXE")
     if not java.is_file():
         raise FileNotFoundError("Java 21 is required for csv-batch-launcher")
     jars = {
@@ -532,7 +534,7 @@ def start_batch_launcher() -> dict[str, Any]:
     }
     if any(not path.is_file() for path in jars.values()):
         raise FileNotFoundError("One or more batch JARs are missing")
-    environment = os.environ | {"DB_URL": "jdbc:postgresql://localhost:55432/basketball", "DB_USER": "test", "DB_PASS": "test", "BATCH_DB_URL": "jdbc:postgresql://localhost:55432/basketball", "BATCH_DB_USER": "test", "BATCH_DB_PASS": "test", "CSV_ALLOWED_ROOT": r"C:\data\basketball-ready", **{name: str(path) for name, path in jars.items()}}
+    environment = os.environ | {"DB_URL": CONFIG["DB_URL"], "DB_USER": CONFIG["DB_USER"], "DB_PASS": CONFIG["DB_PASS"], "BATCH_DB_URL": CONFIG["DB_URL"], "BATCH_DB_USER": CONFIG["DB_USER"], "BATCH_DB_PASS": CONFIG["DB_PASS"], "CSV_ALLOWED_ROOT": CONFIG["READY_ROOT"], **{name: str(path) for name, path in jars.items()}}
     log = REPORTS_ROOT / "batch-launcher-mcp.log"
     log.parent.mkdir(parents=True, exist_ok=True)
     handle = log.open("a", encoding="utf-8")

@@ -8,8 +8,10 @@ import time
 from datetime import datetime
 from pathlib import Path
 
+from proyecto_config import CONFIG, path
 
-DATA_ROOT = Path(r"C:\data\basketball")
+
+DATA_ROOT = path("DATA_DIR")
 PREFIXES = (
     "MATCH_DETAILS", "SCORE_SUMMARY", "PLAYER_STATS", "STATS_ALL_PERIODS",
     "POINT_BY_POINT", "H2H", "ODDS_HOME_AWAY", "ODDS_1X2",

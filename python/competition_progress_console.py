@@ -9,8 +9,10 @@ import time
 from datetime import datetime
 from pathlib import Path
 
+from proyecto_config import CONFIG, path
 
-DATA_ROOT = Path(r"C:\data\basketball")
+
+DATA_ROOT = path("DATA_DIR")
 MATCH = re.compile(r"[?&]mid=([A-Za-z0-9]+)")
 CSV = re.compile(r"CSV created:\s+(.+\.csv)")
 EVENT = re.compile(r"(extract_flashscore_match_bundle\.py|CSV created:|Generated files:|Manifest creado:|Browser timeout|Traceback|ERROR|failed)", re.IGNORECASE)

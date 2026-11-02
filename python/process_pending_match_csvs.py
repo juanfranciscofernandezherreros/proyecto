@@ -7,14 +7,16 @@ import subprocess
 import sys
 from pathlib import Path
 
+from proyecto_config import CONFIG, path
+
 WORKSPACE = Path(__file__).resolve().parents[1]
 PYTHON = WORKSPACE / "python-pyppeter" / ".venv" / "Scripts" / "python.exe"
 SCRAPER = WORKSPACE / "python-pyppeter" / "extract_flashscore_match_bundle.py"
 RESOLVER = WORKSPACE / "python" / "resolve_flashscore_redirect.py"
 CONSOLIDATOR = WORKSPACE / "python-pyppeter" / "consolidate_csv.py"
 SUBMITTER = WORKSPACE / "python-pyppeter" / "run_all_csv_batches.py"
-RAW = Path(r"C:\data\basketball\competitions")
-READY = Path(r"C:\data\basketball-ready")
+RAW = path("COMPETITIONS_DIR")
+READY = path("READY_ROOT")
 DATASETS = {
     "MATCH_SUMMARY": ("score_summary.csv", "SCORE_SUMMARY_"),
     "TEAM_STATS": ("stats_all_periods.csv", "STATS_ALL_PERIODS_"),
@@ -69,7 +71,7 @@ def main() -> int:
         print(f"[{args.match_id}] consolidating {csv_path.name}...", flush=True)
         call(str(PYTHON), str(CONSOLIDATOR), "--input", str(root), "--output", str(READY), "--match-id", args.match_id, "--prefix", prefix)
         print(f"[{args.match_id}] submitting {logical} to batch launcher...", flush=True)
-        call(str(PYTHON), str(SUBMITTER), "--root", str(READY / "current" / args.match_id), "--prefix", prefix, "--launcher-url", "http://localhost:8088", "--timeout-seconds", "120")
+        call(str(PYTHON), str(SUBMITTER), "--root", str(READY / "current" / args.match_id), "--prefix", prefix, "--launcher-url", CONFIG["LAUNCHER_URL"], "--timeout-seconds", "120")
         print(f"[{args.match_id}] {logical} import completed.", flush=True)
     print(f"[{args.match_id}] all requested datasets completed.", flush=True)
     return 0

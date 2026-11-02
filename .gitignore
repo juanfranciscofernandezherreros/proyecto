@@ -1,0 +1,27 @@
+# Repositorios propios: cada uno lleva su historial en su propia carpeta.
+/basketball-match-api/
+/basketball-match-projector/
+/basketball-match-web/
+/csv-extra-batch/
+/local-validation/
+/python-pyppeter/
+/.tmp-ai-generic-generation-content/
+
+# Material archivado y datos generados.
+/_archivo/
+/outputs/
+/logs/
+*.log
+
+# Dependencias, compilados y caches.
+/.m2/
+**/target/
+**/node_modules/
+**/.venv/
+__pycache__/
+*.pyc
+
+# Configuracion local de herramientas (puede llevar credenciales).
+/.codex/
+/.vscode/
+/.claude/

@@ -1,0 +1,79 @@
+[
+  {
+    "code": "EUROLIGA",
+    "name": "Euroliga",
+    "country": "europe",
+    "competition": "euroleague",
+    "resultsUrl": "https://www.flashscore.com/basketball/europe/euroleague/results/"
+  },
+  {
+    "code": "NBA",
+    "name": "NBA",
+    "country": "usa",
+    "competition": "nba",
+    "resultsUrl": "https://www.flashscore.com/basketball/usa/nba/results/"
+  },
+  {
+    "code": "ACB",
+    "name": "España - Liga Endesa (ACB)",
+    "country": "spain",
+    "competition": "liga-endesa",
+    "resultsUrl": "https://www.flashscore.com/basketball/spain/acb/results/"
+  },
+  {
+    "code": "BSL",
+    "name": "Turquía - Super Lig",
+    "country": "turkey",
+    "competition": "super-lig",
+    "resultsUrl": "https://www.flashscore.com/basketball/turkey/super-lig/results/"
+  },
+  {
+    "code": "GBL",
+    "name": "Grecia - Basket League",
+    "country": "greece",
+    "competition": "basket-league",
+    "resultsUrl": "https://www.flashscore.com/basketball/greece/basket-league/results/"
+  },
+  {
+    "code": "LEGA_A",
+    "name": "Italia - Lega A",
+    "country": "italy",
+    "competition": "lega-a",
+    "resultsUrl": "https://www.flashscore.com/basketball/italy/lega-a/results/"
+  },
+  {
+    "code": "LNB",
+    "name": "Francia - LNB",
+    "country": "france",
+    "competition": "lnb",
+    "resultsUrl": "https://www.flashscore.com/basketball/france/lnb/results/"
+  },
+  {
+    "code": "BBL",
+    "name": "Alemania - BBL",
+    "country": "germany",
+    "competition": "bbl",
+    "resultsUrl": "https://www.flashscore.com/basketball/germany/bbl/results/"
+  },
+  {
+    "code": "LKL",
+    "name": "Lituania - LKL",
+    "country": "lithuania",
+    "competition": "lkl",
+    "resultsUrl": "https://www.flashscore.com/basketball/lithuania/lkl/results/"
+  },
+  {
+    "code": "KLS",
+    "name": "Serbia - Superleague",
+    "country": "serbia",
+    "competition": "superleague",
+    "resultsUrl": "https://www.flashscore.com/basketball/serbia/superleague/results/"
+  },
+  {
+    "code": "WINNER",
+    "name": "Israel - Super League",
+    "country": "israel",
+    "competition": "winner-league",
+    "resultsUrl": "https://www.flashscore.com/basketball/israel/super-league/results/"
+  }
+]

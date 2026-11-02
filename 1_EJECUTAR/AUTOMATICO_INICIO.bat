@@ -30,7 +30,6 @@ if errorlevel 1 (
 
 rem Grafana va al final del arranque y no es imprescindible: si falla, se registra y se sigue.
 echo Arrancando Grafana...
-if not defined GRAFANA_URL set "GRAFANA_URL=http://localhost:8084"
 call "%SCRIPTS%\arranque\ASEGURAR.bat" grafana
 if errorlevel 1 (
     >> "%LOG%" echo [AVISO] Grafana no quedo disponible; se continua con el procesamiento.

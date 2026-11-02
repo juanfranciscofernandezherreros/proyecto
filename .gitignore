@@ -25,3 +25,6 @@ __pycache__/
 /.codex/
 /.vscode/
 /.claude/
+
+# Configuracion propia de esta maquina (rutas, contrasenas reales).
+/config/basketball.local.env

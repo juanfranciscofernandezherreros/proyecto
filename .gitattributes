@@ -1,0 +1,2 @@
+# Los .bat necesitan finales de linea de Windows para que cmd ejecute bien etiquetas y goto.
+*.bat text eol=crlf

@@ -7,7 +7,6 @@ rem Reimporta el dashboard desde csv-extra-batch\observability\fixtures-pending-
 call "%SCRIPTS%\arranque\ASEGURAR.bat" antibloqueo postgres auditoria grafana --actualizar-dashboard
 if errorlevel 1 exit /b %ERRORLEVEL%
 
-if not defined GRAFANA_URL set "GRAFANA_URL=http://localhost:8084"
 set "DASHBOARD=%GRAFANA_URL%/d/fixtures-audit-live"
 echo Abriendo %DASHBOARD%
 start "" "%DASHBOARD%"

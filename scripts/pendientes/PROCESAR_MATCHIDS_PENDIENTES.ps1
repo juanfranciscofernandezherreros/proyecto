@@ -63,6 +63,17 @@ if (-not [string]::IsNullOrWhiteSpace($CsvPath)) {
     $freshRows = @($freshRows | Where-Object { $selectedKeys.Contains((Get-MatchKey $_)) })
 }
 
+# FILTRO_PAIS / FILTRO_COMPETICION (config\basketball.env): vacios = todas las ligas.
+$countryFilter = @("$($Config.FILTRO_PAIS)" -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+$competitionFilter = @("$($Config.FILTRO_COMPETICION)" -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+if ($countryFilter.Count -or $competitionFilter.Count) {
+    $freshRows = @($freshRows | Where-Object {
+        (-not $countryFilter.Count -or $_.country -in $countryFilter) -and
+        (-not $competitionFilter.Count -or $_.competition -in $competitionFilter)
+    })
+    Write-Host "Filtro de ligas: pais=$($Config.FILTRO_PAIS) competicion=$($Config.FILTRO_COMPETICION); pendientes tras filtrar: $($freshRows.Count)" -ForegroundColor Cyan
+}
+
 $queue = @($freshRows | Where-Object {
     $_.match_id -match '^[A-Za-z0-9]+$' -and $_.country -match '^[a-z0-9][a-z0-9-]*$' -and $_.competition -match '^[a-z0-9][a-z0-9-]*$'
 } | Group-Object country,competition,match_id | ForEach-Object { $_.Group | Select-Object -First 1 })

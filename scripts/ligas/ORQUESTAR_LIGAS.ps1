@@ -24,6 +24,15 @@ $scraper = $Config.SCRAPER
 $leagues = @(Get-Content -Raw -LiteralPath $ConfigPath | ConvertFrom-Json)
 $selected = if ($League -eq 'ALL') { $leagues } else { @($leagues | Where-Object { $_.code -eq $League }) }
 if (-not $selected.Count) { throw "Liga no encontrada: $League" }
+# FILTRO_PAIS / FILTRO_COMPETICION (config\basketball.env): vacios = todas las ligas.
+$countryFilter = @("$($Config.FILTRO_PAIS)" -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+$competitionFilter = @("$($Config.FILTRO_COMPETICION)" -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+$selected = @($selected | Where-Object {
+    (-not $countryFilter.Count -or $_.country -in $countryFilter) -and
+    (-not $competitionFilter.Count -or $_.competition -in $competitionFilter)
+})
+if (-not $selected.Count) { throw "Ninguna liga cumple FILTRO_PAIS='$($Config.FILTRO_PAIS)' y FILTRO_COMPETICION='$($Config.FILTRO_COMPETICION)'." }
+if ($countryFilter.Count -or $competitionFilter.Count) { Write-Host "Ligas filtradas: $(($selected | ForEach-Object code) -join ', ')" -ForegroundColor Cyan }
 
 $summary = [System.Collections.Generic.List[object]]::new()
 

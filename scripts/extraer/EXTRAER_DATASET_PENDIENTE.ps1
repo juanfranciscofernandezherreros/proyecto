@@ -35,13 +35,22 @@ New-Item -ItemType Directory -Force -Path $reportRoot | Out-Null
 $results = Get-ChildItem -LiteralPath $competitionRoot -File -Filter "RESULTS_*_$Country`_$Competition.csv" |
     Sort-Object LastWriteTime -Descending | Select-Object -First 1
 if (-not $results) { throw "No hay RESULTS CSV para $Country/$Competition en $competitionRoot" }
-$rows = @(Import-Csv -LiteralPath $results.FullName | Where-Object {
+$label = $datasetLabels[$Dataset]
+# Los partidos que ya tienen este dataset en PostgreSQL se saltan antes de aplicar el limite.
+$imported = [System.Collections.Generic.HashSet[string]]::new([string[]]@(& (Join-Path $PSScriptRoot 'PARTIDOS_YA_IMPORTADOS.ps1') -Dataset $label))
+$candidates = @(Import-Csv -LiteralPath $results.FullName | Where-Object {
     ($_.matchId -or $_.match_id) -and $_.eventDatetime
-} | Sort-Object { [datetimeoffset]::Parse($_.eventDatetime) } -Descending | Select-Object -First $Limit)
-if (-not $rows.Count) { throw "El CSV $($results.Name) no contiene partidos con ID y fecha." }
+})
+if (-not $candidates.Count) { throw "El CSV $($results.Name) no contiene partidos con ID y fecha." }
+$notImported = @($candidates | Where-Object { -not $imported.Contains($(if ($_.matchId) { $_.matchId } else { $_.match_id })) })
+Write-Host "Ya importados en $label (se saltan): $($candidates.Count - $notImported.Count)"
+$rows = @($notImported | Sort-Object { [datetimeoffset]::Parse($_.eventDatetime) } -Descending | Select-Object -First $Limit)
+if (-not $rows.Count) {
+    Write-Host "Todos los partidos de $($results.Name) ya tienen $label. No se extrae nada." -ForegroundColor Green
+    exit 0
+}
 
 $runId = Get-Date -Format 'yyyyMMddHHmmss'
-$label = $datasetLabels[$Dataset]
 $prefix = $datasetPrefixes[$Dataset]
 $logPath = Join-Path $reportRoot "$($label.ToLowerInvariant())-extraction-$runId.log"
 Write-Host "RESULTS: $($results.FullName)"

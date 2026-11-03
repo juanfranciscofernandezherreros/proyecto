@@ -23,10 +23,19 @@ $env:CHROMEDRIVER_PATH = $chromeDriver
 $results = Get-ChildItem -LiteralPath $competitionRoot -File -Filter "RESULTS_*_$Country`_$Competition.csv" |
     Sort-Object LastWriteTime -Descending | Select-Object -First 1
 if (-not $results) { throw "No hay RESULTS CSV para $Country/$Competition en $competitionRoot" }
-$rows = @(Import-Csv -LiteralPath $results.FullName | Where-Object {
+# Los partidos que ya tienen POINT_BY_POINT en PostgreSQL se saltan antes de aplicar el limite.
+$imported = [System.Collections.Generic.HashSet[string]]::new([string[]]@(& (Join-Path $PSScriptRoot 'PARTIDOS_YA_IMPORTADOS.ps1') -Dataset POINT_BY_POINT))
+$candidates = @(Import-Csv -LiteralPath $results.FullName | Where-Object {
     ($_.matchId -or $_.match_id) -and $_.eventDatetime
-} | Sort-Object { [datetimeoffset]::Parse($_.eventDatetime) } -Descending | Select-Object -First $Limit)
-if (-not $rows.Count) { throw "El CSV $($results.Name) no contiene partidos con ID y fecha." }
+})
+if (-not $candidates.Count) { throw "El CSV $($results.Name) no contiene partidos con ID y fecha." }
+$notImported = @($candidates | Where-Object { -not $imported.Contains($(if ($_.matchId) { $_.matchId } else { $_.match_id })) })
+Write-Host "Ya importados en POINT_BY_POINT (se saltan): $($candidates.Count - $notImported.Count)"
+$rows = @($notImported | Sort-Object { [datetimeoffset]::Parse($_.eventDatetime) } -Descending | Select-Object -First $Limit)
+if (-not $rows.Count) {
+    Write-Host "Todos los partidos de $($results.Name) ya tienen POINT_BY_POINT. No se extrae nada." -ForegroundColor Green
+    exit 0
+}
 
 $runId = Get-Date -Format 'yyyyMMddHHmmss'
 $logPath = Join-Path $reportRoot "play-by-play-extraction-$runId.log"

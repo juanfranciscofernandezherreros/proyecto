@@ -27,11 +27,19 @@ if not defined RESULTS_CSV echo [ERROR] No hay RESULTS para %COUNTRY%/%COMPETITI
 
 echo RESULTS seleccionado: %RESULTS_CSV%
 echo Flujo: ID ^> Point by Point ^> cuartos. Limite: %LIMIT%
+rem Los partidos que ya tienen POINT_BY_POINT en PostgreSQL se saltan y no cuentan para el limite.
+set "IMPORTED_IDS=%TEMP%\pbp-importados-%RANDOM%%RANDOM%.txt"
+%PS% -File "%~dp0PARTIDOS_YA_IMPORTADOS.ps1" -Dataset POINT_BY_POINT -Salida "%IMPORTED_IDS%"
+if errorlevel 1 echo [ERROR] No se pudieron leer los partidos ya importados. & exit /b 1
 set /a COUNT=0
 set "FAILED=0"
 for /f "usebackq skip=1 tokens=1 delims=," %%M in ("%RESULTS_CSV%") do (
+    set "MATCH_ID=%%~M"
+    if defined MATCH_ID findstr /x /c:"%%~M" "%IMPORTED_IDS%" >nul 2>&1 && (
+        echo [%%~M] ya importado; se salta.
+        set "MATCH_ID="
+    )
     if !COUNT! LSS %LIMIT% (
-        set "MATCH_ID=%%~M"
         if defined MATCH_ID (
             set /a COUNT+=1
             set "MATCH_URL="
@@ -63,7 +71,8 @@ for /f "usebackq skip=1 tokens=1 delims=," %%M in ("%RESULTS_CSV%") do (
         )
     )
 )
-if !COUNT! EQU 0 echo [ERROR] El RESULTS seleccionado no contiene matchId. & exit /b 1
+del "%IMPORTED_IDS%" >nul 2>&1
+if !COUNT! EQU 0 echo Todos los partidos del RESULTS ya tienen POINT_BY_POINT. No se extrae nada. & exit /b 0
 if "!FAILED!"=="1" exit /b 1
 echo.
 echo OK. POINT_BY_POINT generado junto a RESULTS en: %RESULTS_DIR%

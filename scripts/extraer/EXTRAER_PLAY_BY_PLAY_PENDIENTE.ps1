@@ -13,12 +13,10 @@ $python = Join-Path $root '.venv\Scripts\python.exe'
 $scraper = Join-Path $root 'flashscore.py'
 $competitionRoot = Join-Path $Config.COMPETITIONS_DIR "$Country\$Competition"
 $reportRoot = Join-Path $PSScriptRoot '..\..\logs'
-$chromeDriver = Join-Path $PSScriptRoot '..\..\.tools\chromedriver\chromedriver-win64\chromedriver.exe'
-foreach ($path in @($python, $scraper, $competitionRoot, $chromeDriver)) {
+foreach ($path in @($python, $scraper, $competitionRoot)) {
     if (-not (Test-Path -LiteralPath $path)) { throw "No se encuentra: $path" }
 }
 New-Item -ItemType Directory -Force -Path $reportRoot | Out-Null
-$env:CHROMEDRIVER_PATH = $chromeDriver
 
 $results = Get-ChildItem -LiteralPath $competitionRoot -File -Filter "RESULTS_*_$Country`_$Competition.csv" |
     Sort-Object LastWriteTime -Descending | Select-Object -First 1

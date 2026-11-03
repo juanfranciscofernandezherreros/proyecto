@@ -50,15 +50,12 @@ if ([string]::IsNullOrWhiteSpace($League)) {
 . (Join-Path $PSScriptRoot '..\config.ps1')
 $python = $Config.PYTHON
 $scraper = $Config.SCRAPER
-$chromeDriver = Join-Path $desktopRoot '.tools\chromedriver\chromedriver-win64\chromedriver.exe'
 $competitionRoot = Join-Path $Config.COMPETITIONS_DIR "$($leagueDefinition.country)\$($leagueDefinition.competition)"
 $output = Join-Path $competitionRoot 'RESULTS.csv'
 $logDirectory = Join-Path $desktopRoot 'logs'
 $logPath = Join-Path $logDirectory ("extraccion_{0}_{1:yyyyMMdd_HHmmss}.log" -f $leagueDefinition.code, (Get-Date))
 if (-not (Test-Path -LiteralPath $python)) { throw "No se encuentra Python: $python" }
 if (-not (Test-Path -LiteralPath $scraper)) { throw "No se encuentra el scraper: $scraper" }
-if (-not (Test-Path -LiteralPath $chromeDriver)) { throw "No se encuentra ChromeDriver: $chromeDriver" }
-$env:CHROMEDRIVER_PATH = $chromeDriver
 New-Item -ItemType Directory -Force -Path $competitionRoot | Out-Null
 New-Item -ItemType Directory -Force -Path $logDirectory | Out-Null
 

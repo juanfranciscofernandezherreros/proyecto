@@ -2,9 +2,12 @@
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import subprocess
 import sys
+import urllib.error
+import urllib.request
 from pathlib import Path
 
 from proyecto_config import CONFIG, path
@@ -28,6 +31,30 @@ def call(*args: str) -> None:
     completed = subprocess.run(args, cwd=WORKSPACE)
     if completed.returncode:
         raise RuntimeError(f"Command failed with exit code {completed.returncode}: {subprocess.list2cmdline(args)}")
+
+def mark_dataset_unavailable(match_id: str, logical: str, attempts: int) -> bool:
+    """Registra en la auditoria que Flashscore no publica `logical` para `match_id`.
+
+    Asi la auditoria deja de marcar ese dataset como pendiente y el orquestador no vuelve
+    a reabrir el partido en cada arranque. Devuelve True si el registro quedo guardado.
+    """
+    audit_url = CONFIG.get("AUDIT_URL", "").rstrip("/")
+    if not audit_url:
+        print(f"[{match_id}] AVISO: AUDIT_URL no configurada; no se pudo registrar {logical} como SIN DATOS.", flush=True)
+        return False
+    payload = json.dumps({
+        "matchId": match_id, "dataset": logical,
+        "reason": f"EMPTY_AFTER_{attempts}_ATTEMPTS", "attempts": attempts,
+    }).encode("utf-8")
+    request = urllib.request.Request(f"{audit_url}/dataset-unavailable", data=payload,
+                                     headers={"Content-Type": "application/json"}, method="POST")
+    try:
+        with urllib.request.urlopen(request, timeout=30) as response:
+            response.read()
+        return True
+    except (urllib.error.URLError, OSError) as error:
+        print(f"[{match_id}] AVISO: no se pudo registrar {logical} como SIN DATOS: {error}", flush=True)
+        return False
 
 def canonical_url(match_id: str) -> str:
     completed = subprocess.run((str(PYTHON), str(RESOLVER), match_id), cwd=WORKSPACE, text=True, capture_output=True)
@@ -57,22 +84,35 @@ def main() -> int:
     print(f"[{args.match_id}] resolving canonical Flashscore URL...", flush=True)
     url = canonical_url(args.match_id)
     print(f"[{args.match_id}] canonical URL resolved; datasets={','.join(dict.fromkeys(args.datasets))}", flush=True)
+    unavailable: list[str] = []
     for logical in dict.fromkeys(args.datasets):
         dataset, prefix = DATASETS[logical]
+        empty_after_retries = False
         for attempt in range(1, 4):
             print(f"[{args.match_id}] extracting {logical} (attempt {attempt}/3)...", flush=True)
             call(str(PYTHON), str(SCRAPER), url, "--data-dir", str(root), "--dataset", dataset)
             if latest_data(match_dir, prefix):
                 break
             if attempt == 3:
-                raise RuntimeError(f"{logical} was empty after 3 attempts for {args.match_id}")
+                empty_after_retries = True
+                break
             print(f"[{args.match_id}] {logical} CSV is empty; retrying...", flush=True)
+        if empty_after_retries:
+            # La fuente no publica este dataset (CSV vacio tras 3 intentos). No es un error
+            # del proceso: se marca como SIN DATOS para que la auditoria no lo vuelva a pedir
+            # y se continua con el resto de datasets del partido.
+            print(f"[{args.match_id}] {logical} SIN DATOS EN LA FUENTE tras 3 intentos; se marca y se omite.", flush=True)
+            mark_dataset_unavailable(args.match_id, logical, 3)
+            unavailable.append(logical)
+            continue
         csv_path = latest_data(match_dir, prefix)
         print(f"[{args.match_id}] consolidating {csv_path.name}...", flush=True)
         call(str(PYTHON), str(CONSOLIDATOR), "--input", str(root), "--output", str(READY), "--match-id", args.match_id, "--prefix", prefix)
         print(f"[{args.match_id}] submitting {logical} to batch launcher...", flush=True)
         call(str(PYTHON), str(SUBMITTER), "--root", str(READY / "current" / args.match_id), "--prefix", prefix, "--launcher-url", CONFIG["LAUNCHER_URL"], "--timeout-seconds", "120")
         print(f"[{args.match_id}] {logical} import completed.", flush=True)
+    if unavailable:
+        print(f"[{args.match_id}] datasets sin datos en la fuente: {','.join(unavailable)}.", flush=True)
     print(f"[{args.match_id}] all requested datasets completed.", flush=True)
     return 0
 

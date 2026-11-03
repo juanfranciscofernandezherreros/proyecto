@@ -8,7 +8,7 @@ rem Los monitores interactivos se omiten: no hacen falta para extraer o importar
 set "SKIP_CSV_WATCHER=1"
 if not "%~2"=="" call "%SCRIPTS%\validar_limite.bat" "%~2" || exit /b 1
 
-call "%SCRIPTS%\arranque\ASEGURAR.bat" antibloqueo postgres auditoria launcher
+call "%SCRIPTS%\arranque\ASEGURAR.bat" antibloqueo postgres auditoria launcher navegador
 if errorlevel 1 (
   echo ERROR: no se pudieron asegurar los servicios necesarios.
   exit /b 1

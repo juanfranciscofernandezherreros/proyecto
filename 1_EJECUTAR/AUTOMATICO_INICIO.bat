@@ -21,7 +21,7 @@ rem ya no podria ejecutar las siguientes lineas con ">>". ASEGURAR escribe en el
 rem cuenta, linea a linea, gracias a ASEGURAR_LOG.
 set "ASEGURAR_LOG=%LOG%"
 echo Arrancando Docker y servicios...
-call "%SCRIPTS%\arranque\ASEGURAR.bat" antibloqueo postgres auditoria launcher
+call "%SCRIPTS%\arranque\ASEGURAR.bat" antibloqueo postgres auditoria launcher navegador
 if errorlevel 1 (
     >> "%LOG%" echo [ERROR] No se pudieron arrancar los servicios; no se procesa nada.
     echo ERROR: no se pudieron arrancar los servicios. Registro: %LOG%

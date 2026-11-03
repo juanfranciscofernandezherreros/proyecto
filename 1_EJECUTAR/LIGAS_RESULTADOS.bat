@@ -19,7 +19,7 @@ if errorlevel 2 goto :run_one
 goto :run_all
 
 :run_one
-call "%SCRIPTS%\arranque\ASEGURAR.bat" antibloqueo postgres launcher
+call "%SCRIPTS%\arranque\ASEGURAR.bat" antibloqueo postgres launcher navegador
 if errorlevel 1 goto :error
 
 echo.
@@ -28,7 +28,7 @@ echo Ligas disponibles:
 exit /b %ERRORLEVEL%
 
 :run_all
-call "%SCRIPTS%\arranque\ASEGURAR.bat" antibloqueo postgres launcher
+call "%SCRIPTS%\arranque\ASEGURAR.bat" antibloqueo postgres launcher navegador
 if errorlevel 1 goto :error
 
 echo [INFO] Lanzando el proceso para todas las ligas...

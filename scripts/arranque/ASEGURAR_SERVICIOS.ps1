@@ -3,7 +3,7 @@
 # Las dependencias se resuelven solas (launcher -> postgres -> docker).
 #
 # Uso: ASEGURAR_SERVICIOS.ps1 -Servicios postgres,launcher [-ReiniciarLauncher] [-ActualizarDashboard]
-# Servicios: antibloqueo, watcher, docker, postgres, runtime, auditoria, launcher, grafana
+# Servicios: antibloqueo, watcher, docker, postgres, runtime, auditoria, launcher, grafana, navegador
 param(
     [Parameter(Mandatory)][string[]]$Servicios,
     [switch]$ReiniciarLauncher,
@@ -35,7 +35,11 @@ $grafanaUrl = $Config.GRAFANA_URL.TrimEnd('/')
 $grafanaUser = $Config.GRAFANA_USER
 $grafanaPassword = $Config.GRAFANA_PASSWORD
 $grafanaContainer = 'basketball-grafana'
-$pendingDashboardFile = Join-Path $batchRoot 'observability\fixtures-pending-dashboard.json'
+# Dashboards que ASEGURAR grafana mantiene importados (uid -> fichero en csv-extra-batch\observability).
+$grafanaDashboards = [ordered]@{
+    'fixtures-audit-live' = Join-Path $batchRoot 'observability\fixtures-pending-dashboard.json'
+    'processing-live'     = Join-Path $batchRoot 'observability\processing-live-dashboard.json'
+}
 $pendingDashboardUid = 'fixtures-audit-live'
 
 $dependencies = @{
@@ -230,12 +234,24 @@ function Ensure-Grafana {
         Invoke-Grafana 'Post' '/api/datasources' ($datasource | ConvertTo-Json -Depth 5) | Out-Null
     }
 
-    if ($ActualizarDashboard -or -not (Test-GrafanaResource "/api/dashboards/uid/$pendingDashboardUid")) {
-        if (-not (Test-Path -LiteralPath $pendingDashboardFile)) { throw "No se encontro $pendingDashboardFile" }
-        Write-Status 'grafana' 'importando dashboard de pendientes' Yellow
-        Invoke-Grafana 'Post' '/api/dashboards/db' (Get-Content -Raw -Encoding UTF8 -LiteralPath $pendingDashboardFile) | Out-Null
+    foreach ($uid in $grafanaDashboards.Keys) {
+        if ($ActualizarDashboard -or -not (Test-GrafanaResource "/api/dashboards/uid/$uid")) {
+            $file = $grafanaDashboards[$uid]
+            if (-not (Test-Path -LiteralPath $file)) { throw "No se encontro $file" }
+            Write-Status 'grafana' "importando dashboard $uid" Yellow
+            Invoke-Grafana 'Post' '/api/dashboards/db' (Get-Content -Raw -Encoding UTF8 -LiteralPath $file) | Out-Null
+        }
     }
     Write-Status 'grafana' "listo en $grafanaUrl/d/$pendingDashboardUid" Green
+}
+
+# Con FLASHSCORE_BROWSER=edge, el driver de Edge debe coincidir con la version instalada.
+function Ensure-Navegador {
+    if ($Config.FLASHSCORE_BROWSER -ne 'edge') { Write-Status 'navegador' "usa $($Config.FLASHSCORE_BROWSER); nada que comprobar" Green; return }
+    $output = & powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'ACTUALIZAR_EDGEDRIVER.ps1') 2>&1
+    $code = $LASTEXITCODE
+    $output | ForEach-Object { Write-Status 'navegador' "$_" $(if ($code) { 'Red' } else { 'Green' }) }
+    if ($code) { throw 'el driver de Edge no esta disponible.' }
 }
 
 function Ensure-Docker {
@@ -259,7 +275,8 @@ function Ensure-Service([string]$Service) {
         'auditoria'   { Ensure-Auditoria }
         'launcher'    { Ensure-Launcher }
         'grafana'     { Ensure-Grafana }
-        default       { throw "Servicio desconocido: $Service. Validos: antibloqueo, watcher, docker, postgres, runtime, auditoria, launcher, grafana" }
+        'navegador'   { Ensure-Navegador }
+        default       { throw "Servicio desconocido: $Service. Validos: antibloqueo, watcher, docker, postgres, runtime, auditoria, launcher, grafana, navegador" }
     }
     [void]$done.Add($Service)
 }

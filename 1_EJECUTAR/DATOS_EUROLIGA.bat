@@ -31,7 +31,7 @@ if errorlevel 1 goto :point_by_point
 
 :preflight
 if defined AUXILIARIES_STARTED exit /b 0
-call "%SCRIPTS%\arranque\ASEGURAR.bat" antibloqueo watcher postgres launcher || exit /b 1
+call "%SCRIPTS%\arranque\ASEGURAR.bat" antibloqueo watcher postgres launcher navegador || exit /b 1
 set "AUXILIARIES_STARTED=1"
 exit /b 0
 

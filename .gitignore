@@ -28,3 +28,6 @@ __pycache__/
 
 # Configuracion propia de esta maquina (rutas, contrasenas reales).
 /config/basketball.local.env
+
+# Herramientas descargadas (drivers de navegador).
+/.tools/

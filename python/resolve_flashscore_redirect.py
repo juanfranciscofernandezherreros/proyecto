@@ -12,8 +12,11 @@ import sys
 import time
 from urllib.parse import parse_qs, urlparse
 
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
+from proyecto_config import path
+
+# El navegador (Chrome o Edge, FLASHSCORE_BROWSER) lo crea el modulo comun del scraper.
+sys.path.insert(0, str(path("SCRAPER_DIR")))
+from flashscore_browser import BrowserFactory  # noqa: E402
 
 
 def is_canonical_match_url(url: str, match_id: str) -> bool:
@@ -32,13 +35,7 @@ def main() -> int:
     parser.add_argument("--timeout", type=int, default=30)
     args = parser.parse_args()
 
-    options = Options()
-    options.add_argument("--headless=new")
-    options.add_argument("--disable-gpu")
-    options.add_argument("--window-size=1280,900")
-
-    driver = webdriver.Chrome(options=options)
-    try:
+    with BrowserFactory.session(headless=True) as driver:
         driver.get(f"https://www.flashscore.com/match/{args.match_id}/")
         deadline = time.monotonic() + args.timeout
         while time.monotonic() < deadline:
@@ -53,8 +50,6 @@ def main() -> int:
             file=sys.stderr,
         )
         return 1
-    finally:
-        driver.quit()
 
 
 if __name__ == "__main__":

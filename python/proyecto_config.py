@@ -58,6 +58,12 @@ def _load() -> dict[str, str]:
 
 CONFIG = _load()
 
+# Igual que scripts\config.ps1: la configuracion tambien queda en el entorno, para los
+# modulos que la leen de ahi (p. ej. FLASHSCORE_BROWSER en flashscore_browser.py) y para
+# los procesos que se lancen despues. Lo ya definido en el entorno no se toca.
+for _key, _value in CONFIG.items():
+    os.environ.setdefault(_key, _value)
+
 
 def path(key: str) -> Path:
     """Valor de configuracion como ruta."""

@@ -44,8 +44,8 @@ if (-not (Test-Path -LiteralPath $python)) { throw "No existe Python: $python" }
 if (-not (Test-Path -LiteralPath $pipeline)) { throw "No existe el pipeline por match_id: $pipeline" }
 
 New-Item -ItemType Directory -Force -Path $reportRoot | Out-Null
-& (Join-Path $PSScriptRoot '..\arranque\ASEGURAR_SERVICIOS.ps1') -Servicios antibloqueo,postgres,auditoria,launcher
-if ($LASTEXITCODE -ne 0) { throw 'No se pudieron asegurar los servicios: antibloqueo,postgres,auditoria,launcher.' }
+& (Join-Path $PSScriptRoot '..\arranque\ASEGURAR_SERVICIOS.ps1') -Servicios antibloqueo,postgres,auditoria,launcher,navegador
+if ($LASTEXITCODE -ne 0) { throw 'No se pudieron asegurar los servicios: antibloqueo,postgres,auditoria,launcher,navegador.' }
 
 # Siempre se calcula el trabajo desde una auditoria nueva. Un CSV indicado por
 # el usuario solo limita la seleccion; nunca puede reintroducir partidos ya completos.

@@ -3,7 +3,7 @@ setlocal EnableExtensions
 title Procesar ultimos partidos de baloncesto
 call "%~dp0..\scripts\config.bat"
 
-call "%SCRIPTS%\arranque\ASEGURAR.bat" antibloqueo postgres launcher
+call "%SCRIPTS%\arranque\ASEGURAR.bat" antibloqueo postgres launcher navegador
 if errorlevel 1 exit /b %ERRORLEVEL%
 
 %PS% -File "%SCRIPTS%\ligas\PROCESAR_ULTIMOS_PARTIDOS_COMPLETO.ps1" %*

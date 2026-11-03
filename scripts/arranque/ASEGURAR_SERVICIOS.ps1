@@ -244,6 +244,17 @@ function Test-GrafanaResource([string]$Path) {
 }
 
 function Ensure-Grafana {
+    # Prometheus y Loki son las fuentes de datos de Grafana: sin ellos los dashboards salen vacios.
+    # No son imprescindibles para Grafana, asi que un fallo solo se avisa.
+    foreach ($source in @('basketball-prometheus', 'basketball-loki')) {
+        $sourceState = Invoke-Docker inspect --format '{{.State.Status}}' $source
+        if (-not $sourceState) { Write-Status 'grafana' "no existe el contenedor $source" Yellow; continue }
+        if ($sourceState -ne 'running') {
+            Write-Status 'grafana' "$source $sourceState; arrancando" Yellow
+            Invoke-DockerVisible start $source
+            if ($LASTEXITCODE -ne 0) { Write-Status 'grafana' "docker start $source fallo" Yellow }
+        }
+    }
     $state = Invoke-Docker inspect --format '{{.State.Status}}' $grafanaContainer
     if (-not $state) {
         throw "No existe el contenedor $grafanaContainer. Crealo una vez con: powershell -File local-validation\scripts\Start-BasketballLocal.ps1"

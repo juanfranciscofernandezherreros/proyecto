@@ -8,6 +8,7 @@ param(
     [Parameter(Mandatory)][string[]]$Servicios,
     [switch]$ReiniciarLauncher,
     # Reimporta el dashboard de pendientes aunque ya exista (pisa cambios hechos en la web).
+    # Se mantiene por compatibilidad: los dashboards ya se reimportan siempre al asegurar grafana.
     [switch]$ActualizarDashboard
 )
 
@@ -41,6 +42,11 @@ $grafanaDashboards = [ordered]@{
     'consumo-recursos'    = Join-Path $batchRoot 'observability\consumo-recursos-dashboard.json'
 }
 $pendingDashboardUid = 'fixtures-audit-live'
+# Vistas de PostgreSQL que necesitan esos dashboards (ver Ensure-Grafana).
+$grafanaViews = @(
+    Join-Path $workspace 'sql\consultas\2026-11-03_1055_vista-csv-procesados.sql'
+    Join-Path $workspace 'sql\consultas\2026-11-03_1635_vista-csv-generados.sql'
+)
 
 $dependencies = @{
     grafana   = @('docker')
@@ -281,13 +287,26 @@ function Ensure-Grafana {
         Invoke-Grafana 'Post' '/api/datasources' ($datasource | ConvertTo-Json -Depth 5) | Out-Null
     }
 
+    # Vistas de PostgreSQL que leen los dashboards CSV procesados y Procesamiento en vivo. Son
+    # CREATE OR REPLACE (repetibles); se aplican en cada arranque por si la base se recreo.
+    # Si fallan se avisa y se sigue: Grafana arranca igual, solo esos paneles saldrian vacios.
+    foreach ($view in $grafanaViews) {
+        $ErrorActionPreference = 'Continue'
+        $out = Get-Content -Raw -Encoding UTF8 -LiteralPath $view |
+            & docker exec -i $Config.POSTGRES_CONTAINER psql -U $Config.DB_USER -d $Config.DB_NAME -X -q -v ON_ERROR_STOP=1 2>&1
+        $ok = $LASTEXITCODE -eq 0
+        $ErrorActionPreference = 'Stop'
+        if ($ok) { Write-Status 'grafana' "vista aplicada: $(Split-Path $view -Leaf)" Green }
+        else { Write-Status 'grafana' "no se pudo aplicar $(Split-Path $view -Leaf): $(($out | Select-Object -Last 1))" Yellow }
+    }
+
+    # Los dashboards se importan siempre desde los JSON: asi, tras reiniciar, Grafana tiene la
+    # ultima version de cada uno (los cambios hechos a mano en Grafana se pierden).
     foreach ($uid in $grafanaDashboards.Keys) {
-        if ($ActualizarDashboard -or -not (Test-GrafanaResource "/api/dashboards/uid/$uid")) {
-            $file = $grafanaDashboards[$uid]
-            if (-not (Test-Path -LiteralPath $file)) { throw "No se encontro $file" }
-            Write-Status 'grafana' "importando dashboard $uid" Yellow
-            Invoke-Grafana 'Post' '/api/dashboards/db' (Get-Content -Raw -Encoding UTF8 -LiteralPath $file) | Out-Null
-        }
+        $file = $grafanaDashboards[$uid]
+        if (-not (Test-Path -LiteralPath $file)) { throw "No se encontro $file" }
+        Write-Status 'grafana' "importando dashboard $uid" Yellow
+        Invoke-Grafana 'Post' '/api/dashboards/db' (Get-Content -Raw -Encoding UTF8 -LiteralPath $file) | Out-Null
     }
     Write-Status 'grafana' "listo en $grafanaUrl/d/$pendingDashboardUid" Green
 }

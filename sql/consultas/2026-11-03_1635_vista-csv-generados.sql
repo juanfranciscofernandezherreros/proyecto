@@ -50,9 +50,10 @@
 -- =============================================================================
 
 
--- PASO 1 · Crear (o reemplazar) la vista. Se borra antes porque cambian sus columnas.
-DROP VIEW IF EXISTS public.v_csv_generados;
-CREATE VIEW public.v_csv_generados AS
+-- PASO 1 · Crear (o reemplazar) la vista. La aplica tambien ASEGURAR grafana en cada arranque.
+--          Si algun dia cambian sus columnas, CREATE OR REPLACE falla: entonces hay que
+--          ejecutar antes DROP VIEW public.v_csv_generados;
+CREATE OR REPLACE VIEW public.v_csv_generados AS
 SELECT g.discovered_at                                              AS generado,
        g.file_name                                                  AS fichero,
        CASE g.dataset

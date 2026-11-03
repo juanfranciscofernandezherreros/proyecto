@@ -30,8 +30,10 @@ if errorlevel 1 (
 )
 
 rem Grafana va al final del arranque y no es imprescindible: si falla, se registra y se sigue.
+rem ASEGURAR grafana arranca Prometheus y Loki, aplica las vistas de los dashboards y los
+rem reimporta; "consumo" arranca el recolector del dashboard Basketball - Consumo.
 echo Arrancando Grafana...
-call "%SCRIPTS%\arranque\ASEGURAR.bat" grafana
+call "%SCRIPTS%\arranque\ASEGURAR.bat" grafana consumo
 if errorlevel 1 (
     >> "%LOG%" echo [AVISO] Grafana no quedo disponible; se continua con el procesamiento.
 ) else (

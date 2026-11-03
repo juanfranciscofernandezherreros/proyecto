@@ -36,6 +36,43 @@ if ($countryFilter.Count -or $competitionFilter.Count) { Write-Host "Ligas filtr
 
 $summary = [System.Collections.Generic.List[object]]::new()
 
+# ---------- Seguimiento en vivo (public.pipeline_step, dashboard "Procesamiento en vivo") ----------
+# Cada paso se inserta como RUNNING al empezar y se cierra al terminar. Es solo informativo:
+# si la base no responde se avisa una vez y la orquestacion sigue igual.
+$runId = Get-Date -Format 'yyyyMMdd-HHmmss'
+$trackingOn = $true
+
+function Invoke-TrackSql([string]$Sql) {
+    if (-not $script:trackingOn) { return $null }
+    $ErrorActionPreference = 'Continue'
+    $out = $Sql | & docker exec -i $Config.POSTGRES_CONTAINER psql -U $Config.DB_USER -d $Config.DB_NAME -X -q -t -A -v ON_ERROR_STOP=1 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "[AVISO] Sin seguimiento en vivo en Grafana: $($out -join ' ')" -ForegroundColor DarkYellow
+        $script:trackingOn = $false
+        return $null
+    }
+    return "$($out | Select-Object -Last 1)".Trim()
+}
+
+function SqlText([string]$Value) {
+    if ($null -eq $Value -or $Value -eq '') { return 'NULL' }
+    return "'" + $Value.Replace("'", "''") + "'"
+}
+
+function Start-Track([string]$Code, [string]$Step) {
+    $league = $selected | Where-Object code -eq $Code | Select-Object -First 1
+    Invoke-TrackSql ("INSERT INTO public.pipeline_step (run_id, liga, pais, competicion, paso, estado) VALUES ({0}, {1}, {2}, {3}, {4}, 'RUNNING') RETURNING id;" -f `
+        (SqlText $runId), (SqlText $Code), (SqlText $league.country), (SqlText $league.competition), (SqlText $Step))
+}
+
+function Stop-Track($Id, [string]$State, [int]$Attempts, [string]$Detail) {
+    if (-not $Id) { return }
+    [void](Invoke-TrackSql ("UPDATE public.pipeline_step SET estado = {0}, intentos = {1}, finished_at = now(), detalle = {2} WHERE id = {3};" -f `
+        (SqlText $State), $Attempts, (SqlText $Detail), [long]$Id))
+}
+
+[void](Invoke-TrackSql (Get-Content -Raw -LiteralPath (Join-Path $workspace 'sql\consultas\2026-11-03_1625_esquema-pipeline-step.sql')))
+
 function Invoke-Bat([string]$Name, [string[]]$Arguments) {
     & (Join-Path $PSScriptRoot "..\$Name") @Arguments
     if ($LASTEXITCODE -ne 0) { throw "$Name termino con codigo $LASTEXITCODE" }
@@ -45,11 +82,13 @@ function Invoke-Bat([string]$Name, [string[]]$Arguments) {
 # Devuelve $true si termino bien.
 function Invoke-Step([string]$Code, [string]$Step, [scriptblock]$Action, [int]$Retries = 0) {
     $started = Get-Date
+    $trackId = Start-Track $Code $Step
     for ($attempt = 1; $attempt -le $Retries + 1; $attempt++) {
         try {
             & $Action
             $summary.Add([pscustomobject]@{ Liga = $Code; Paso = $Step; Estado = 'OK'; Intentos = $attempt
                 Segundos = [int]((Get-Date) - $started).TotalSeconds; Detalle = '' })
+            Stop-Track $trackId 'OK' $attempt ''
             return $true
         } catch {
             $message = $_.Exception.Message
@@ -62,12 +101,14 @@ function Invoke-Step([string]$Code, [string]$Step, [scriptblock]$Action, [int]$R
     Write-Host "[FALLO] [$Code] $Step`: $message" -ForegroundColor Red
     $summary.Add([pscustomobject]@{ Liga = $Code; Paso = $Step; Estado = 'FALLO'; Intentos = $Retries + 1
         Segundos = [int]((Get-Date) - $started).TotalSeconds; Detalle = $message })
+    Stop-Track $trackId 'FALLO' ($Retries + 1) $message
     return $false
 }
 
 function Add-Skipped([string]$Code, [string]$Step, [string]$Reason) {
     Write-Host "[OMITIDO] [$Code] $Step`: $Reason" -ForegroundColor DarkYellow
     $summary.Add([pscustomobject]@{ Liga = $Code; Paso = $Step; Estado = 'OMITIDO'; Intentos = 0; Segundos = 0; Detalle = $Reason })
+    Stop-Track (Start-Track $Code $Step) 'OMITIDO' 0 $Reason
 }
 
 if ($Mode -in @('results', 'todo')) {

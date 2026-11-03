@@ -32,8 +32,6 @@ $launcherAllowedRoot = $Config.LAUNCHER_CSV_ALLOWED_ROOT
 $launcherMarker = '-Dbasketball.launcher.config=comun-v1'
 
 $grafanaUrl = $Config.GRAFANA_URL.TrimEnd('/')
-$grafanaUser = $Config.GRAFANA_USER
-$grafanaPassword = $Config.GRAFANA_PASSWORD
 $grafanaContainer = 'basketball-grafana'
 # Dashboards que ASEGURAR grafana mantiene importados (uid -> fichero en csv-extra-batch\observability).
 $grafanaDashboards = [ordered]@{
@@ -231,9 +229,10 @@ function Ensure-Auditoria {
     Write-Status 'auditoria' "lista en $auditUrl" Green
 }
 
+# Grafana local va sin login (acceso anonimo con rol Admin, ver Start-BasketballLocal.ps1):
+# las llamadas no llevan credenciales.
 function Invoke-Grafana([string]$Method, [string]$Path, [string]$Body) {
-    $token = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("${grafanaUser}:${grafanaPassword}"))
-    $request = @{ Method = $Method; Uri = "$grafanaUrl$Path"; Headers = @{ Authorization = "Basic $token" }; TimeoutSec = 15 }
+    $request = @{ Method = $Method; Uri = "$grafanaUrl$Path"; TimeoutSec = 15 }
     if ($Body) { $request.ContentType = 'application/json; charset=utf-8'; $request.Body = [Text.Encoding]::UTF8.GetBytes($Body) }
     Invoke-RestMethod @request
 }

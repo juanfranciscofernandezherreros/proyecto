@@ -41,9 +41,18 @@
 \d+ fixtures_processing_audit.dataset_unavailable
 
 -- PASO 2 (LECTURA) . Datasets marcados como SIN DATOS, los mas reintentados primero.
-SELECT match_id, dataset, reason, attempts, first_seen, last_seen
+--   estado VACIO        = la pagina existe pero tiene 0 filas.
+--   estado NO_PUBLICADO = el bloque/enlace no existe en la fuente (p. ej. stats por cuartos).
+SELECT match_id, country, competition, dataset, estado, rows_found, attempts, first_seen, last_seen, source_url
 FROM fixtures_processing_audit.dataset_unavailable
 ORDER BY attempts DESC, last_seen DESC;
+
+-- PASO 2b (LECTURA) . Resumen por liga y dataset (lo mismo que muestra el dashboard
+--   "Basketball - Datasets vacios / no publicados").
+SELECT country, competition, dataset, estado, count(*) AS partidos
+FROM fixtures_processing_audit.dataset_unavailable
+GROUP BY country, competition, dataset, estado
+ORDER BY partidos DESC;
 
 -- PASO 3 (ESCRITURA opcional) . Forzar un reintento: borra la marca de UN partido+dataset.
 --   Protege los demas registros con el filtro exacto por match_id y dataset. Descomenta y

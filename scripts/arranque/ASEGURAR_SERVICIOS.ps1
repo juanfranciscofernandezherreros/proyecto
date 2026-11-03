@@ -3,7 +3,7 @@
 # Las dependencias se resuelven solas (launcher -> postgres -> docker).
 #
 # Uso: ASEGURAR_SERVICIOS.ps1 -Servicios postgres,launcher [-ReiniciarLauncher] [-ActualizarDashboard]
-# Servicios: antibloqueo, watcher, docker, postgres, runtime, auditoria, launcher, grafana, navegador
+# Servicios: antibloqueo, watcher, docker, postgres, runtime, auditoria, launcher, grafana, navegador, consumo
 param(
     [Parameter(Mandatory)][string[]]$Servicios,
     [switch]$ReiniciarLauncher,
@@ -39,6 +39,8 @@ $grafanaContainer = 'basketball-grafana'
 $grafanaDashboards = [ordered]@{
     'fixtures-audit-live' = Join-Path $batchRoot 'observability\fixtures-pending-dashboard.json'
     'processing-live'     = Join-Path $batchRoot 'observability\processing-live-dashboard.json'
+    'csv-procesados'      = Join-Path $batchRoot 'observability\csv-procesados-dashboard.json'
+    'consumo-recursos'    = Join-Path $batchRoot 'observability\consumo-recursos-dashboard.json'
 }
 $pendingDashboardUid = 'fixtures-audit-live'
 
@@ -50,6 +52,7 @@ $dependencies = @{
     runtime   = @('postgres')
     auditoria = @('postgres')
     launcher  = @('postgres')
+    consumo   = @('postgres')
 }
 $done = [System.Collections.Generic.HashSet[string]]::new()
 
@@ -182,9 +185,31 @@ function Ensure-Launcher {
     Write-Status 'launcher' "listo en $launcherUrl" Green
 }
 
+# La auditoria se repite cada pocos segundos. Si su ultimo resultado es antiguo, el servicio
+# responde pero esta colgado (ya paso: bloqueado escribiendo en una consola congelada).
+function Test-AuditoriaFresca {
+    $latest = Get-Json "$auditUrl/latest"
+    if (-not $latest -or -not $latest.refreshedAt) { return $false }
+    # Java da 9 decimales en los segundos; .NET solo admite 7.
+    $stamp = $latest.refreshedAt -replace '(\.\d{7})\d+', '$1'
+    try { $age = (Get-Date) - [datetimeoffset]::Parse($stamp, [Globalization.CultureInfo]::InvariantCulture).LocalDateTime } catch { return $false }
+    return $age.TotalMinutes -lt 2
+}
+
+function Get-AuditoriaProcesses {
+    @(Get-CimInstance Win32_Process -Filter "Name='java.exe'" | Where-Object { $_.CommandLine -like '*fixtures-processing-audit.jar*' })
+}
+
 function Ensure-Auditoria {
-    if (Get-Json "$auditUrl/latest") { Write-Status 'auditoria' 'ya estaba lista' Green; return }
-    $running = @(Get-CimInstance Win32_Process -Filter "Name='java.exe'" | Where-Object { $_.CommandLine -like '*fixtures-processing-audit.jar*' })
+    if (Test-AuditoriaFresca) { Write-Status 'auditoria' 'ya estaba lista' Green; return }
+    $running = Get-AuditoriaProcesses
+    if ($running.Count -and (Get-Json "$auditUrl/latest")) {
+        # Responde pero no refresca: esta colgada. Se reinicia.
+        Write-Status 'auditoria' 'responde pero lleva mas de 2 minutos sin refrescar; reiniciando' Yellow
+        $running | ForEach-Object { Stop-Process -Id $_.ProcessId -Force }
+        Wait-Until 'auditoria (parada)' 30 { -not (Get-AuditoriaProcesses).Count }
+        $running = @()
+    }
     if ($running.Count) {
         Write-Status 'auditoria' 'arrancando ya; esperando a que responda' Yellow
     } else {
@@ -195,7 +220,11 @@ function Ensure-Auditoria {
         }
         New-Item -ItemType Directory -Force -Path $reportDir | Out-Null
         Write-Status 'auditoria' 'arrancando' Yellow
-        Start-Detached $javaExe @('-jar', "`"$jar`"", '--app.audit.run-once=false', "`"--logging.file.name=$reportDir\fixtures-processing-audit-service.log`"") (Split-Path $jar -Parent) 7
+        # Oculta y sin salida por consola (--logging.pattern.console= la desactiva): una consola
+        # congelada por un clic bloqueaba el hilo de la auditoria. El log va solo a su fichero.
+        $env:FIXTURES_PROCESSING_AUDIT_LEAGUE_CATALOG = $Config.LEAGUE_CATALOG
+        Start-Detached $javaExe @('-jar', "`"$jar`"", '--app.audit.run-once=false', '--logging.pattern.console=',
+            "`"--logging.file.name=$reportDir\fixtures-processing-audit-service.log`"") (Split-Path $jar -Parent) 0
     }
     # La primera auditoria se lanza al arrancar; se espera a que termine.
     Wait-Until 'auditoria' 120 { (Get-Json "$auditUrl/latest").status -eq 'COMPLETED' }
@@ -224,7 +253,15 @@ function Ensure-Grafana {
         Invoke-DockerVisible start $grafanaContainer
         if ($LASTEXITCODE -ne 0) { throw "docker start $grafanaContainer fallo." }
     }
-    Wait-Until 'grafana' 120 { try { (Invoke-RestMethod -Uri "$grafanaUrl/api/health" -TimeoutSec 3).database -eq 'ok' } catch { $false } }
+    $healthy = { try { (Invoke-RestMethod -Uri "$grafanaUrl/api/health" -TimeoutSec 3).database -eq 'ok' } catch { $false } }
+    if ($state -eq 'running') {
+        # En marcha pero sin responder (p. ej. sin memoria): se reinicia en vez de esperar.
+        try { Wait-Until 'grafana' 20 $healthy } catch {
+            Write-Status 'grafana' 'en marcha pero no responde; reiniciando' Yellow
+            Invoke-DockerVisible restart $grafanaContainer
+        }
+    }
+    Wait-Until 'grafana' 120 $healthy
 
     # Datasource Infinity que lee el JSON del modulo de pendientes (puerto 8090 del host).
     if (-not (Test-GrafanaResource '/api/datasources/uid/fixtures-audit-http')) {
@@ -243,6 +280,21 @@ function Ensure-Grafana {
         }
     }
     Write-Status 'grafana' "listo en $grafanaUrl/d/$pendingDashboardUid" Green
+}
+
+# Recolector de CPU, RAM, heap, base y disco para el dashboard consumo-recursos.
+function Get-ConsumoProcesses {
+    @(Get-CimInstance Win32_Process -Filter "Name='powershell.exe'" | Where-Object { $_.CommandLine -like '*RECOLECTAR_CONSUMO.ps1*' })
+}
+
+function Ensure-Consumo {
+    if (@(Get-ConsumoProcesses).Count) { Write-Status 'consumo' 'ya estaba en marcha' Green; return }
+    Write-Status 'consumo' 'arrancando recolector' Yellow
+    $script = Join-Path $workspace 'scripts\monitor\RECOLECTAR_CONSUMO.ps1'
+    Start-Detached 'powershell.exe' @('-NoLogo', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', "`"$script`"") $workspace 0
+    # @(): con un solo proceso la funcion devuelve el objeto suelto y .Count no existe.
+    Wait-Until 'consumo' 30 { @(Get-ConsumoProcesses).Count }
+    Write-Status 'consumo' 'en marcha (log en reports\consumo\recolector-consumo.log)' Green
 }
 
 # Con FLASHSCORE_BROWSER=edge, el driver de Edge debe coincidir con la version instalada.
@@ -276,7 +328,8 @@ function Ensure-Service([string]$Service) {
         'launcher'    { Ensure-Launcher }
         'grafana'     { Ensure-Grafana }
         'navegador'   { Ensure-Navegador }
-        default       { throw "Servicio desconocido: $Service. Validos: antibloqueo, watcher, docker, postgres, runtime, auditoria, launcher, grafana, navegador" }
+        'consumo'     { Ensure-Consumo }
+        default       { throw "Servicio desconocido: $Service. Validos: antibloqueo, watcher, docker, postgres, runtime, auditoria, launcher, grafana, navegador, consumo" }
     }
     [void]$done.Add($Service)
 }

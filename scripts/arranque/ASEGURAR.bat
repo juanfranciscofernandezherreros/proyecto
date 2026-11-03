@@ -6,10 +6,10 @@ set "HERE=%~dp0"
 
 rem Comprueba cada servicio y, si no esta listo, lo arranca y espera a que lo este.
 rem Uso: ASEGURAR.bat <servicio> [servicio...] [--reiniciar-launcher] [--actualizar-dashboard]
-rem Servicios: antibloqueo watcher docker postgres runtime auditoria launcher grafana
+rem Servicios: antibloqueo watcher docker postgres runtime auditoria launcher grafana navegador consumo
 rem SKIP_CSV_WATCHER=1 ignora "watcher".
 if "%~1"=="" (
-    echo ERROR: indica al menos un servicio: antibloqueo watcher docker postgres runtime auditoria launcher grafana
+    echo ERROR: indica al menos un servicio: antibloqueo watcher docker postgres runtime auditoria launcher grafana navegador consumo
     exit /b 1
 )
 set "SERVICES="

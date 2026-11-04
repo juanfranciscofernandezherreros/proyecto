@@ -7,18 +7,18 @@
     "resultsUrl": "https://www.flashscore.com/basketball/europe/euroleague/results/"
   },
   {
-    "code": "NBA",
-    "name": "NBA",
-    "country": "usa",
-    "competition": "nba",
-    "resultsUrl": "https://www.flashscore.com/basketball/usa/nba/results/"
-  },
-  {
     "code": "ACB",
     "name": "España - Liga Endesa (ACB)",
     "country": "spain",
     "competition": "liga-endesa",
     "resultsUrl": "https://www.flashscore.com/basketball/spain/acb/results/"
+  },
+  {
+    "code": "NBA",
+    "name": "NBA",
+    "country": "usa",
+    "competition": "nba",
+    "resultsUrl": "https://www.flashscore.com/basketball/usa/nba/results/"
   },
   {
     "code": "BSL",

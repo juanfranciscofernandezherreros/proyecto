@@ -77,6 +77,19 @@ if ($countryFilter.Count -or $competitionFilter.Count) {
 $queue = @($freshRows | Where-Object {
     $_.match_id -match '^[A-Za-z0-9]+$' -and $_.country -match '^[a-z0-9][a-z0-9-]*$' -and $_.competition -match '^[a-z0-9][a-z0-9-]*$'
 } | Group-Object country,competition,match_id | ForEach-Object { $_.Group | Select-Object -First 1 })
+
+# Orden de procesamiento: primero euroleague, luego liga-endesa, y el resto a continuacion
+# conservando el orden de la auditoria (Sort-Object de PS 5.1 no es estable, por eso se usa
+# el indice original como desempate). El Limit se aplica despues para respetar esta prioridad.
+$priority = @{ 'euroleague' = 0; 'liga-endesa' = 1 }
+$orderIndex = 0
+$queue = @(
+    $queue | ForEach-Object { [pscustomobject]@{
+        Row  = $_
+        Rank = if ($priority.ContainsKey($_.competition)) { $priority[$_.competition] } else { $priority.Count }
+        Idx  = $orderIndex++
+    } } | Sort-Object Rank, Idx | ForEach-Object { $_.Row }
+)
 if ($Limit -gt 0) { $queue = @($queue | Select-Object -First $Limit) }
 if (-not $queue.Count) {
     Write-Host 'La auditoria fresca no devuelve partidos que procesar. No se lanzara ninguna extraccion.' -ForegroundColor Green

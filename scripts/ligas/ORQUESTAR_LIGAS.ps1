@@ -119,7 +119,7 @@ if ($Mode -in @('results', 'todo')) {
         $extracted = Invoke-Step $item.code 'RESULTS extraer' -Retries $Reintentos {
             New-Item -ItemType Directory -Force -Path $root | Out-Null
             $started = Get-Date
-            & $python $scraper --no-headless competition results $item.resultsUrl --output (Join-Path $root 'RESULTS.csv')
+            & $python $scraper competition results $item.resultsUrl --output (Join-Path $root 'RESULTS.csv')
             if ($LASTEXITCODE -ne 0) { throw "el scraper termino con codigo $LASTEXITCODE" }
             $csvRef.File = Get-ChildItem -LiteralPath $root -File -Filter "RESULTS_*_$($item.country)_$($item.competition).csv" |
                 Where-Object { $_.LastWriteTime -ge $started } | Sort-Object LastWriteTime -Descending | Select-Object -First 1

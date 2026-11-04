@@ -104,8 +104,22 @@ foreach ($row in $queue) {
         Write-Host "[$($row.country)/$($row.competition)] $($row.match_id): $($row.home_team) vs $($row.away_team)" -ForegroundColor Cyan
         $datasets = @($row.pending_datasets -split ',' | Where-Object { $_ -in @('MATCH_SUMMARY','TEAM_STATS','PLAYER_STATS','POINT_BY_POINT') })
         if (-not $datasets.Count) { throw "No hay datasets detallados procesables para $($row.match_id): $($row.pending_datasets)" }
-        & $python -u $pipeline $row.match_id $row.country $row.competition $datasets 2>&1 | Tee-Object -FilePath $logPath
-        if ($LASTEXITCODE -ne 0) { throw "process_pending_match_csvs.py termino con codigo $LASTEXITCODE" }
+        # Con Stop, Windows PowerShell 5.1 convierte la primera linea de stderr ("Traceback...")
+        # en excepcion y corta la salida: el log se quedaba sin el error real. Se ejecuta con
+        # Continue, se guarda toda la salida (UTF-8) y se juzga solo por el codigo de salida.
+        $ErrorActionPreference = 'Continue'
+        Set-Content -LiteralPath $logPath -Value $null -Encoding utf8
+        & $python -u $pipeline $row.match_id $row.country $row.competition $datasets 2>&1 | ForEach-Object {
+            $line = "$_"
+            Add-Content -LiteralPath $logPath -Value $line -Encoding utf8
+            $line
+        }
+        $exitCode = $LASTEXITCODE
+        $ErrorActionPreference = 'Stop'
+        if ($exitCode -ne 0) {
+            $lastLine = @(Get-Content -LiteralPath $logPath -Encoding utf8 | Where-Object { $_.Trim() }) | Select-Object -Last 1
+            throw "process_pending_match_csvs.py termino con codigo $exitCode`: $lastLine"
+        }
         $status = 'COMPLETED'
         $message = 'Solo datasets pendientes extraidos e importados mediante el launcher.'
     } catch {

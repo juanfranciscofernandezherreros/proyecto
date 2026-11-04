@@ -25,6 +25,11 @@ if errorlevel 1 (
 )
 set "ASEGURAR_LOG="
 
+rem CICLO_RESULTS (config\basketball.env) decide si se extraen los RESULTS; por defecto si.
+if not "%CICLO_RESULTS%"=="1" (
+    >> "%LOG%" echo RESULTS desactivado en el ciclo diario ^(CICLO_RESULTS=%CICLO_RESULTS%^); se pasa a los pendientes.
+    goto :pendientes
+)
 >> "%LOG%" echo --- Partidos jugados sin resultado ANTES de RESULTS:
 call "%SCRIPTS%\pendientes\FIXTURES_SIN_RESULTS.bat" >> "%LOG%" 2>&1
 
@@ -34,6 +39,8 @@ if errorlevel 1 >> "%LOG%" echo [AVISO] Alguna liga fallo en RESULTS; se continu
 
 >> "%LOG%" echo --- Partidos jugados sin resultado DESPUES de RESULTS:
 call "%SCRIPTS%\pendientes\FIXTURES_SIN_RESULTS.bat" >> "%LOG%" 2>&1
+
+:pendientes
 
 echo Procesando partidos pendientes...
 call "%~dp0MATCHIDS_PENDIENTES.bat" >> "%LOG%" 2>&1

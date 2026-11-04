@@ -97,7 +97,7 @@ if ($existingCsv -and $existingCsvHasResults -and $existingCsv.LastWriteTime.Dat
     Write-Host "Extrayendo resultados de $($leagueDefinition.name)..."
     Write-Host "Log de extraccion: $logPath"
     $startedAt = Get-Date
-    $scraperCommand = "`"$python`" `"$scraper`" --no-headless competition results `"$($leagueDefinition.resultsUrl)`" --output `"$output`" 2>&1"
+    $scraperCommand = "`"$python`" `"$scraper`" competition results `"$($leagueDefinition.resultsUrl)`" --output `"$output`" 2>&1"
     & cmd.exe /d /c $scraperCommand | Tee-Object -FilePath $logPath
     $scraperExitCode = $LASTEXITCODE
     if ($scraperExitCode -ne 0) { throw "El scraper termino con codigo $scraperExitCode." }

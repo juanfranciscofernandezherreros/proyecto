@@ -6,7 +6,7 @@ call "%~dp0..\scripts\config.bat"
 rem Lo ejecuta la tarea programada al iniciar sesion (scripts\arranque\TAREA_INICIO.bat).
 rem 1. Arranca, si estan parados, Docker y todos los servicios del procesamiento.
 rem 2. Lo ultimo del arranque: Grafana y el dashboard de pendientes en el navegador.
-rem 3. Extrae los RESULTS de todas las ligas (registra antes y despues los fixtures sin results).
+rem 3. Solo si INICIO_RESULTS=1: extrae los RESULTS de todas las ligas (registra antes y despues los fixtures sin results).
 rem 4. Lanza MATCHIDS_PENDIENTES, que procesa todos los partidos pendientes.
 rem Todo queda en %REPORT_DIR%\automatico-inicio-<fecha>.log
 if not exist "%REPORT_DIR%" mkdir "%REPORT_DIR%"
@@ -49,6 +49,11 @@ set "ASEGURAR_LOG="
 rem Primero los RESULTS de todas las ligas: convierten en partidos jugados los del calendario
 rem que ya se disputaron, y asi la auditoria los cuenta como pendientes. Un fallo no detiene
 rem el procesamiento. Se registran los huecos fixtures sin results antes y despues.
+rem INICIO_RESULTS (config\basketball.env) decide si se hace este paso; por defecto no.
+if not "%INICIO_RESULTS%"=="1" (
+    >> "%LOG%" echo RESULTS desactivado al inicio ^(INICIO_RESULTS=%INICIO_RESULTS%^); se pasa a los pendientes.
+    goto :pendientes
+)
 >> "%LOG%" echo --- Partidos jugados sin resultado ANTES de RESULTS:
 call "%SCRIPTS%\pendientes\FIXTURES_SIN_RESULTS.bat" >> "%LOG%" 2>&1
 echo Extrayendo RESULTS de todas las ligas...
@@ -56,6 +61,8 @@ call "%~dp0LIGAS_ORQUESTAR.bat" ALL results >> "%LOG%" 2>&1
 if errorlevel 1 >> "%LOG%" echo [AVISO] Alguna liga fallo en RESULTS; se continua con los pendientes.
 >> "%LOG%" echo --- Partidos jugados sin resultado DESPUES de RESULTS:
 call "%SCRIPTS%\pendientes\FIXTURES_SIN_RESULTS.bat" >> "%LOG%" 2>&1
+
+:pendientes
 
 echo Procesando partidos pendientes...
 call "%~dp0MATCHIDS_PENDIENTES.bat" >> "%LOG%" 2>&1

@@ -236,3 +236,23 @@ Extremo a extremo validado con `juVOVk74` (Partizan 88-67 Maccabi): SCORE_SUMMAR
 identidad → `results.results` (country/competition/event_time) → MongoDB → API. Builds
 Java en verde y suite del scraper sin regresiones. Pendiente: validar el tramo
 Flashscore → CSV en una extracción real de liga completa.
+
+## 13. Verificación continua (calidad / gates)
+
+La verificación no es solo manual; está soportada por tres capas:
+
+- **Script de verificación** `scripts/Verificar.ps1` (lanzador `1_EJECUTAR/VERIFICAR.bat`):
+  convierte las comprobaciones de `VERIFICACION-SDD.md` en checks verde/rojo
+  (web/API 200, sin slugs no canónicos, filtros limpios, join fixture+result). Código
+  de salida 0/1, apto para hook o CI. Requiere el stack arrancado.
+- **Hook `pre-push`** en cada subrepo (`.githooks/pre-push`): compila/typechea antes de
+  permitir el push. Se activa una vez por repo con `git config core.hooksPath .githooks`.
+- **CI en GitHub Actions** (`.github/workflows/ci.yml`) por subrepo: Maven `verify`
+  (Java), `npm run build` + `npm test` (web), `unittest` (python), en cada push/PR.
+
+Además, la skill de proyecto **`/normas-basketball`** recoge las convenciones de código
+y el flujo SDD → plan → verificación.
+
+Estado conocido: el CI arranca en **rojo** en los repos con suites ya rotas de antes
+(scraper python y tests de la API que no compilan); ponerlo en verde es trabajo
+pendiente (ver §11 y `VERIFICACION-SDD.md`).

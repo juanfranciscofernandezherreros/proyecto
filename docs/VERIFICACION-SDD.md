@@ -112,6 +112,25 @@ batch); queda solo como limpieza de nombres.
 | `batch` (csv-extra-batch) | `b52c2b1`, `655f0da`, `92561ab` | match-summary (D1) + fixtures (D2) |
 | `local-validation` | `0e89dcd` | Limpieza compose/observabilidad (M1/M2) |
 
+## 5.bis Infraestructura de verificación (gates)
+
+La verificación es ahora **ejecutable y automatizable**, no solo manual:
+
+| Capa | Qué | Dónde | Cómo se usa |
+|---|---|---|---|
+| Script | Checks verde/rojo del SDD | `scripts/Verificar.ps1` · `1_EJECUTAR/VERIFICAR.bat` | Stack arrancado → exit 0/1 |
+| Hook | Compila/typechea antes del push | `<repo>/.githooks/pre-push` | `git config core.hooksPath .githooks` (una vez por repo) |
+| CI | Build + tests en cada push/PR | `<repo>/.github/workflows/ci.yml` | Automático en GitHub |
+| Skill | Normas + flujo SDD→plan→verificación | `/normas-basketball` | Invocar antes de implementar/revisar |
+
+**Estado del CI (conocido):** arranca en **rojo** en los repos con suites ya rotas de
+antes — `python-pyppeter` (~9 tests fallando, de entorno/contratos antiguos) y
+`basketball-match-api` (tests que no compilan). Ponerlo en verde es trabajo pendiente;
+el gate está cumpliendo su función: **destapar** esos fallos en vez de ocultarlos.
+
+**Notas:** la skill `/normas-basketball` vive en `.claude/` (gitignored), así que es
+local, no versionada; el hook requiere activación manual por repo (diseño de git).
+
 ## 6. Conclusión
 
 Lo implementado se corresponde con lo pretendido en el SDD y el plan: cada requisito

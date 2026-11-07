@@ -285,6 +285,14 @@ arranca lo que esté parado. `VIGILAR_SERVICIOS.bat una-vez` hace una sola pasad
 
 ## 8. Verificar
 
+**Rápido (verde/rojo):** con el stack arrancado, `1_EJECUTAR\VERIFICAR.bat` (o
+`scripts\Verificar.ps1`) ejecuta las comprobaciones del SDD y devuelve 0/1. Cada
+subrepo trae además CI (`.github/workflows/ci.yml`) y un hook `pre-push`
+(`.githooks/pre-push`, se activa con `git config core.hooksPath .githooks`). Detalle en
+`docs\VERIFICACION-SDD.md` y `docs\SDD.md` (§13).
+
+Comprobaciones manuales:
+
 ```bash
 # Web y API
 curl http://localhost:8083/

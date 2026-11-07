@@ -12,22 +12,41 @@ flujo sin conocer el proyecto por dentro.
 
 ## 1. Arquitectura y flujo
 
+```mermaid
+flowchart TD
+    FS["Flashscore"] -->|"python-pyppeter + Edge/EdgeDriver"| RAW["CSV crudos<br/>C:\data\basketball\competitions\&lt;pais&gt;\&lt;comp&gt;\&lt;matchId&gt;"]
+    RAW -->|"validación + consolidación"| RDY["CSV consolidados<br/>C:\data\basketball-ready\current"]
+    RDY -->|"carga"| LAU["csv-batch-launcher<br/>:8088 · JARs de csv-extra-batch"]
+    LAU --> PG[("PostgreSQL :55432<br/>schemas: fixtures, results,<br/>point_by_point, match_summary,<br/>stats_player, team_stats,<br/>match_details, h2h, odds")]
+    PG -->|"basketball-match-projector<br/>reproyecta cada ~60 s"| MG[("MongoDB :27017<br/>colección matches<br/>read model por matchId")]
+    MG --> API["basketball-match-api<br/>:8082"]
+    API --> WEB["basketball-match-web (nginx)<br/>:8083 · /api → API"]
+
+    PG -.métricas/logs.-> OBS["Observabilidad<br/>Grafana :8084 · Prometheus :8086 · Loki :8085"]
+    MG -.métricas/logs.-> OBS
+    API -.métricas/logs.-> OBS
+
+    subgraph EXTRACCION["Extracción (host, scripts)"]
+        FS
+        RAW
+        RDY
+        LAU
+    end
+    subgraph STACK["Stack docker (local-validation)"]
+        PG
+        MG
+        API
+        WEB
+        OBS
+    end
+```
+
+Resumen en texto:
+
 ```text
-Flashscore
-   │  (python-pyppeter, Edge/EdgeDriver)
-   ▼
-CSV crudos  C:\data\basketball\competitions\<pais>\<competicion>\<matchId>\
-   │  (validación + consolidación)
-   ▼
-CSV consolidados  C:\data\basketball-ready\current\
-   │  (csv-batch-launcher  →  JARs de csv-extra-batch)
-   ▼
-PostgreSQL  (schemas: fixtures, results, point_by_point, match_summary,
-   │         stats_player, team_stats, match_details, h2h, odds)
-   ▼  basketball-match-projector  (reproyecta cada ~60 s)
-MongoDB  (colección matches: read model por matchId)
-   ▼  basketball-match-api
-Web  (basketball-match-web, nginx)
+Flashscore → (scraper) → CSV crudos → (consolidación) → CSV consolidados
+  → (csv-batch-launcher) → PostgreSQL → (projector ~60s) → MongoDB
+  → basketball-match-api → web
 ```
 
 Dos tipos de información principales:

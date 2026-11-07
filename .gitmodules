@@ -1,0 +1,19 @@
+[submodule "basketball-match-projector"]
+	path = basketball-match-projector
+	url = https://github.com/juanfranciscofernandezherreros/basketball-match-projector.git
+[submodule "basketball-match-api"]
+	path = basketball-match-api
+	url = https://github.com/juanfranciscofernandezherreros/basketball-match-api.git
+[submodule "basketball-match-web"]
+	path = basketball-match-web
+	url = https://github.com/juanfranciscofernandezherreros/basketball-match-web.git
+[submodule "csv-extra-batch"]
+	path = csv-extra-batch
+	url = https://github.com/juanfranciscofernandezherreros/batch.git
+[submodule "local-validation"]
+	path = local-validation
+	url = https://github.com/juanfranciscofernandezherreros/local-validation.git
+[submodule "python-pyppeter"]
+	path = python-pyppeter
+	url = https://github.com/juanfranciscofernandezherreros/python-pyppeter.git
+	branch = KAN-341/readme-extraccion-csv

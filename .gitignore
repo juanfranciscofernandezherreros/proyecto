@@ -1,10 +1,5 @@
-# Repositorios propios: cada uno lleva su historial en su propia carpeta.
-/basketball-match-api/
-/basketball-match-projector/
-/basketball-match-web/
-/csv-extra-batch/
-/local-validation/
-/python-pyppeter/
+# Los subproyectos se incluyen como submodulos de git (ver .gitmodules): cada uno
+# mantiene su propio repositorio e historial, y proyecto los referencia.
 /.tmp-ai-generic-generation-content/
 
 # Material archivado y datos generados.

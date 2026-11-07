@@ -51,6 +51,20 @@ Los servicios `*-parser`, `*-persistence`, `csv-watcher`, `csv-match-normalizer`
 `file-event-router` ya no existen (se eliminaron del compose); el procesamiento real
 lo hace `csv-extra-batch`.
 
+### SCORE_SUMMARY trae identidad de partido (igual que RESULTS)
+
+`SCORE_SUMMARY_*.csv` ahora incluye, además de marcador/parciales, los campos
+`eventTime, eventDatetime, homeTeam, awayTeam, homeScore, awayScore, country,
+competition` (contrato en `python-pyppeter/csv_contracts.py`). La hora sale de
+`.duelParticipant__startTime` de la ficha del partido; país/competición, de la ruta
+`.../competitions/<pais>/<comp>/`. El JAR `csv-extra-batch/match-summary` los carga
+en `results.results` (event_time/event_datetime/country/competition), de modo que un
+partido que llega solo por SCORE_SUMMARY ya no queda sin hora ni país y **sí aparece
+en la web** (la API filtra `finished` por `result.eventTime`). Los SCORE_SUMMARY
+antiguos de 15 columnas se siguen aceptando. Detalle completo en
+`docs\ESPECIFICACIONES.md` (sección 11). Si el scrape de la hora falla, queda el
+backfill desde `fixtures` en `sql\consultas\`.
+
 ## Consultas a la base de datos
 
 Toda consulta SQL que se ejecute contra la base de datos del proyecto (PostgreSQL de

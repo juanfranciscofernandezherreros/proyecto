@@ -341,3 +341,81 @@ Schemas de Postgres y su contenido:
 - No ejecutar `docker compose down -v`: borra el volumen de Postgres y todos los datos.
 - No cargar CSV crudos a mano en `basketball-ready\current`: deben consolidarse antes.
 - Puerto de Postgres desde Windows: `55432` (no `5432`).
+
+---
+
+## 11. SCORE_SUMMARY con identidad de partido (igual que RESULTS)
+
+### Problema que resuelve
+
+Un partido finalizado puede acabar en `results.results` por dos vías:
+
+- Desde el CSV `RESULTS_<ts>_<pais>_<comp>.csv`, que trae `eventTime`,
+  `eventDatetime` y (en el nombre) país/competición.
+- Desde el CSV `SCORE_SUMMARY_<ts>_<matchId>.csv`, que **antes** solo traía
+  marcador y parciales, sin hora ni país/competición.
+
+Cuando un partido se rellenaba solo desde SCORE_SUMMARY, `results.event_time`,
+`country` y `competition` quedaban vacíos. Y como la API considera "finished"
+solo si `result.eventTime` no está vacío ([MatchServiceImpl.java:49](../basketball-match-api/src/main/java/com/fernandez/basketball/matchapi/match/service/MatchServiceImpl.java:49)),
+esos partidos **no salían en la web** aunque estuvieran en Mongo con marcador.
+
+### Qué hace ahora
+
+SCORE_SUMMARY lleva los **mismos campos de identidad** que RESULTS. Columnas
+añadidas al contrato (al final, sin mover las 15 originales):
+`eventTime, eventDatetime, homeTeam, awayTeam, homeScore, awayScore, country, competition`.
+
+Flujo de los nuevos campos:
+
+```text
+Página del partido (Flashscore)
+  .duelParticipant__startTime  "06.11.2026 20:45"
+        │  capture_html -> record score_datetime
+        ▼
+score_rows (extract_flashscore_match_bundle.py)
+  - eventDatetime = parse_flashscore_datetime(...)  -> 2026-11-06T20:45:00+01:00
+  - eventTime     = HH:MM                            -> 20:45
+  - homeTeam/awayTeam/homeScore/awayScore            -> de las filas home/away
+  - country/competition                              -> de la ruta .../competitions/<pais>/<comp>/
+        ▼
+SCORE_SUMMARY_*.csv (23 columnas)
+        │  csv-batch-launcher -> JAR match-summary
+        ▼
+results.results  (event_time, event_datetime, country, competition, ...)
+        ▼  projector -> Mongo -> API -> web
+```
+
+### Detalle técnico
+
+- **Scraper** (`python-pyppeter`):
+  - `csv_contracts.py` → `SCORE_SUMMARY_FIELDS` ampliado.
+  - `extract_flashscore_match_details.py` → `capture_html` emite el record
+    `score_datetime` leyendo `.duelParticipant__startTime`.
+  - `extract_flashscore_match_bundle.py` → `score_rows` parsea la fecha con
+    `parse_flashscore_datetime` y rellena identidad en cada fila (home y away);
+    país/competición se infieren de `--data-dir` (`.../competitions/<pais>/<comp>`).
+- **Carga** (`csv-extra-batch/match-summary`):
+  - `CsvInput.java` → acepta la cabecera ampliada (basta que empiece por las 15
+    columnas originales).
+  - `ResultRow.java` → acepta filas con ≥15 columnas y lee event_time/
+    event_datetime/country/competition del row `home`.
+  - `ResultsWriter.java` → el `INSERT`/`ON CONFLICT` a `results.results` ahora
+    incluye `event_time, event_datetime, country, competition`, con
+    `COALESCE(NULLIF(...,''), EXCLUDED...)` para rellenar vacíos sin pisar valores
+    buenos ya existentes.
+
+### Compatibilidad y red de seguridad
+
+- Los `SCORE_SUMMARY_*.csv` antiguos (15 columnas) se siguen cargando: las
+  columnas extra se tratan como ausentes (quedan nulas).
+- Si el scrape de la hora fallara, el backfill desde `fixtures`
+  ([sql/consultas/2026-11-07_1830_results-sin-event-time-no-salen-en-web.sql](../sql/consultas/2026-11-07_1830_results-sin-event-time-no-salen-en-web.sql))
+  sigue disponible como rescate.
+
+### Verificado
+
+Probado de punta a punta con `juVOVk74` (Partizan 88-67 Maccabi): `country`/
+`competition` pasaron de vacíos a `europe`/`euroleague` y `event_time` a `20:45`
+en `results.results`, y se propagó a MongoDB y a la API. Pendiente: una
+extracción real con Edge para validar el tramo Flashscore → CSV en la máquina.

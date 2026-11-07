@@ -1,5 +1,56 @@
 # Instrucciones del proyecto Basketball
 
+## Arrancar todo (web + procesamiento de CSV)
+
+Cuando el usuario diga "arranca todo", "arranca la web", "inícialo como siempre"
+o equivalente, hay que arrancar **dos cosas** y en este orden. **NO** se lanzan
+piezas sueltas con `mvn spring-boot:run` ni con `npm run dev` (eso usa puertos
+equivocados: 8080 y 5173).
+
+**1) La web y sus servicios** — stack docker en `local-validation\docker-compose.yml`
+(desde `C:\Develop\basketball\local-validation`):
+
+```bash
+docker compose up -d --build mongo basketball-match-projector basketball-match-api basketball-match-web
+```
+
+**2) El procesamiento de los CSV** — el `csv-batch-launcher` de `csv-extra-batch`
+(NO está en el compose). Carga en Postgres los CSV consolidados de
+`C:\data\basketball-ready\current`, y desde ahí el projector los pasa a MongoDB.
+Arrancarlo desde `C:\Develop\basketball`:
+
+```bash
+cmd //c "scripts\arranque\ASEGURAR.bat launcher"
+```
+
+### Puertos y flujo
+
+CSV → `csv-batch-launcher` → **Postgres** → `basketball-match-projector` → **MongoDB**
+→ `basketball-match-api` → **web**.
+
+- **Web** → http://localhost:8083  (nginx `basketball-match-web`, 80 → 8083; consume la API vía `/api`)
+- **API** → http://localhost:8082  (`basketball-match-api`, 8080 → 8082)
+- **Projector ("procesar")** → sin puerto; reproyecta Postgres → Mongo cada ~60 s
+- **Launcher (carga CSV)** → http://localhost:8088
+- **Mongo** → 27017 · **Postgres** → 55432
+
+Postgres, Grafana, Prometheus y Loki suelen estar ya levantados (si no, van en el
+mismo compose).
+
+### Verificar
+
+- Web y API: `curl http://localhost:8083/` y `curl http://localhost:8082/actuator/health` → 200.
+- Launcher procesando: `docker exec -i local-validation-postgres-1 psql -U test -d basketball -c "SELECT batch_type, status, exit_code FROM public.batch_launch_request ORDER BY created_at DESC LIMIT 15;"`
+  → filas `COMPLETED` / `exit_code = 0`.
+- Tras cargar CSV, la web tarda ~1 min en reflejarlo (Postgres → projector → Mongo).
+
+El ciclo diario completo (extraer de Flashscore + procesar) es
+`1_EJECUTAR\CICLO_DIARIO.bat`.
+
+Los servicios `*-parser`, `*-persistence`, `csv-watcher`, `csv-match-normalizer` y
+`file-event-router` ya no existen (se eliminaron del compose); el procesamiento real
+lo hace `csv-extra-batch`.
+
 ## Consultas a la base de datos
 
 Toda consulta SQL que se ejecute contra la base de datos del proyecto (PostgreSQL de

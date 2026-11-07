@@ -223,7 +223,7 @@ Detalle en [ESPECIFICACIONES.md §11](ESPECIFICACIONES.md).
 | Riesgo | Impacto | Mitigación / estado |
 |---|---|---|
 | Filtro `finished` atado a `result.eventTime` | Partidos con marcador pero sin hora no salen en la web | Resuelto en origen (§8) + backfill desde `fixtures` en `sql/consultas/` |
-| Projector no proyecta el objeto `fixture` cuando `fixtures.event_time` es nulo | ~1337 "scheduled" sin equipos/fecha y sin filtrar por liga | **Abierto** — revisar el mapeo del projector |
+| Projector no proyecta el objeto `fixture` cuando `fixtures.event_time` es nulo | ~1337 "scheduled" sin equipos/fecha y sin filtrar por liga | **Cerrado** — eran docs obsoletos; `PROJECTION_VERSION` en el sourceHash fuerza reproyección (0 rotos; scheduled NBA 0→1068) |
 | Exporters con `restart: "no"` | Se quedan `Exited` y los dashboards dejan de actualizarse | **Abierto** — poner `restart: unless-stopped` o `VIGILAR_SERVICIOS.bat` |
 | `results` de euroleague con `country/competition` vacíos (SCORE_SUMMARY antiguos) | Dependen de la `fixture` para clasificarse | Resuelto para extracciones nuevas (§8) |
 | Repos anidados (`python-pyppeter`, `csv-extra-batch`, `local-validation`) gitignorados y de otro propietario | Cambios fáciles de perder / no versionados con el repo raíz | Documentado; commitear en cada repo |

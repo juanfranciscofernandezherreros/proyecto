@@ -18,6 +18,7 @@ Dos desarrollos funcionales y dos de mantenimiento, todos verificados:
 |---|---|---|---|
 | D1 | SCORE_SUMMARY con identidad de partido | §5, §8 | ✅ Verificado |
 | D2 | Normalización de competiciones (acb/super-league) | §5, §11, Plan | ✅ Verificado |
+| D3 | Projector: regenerar documentos con `fixture` nula | §3.1, §11 | ✅ Verificado |
 | M1 | Observabilidad: revivir exporters + consolidar dashboards | §9, §11 | ✅ Verificado |
 | M2 | Limpieza de servicios/dashboards muertos (Kafka) | §3.1, §9 | ✅ Verificado |
 
@@ -60,6 +61,20 @@ results usen el mismo slug canónico.
 fixtures con el slug canónico). Cubierto funcionalmente por 5.4 (normalización en el
 batch); queda solo como limpieza de nombres.
 
+### D3 · Projector: documentos con `fixture` nula  (SDD §3.1, §11)
+
+**Intención:** un partido con fixture en PostgreSQL debe tener su objeto `fixture` en
+el read model; había ~1308 docs con `availableSections:["fixture"]` pero sin objeto
+`fixture` (scheduled sin equipos/fecha, no filtrables por liga).
+
+| Requisito | Cambio | Fichero / commit | Verificación | OK |
+|---|---|---|---|---|
+| Diagnóstico | Docs obsoletos de un build anterior; `sourceHash` saltaba la regeneración | — | `p2fm1ZKa` regenerado → vuelve con `fixture` completo | ✅ |
+| Fix durable | `PROJECTION_VERSION` en el `sourceHash` → bump invalida estados y reproyecta todo una vez | `basketball-match-projector` `MatchProjectionService` | Projector v2 recompilado y redesplegado | ✅ |
+| Resultado | — | — | docs con `fixture` nula: **1308 → 0**; con objeto fixture 1744 → **3081** (= fixtures en PG) | ✅ |
+| Impacto web | — | — | `scheduled` NBA en la API: **0 → 1068** | ✅ |
+| Regresión | Check añadido al gate | `scripts/Verificar.ps1` | VERDE (incluye "ningún partido con fixture nula") | ✅ |
+
 ### M1 · Observabilidad  (SDD §9, §11)
 
 **Intención:** que los dashboards vuelvan a actualizarse.
@@ -99,7 +114,7 @@ batch); queda solo como limpieza de nombres.
 
 | Riesgo (SDD §11) | Estado |
 |---|---|
-| Projector no proyecta `fixture` cuando `event_time` es nulo (~1337 scheduled) | Abierto — pendiente de revisar el mapeo del projector |
+| Projector no proyecta `fixture` cuando `event_time` es nulo (~1337 scheduled) | **Cerrado** (D3): eran docs obsoletos; `PROJECTION_VERSION` fuerza reproyección. 0 rotos |
 | Exporters con `restart: "no"` | Abierto — mitigación propuesta |
 | Scraper nombra fixtures con slug crudo (Plan 5.2/5.3) | Mitigado por 5.4; limpieza pendiente |
 

@@ -17,7 +17,8 @@
 param(
     [string]$WebUrl = 'http://localhost:8083',
     [string]$ApiUrl = 'http://localhost:8082',
-    [string]$PostgresContainer = 'local-validation-postgres-1'
+    [string]$PostgresContainer = 'local-validation-postgres-1',
+    [string]$MongoContainer = 'local-validation-mongo-1'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -27,6 +28,9 @@ function Bad($m)  { Write-Host "  FAIL $m" -ForegroundColor Red; $script:fail++ 
 
 function Psql([string]$sql) {
     return (& docker exec -i $PostgresContainer psql -U test -d basketball -tAc $sql 2>&1).Trim()
+}
+function Mongo([string]$js) {
+    return (& docker exec -i $MongoContainer mongosh --quiet basketball --eval $js 2>&1 | Select-Object -Last 1).Trim()
 }
 function HttpCode([string]$url) {
     try { return [int](Invoke-WebRequest -UseBasicParsing -Uri $url -TimeoutSec 5).StatusCode }
@@ -61,6 +65,10 @@ try {
         Ok "partido spain une fixture+result ($($m.matchId))"
     } else { Bad 'no hay partido spain/liga-endesa consistente' }
 } catch { Bad "no se pudo verificar el join: $($_.Exception.Message)" }
+
+# 5. Projector: no hay documentos con seccion fixture pero sin objeto fixture
+$rotos = Mongo 'print(db.matches.countDocuments({availableSections:/^fixture$/, fixture:null}))'
+if ($rotos -eq '0') { Ok 'Mongo: ningun partido con fixture nula' } else { Bad "Mongo: $rotos partidos con availableSections=fixture pero objeto fixture nulo" }
 
 Write-Host ''
 if ($fail -eq 0) { Write-Host 'RESULTADO: VERDE (todas las comprobaciones pasan)' -ForegroundColor Green; exit 0 }

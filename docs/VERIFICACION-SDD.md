@@ -22,6 +22,7 @@ Dos desarrollos funcionales y dos de mantenimiento, todos verificados:
 | M1 | Observabilidad: revivir exporters + consolidar dashboards | §9, §11 | ✅ Verificado |
 | M2 | Limpieza de servicios/dashboards muertos (Kafka) | §3.1, §9 | ✅ Verificado |
 | M3 | API: tests que no compilaban → verdes (CI) | §6, §13 | ✅ Verificado |
+| M4 | python-pyppeter: suite en verde (CI) | §3.1, §5, §13 | ✅ Verificado |
 
 ---
 
@@ -139,6 +140,17 @@ antiguas). Ver [PLAN-ci-api-tests.md](PLAN-ci-api-tests.md).
 | `searchMatches` 7 args + `MongoTemplate` | mock `count`/`find`, llamada con 7 args | `MatchServiceImplTest`, `MatchControllerTest` · `35f2fd5` | `mvn test` 22/22 verde | ✅ |
 | Sin cambio de contrato | solo tests | — | gate `Verificar.ps1` VERDE | ✅ |
 
+### M4 · python-pyppeter: suite en verde  (SDD §3.1, §5, §13)
+
+**Intención:** CI de `python-pyppeter` en verde. Ver [PLAN-ci-python-tests.md](PLAN-ci-python-tests.md).
+
+| Requisito | Cambio | Verificación | OK |
+|---|---|---|---|
+| Default de navegador real (edge) | tests de navegador actualizados | — | ✅ |
+| Contrato con `event_datetime` (fixtures y results) | expectativas y datos de tests de contrato/validador alineados | — | ✅ |
+| Tests de rutas POSIX | `skipUnless(os.name=='posix')` (corren en CI Linux) | — | ✅ |
+| Suite | — | `unittest` local: **OK (346, skipped=3)** | ✅ |
+
 ## 5.bis Infraestructura de verificación (gates)
 
 La verificación es ahora **ejecutable y automatizable**, no solo manual:
@@ -150,9 +162,8 @@ La verificación es ahora **ejecutable y automatizable**, no solo manual:
 | CI | Build + tests en cada push/PR | `<repo>/.github/workflows/ci.yml` | Automático en GitHub |
 | Skill | Normas + flujo SDD→plan→verificación | `/normas-basketball` | Invocar antes de implementar/revisar |
 
-**Estado del CI (conocido):** `basketball-match-api` ya está **en verde** (M3). Queda
-`python-pyppeter` con ~9 tests fallando (entorno/contratos antiguos); ponerlo en verde
-es el siguiente trabajo pendiente. El gate cumple su función: destapar y ir cerrando.
+**Estado del CI:** `basketball-match-api` (M3) y `python-pyppeter` (M4) ya están **en
+verde**. El resto de repos no tenían suites rotas. El gate cumple su función.
 
 **Notas:** la skill `/normas-basketball` vive en `.claude/` (gitignored), así que es
 local, no versionada; el hook requiere activación manual por repo (diseño de git).

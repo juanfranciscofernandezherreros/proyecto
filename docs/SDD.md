@@ -253,6 +253,5 @@ La verificación no es solo manual; está soportada por tres capas:
 Además, la skill de proyecto **`/normas-basketball`** recoge las convenciones de código
 y el flujo SDD → plan → verificación.
 
-Estado conocido: el CI arranca en **rojo** en los repos con suites ya rotas de antes
-(scraper python y tests de la API que no compilan); ponerlo en verde es trabajo
-pendiente (ver §11 y `VERIFICACION-SDD.md`).
+Estado conocido: la API ya está en **verde** (M3); queda el scraper python con tests
+fallando (ver §11 y `VERIFICACION-SDD.md`).

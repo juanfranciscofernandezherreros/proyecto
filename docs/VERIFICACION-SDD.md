@@ -21,6 +21,7 @@ Dos desarrollos funcionales y dos de mantenimiento, todos verificados:
 | D3 | Projector: regenerar documentos con `fixture` nula | §3.1, §11 | ✅ Verificado |
 | M1 | Observabilidad: revivir exporters + consolidar dashboards | §9, §11 | ✅ Verificado |
 | M2 | Limpieza de servicios/dashboards muertos (Kafka) | §3.1, §9 | ✅ Verificado |
+| M3 | API: tests que no compilaban → verdes (CI) | §6, §13 | ✅ Verificado |
 
 ---
 
@@ -127,6 +128,17 @@ el read model; había ~1308 docs con `availableSections:["fixture"]` pero sin ob
 | `batch` (csv-extra-batch) | `b52c2b1`, `655f0da`, `92561ab` | match-summary (D1) + fixtures (D2) |
 | `local-validation` | `0e89dcd` | Limpieza compose/observabilidad (M1/M2) |
 
+### M3 · API: tests que no compilaban  (SDD §6, §13)
+
+**Intención:** CI de `basketball-match-api` en verde (los tests no compilaban por firmas
+antiguas). Ver [PLAN-ci-api-tests.md](PLAN-ci-api-tests.md).
+
+| Requisito | Cambio | Fichero / commit | Verificación | OK |
+|---|---|---|---|---|
+| Constructor con `MongoTemplate` | mock añadido | `MatchServiceImplTest` · `35f2fd5` | compila | ✅ |
+| `searchMatches` 7 args + `MongoTemplate` | mock `count`/`find`, llamada con 7 args | `MatchServiceImplTest`, `MatchControllerTest` · `35f2fd5` | `mvn test` 22/22 verde | ✅ |
+| Sin cambio de contrato | solo tests | — | gate `Verificar.ps1` VERDE | ✅ |
+
 ## 5.bis Infraestructura de verificación (gates)
 
 La verificación es ahora **ejecutable y automatizable**, no solo manual:
@@ -138,10 +150,9 @@ La verificación es ahora **ejecutable y automatizable**, no solo manual:
 | CI | Build + tests en cada push/PR | `<repo>/.github/workflows/ci.yml` | Automático en GitHub |
 | Skill | Normas + flujo SDD→plan→verificación | `/normas-basketball` | Invocar antes de implementar/revisar |
 
-**Estado del CI (conocido):** arranca en **rojo** en los repos con suites ya rotas de
-antes — `python-pyppeter` (~9 tests fallando, de entorno/contratos antiguos) y
-`basketball-match-api` (tests que no compilan). Ponerlo en verde es trabajo pendiente;
-el gate está cumpliendo su función: **destapar** esos fallos en vez de ocultarlos.
+**Estado del CI (conocido):** `basketball-match-api` ya está **en verde** (M3). Queda
+`python-pyppeter` con ~9 tests fallando (entorno/contratos antiguos); ponerlo en verde
+es el siguiente trabajo pendiente. El gate cumple su función: destapar y ir cerrando.
 
 **Notas:** la skill `/normas-basketball` vive en `.claude/` (gitignored), así que es
 local, no versionada; el hook requiere activación manual por repo (diseño de git).

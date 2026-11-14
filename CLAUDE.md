@@ -14,7 +14,12 @@ El detalle vive fuera de este fichero:
 | Qué | Dónde |
 |---|---|
 | Arrancar la web y el procesamiento de CSV | skill `arrancar-todo` |
-| Extraer resultados de la Euroliga hasta Postgres | skill `extraer-euroliga` |
+| Extraer resultados de una liga hasta Postgres | skill `extraer-resultados` |
+| Extraer jugada a jugada y estadísticas | skill `extraer-datos-partido` |
+| Procesar los partidos pendientes | skill `procesar-pendientes` |
+| Un partido no sale o sale mal en la web | skill `diagnosticar-partido` |
+| Ver qué está levantado y qué falta | skill `estado-del-sistema` |
+| Commit y push con submódulos | skill `commit-multirepo` |
 | Normas de desarrollo y flujo SDD → plan → verificación | skill `normas-basketball` |
 | Formato de los ficheros de `sql\consultas\` | `.claude\rules\consultas-sql.md` |
 | SCORE_SUMMARY con identidad de partido | `.claude\rules\score-summary.md` |

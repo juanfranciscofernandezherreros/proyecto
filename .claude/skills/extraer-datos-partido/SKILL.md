@@ -84,6 +84,13 @@ Un `false` no siempre es un fallo: Flashscore no publica todos los datasets de t
 los partidos. Los que se han intentado y no existen en la fuente quedan en
 `fixtures_processing_audit.dataset_unavailable` (skill `procesar-pendientes`).
 
+## Salida de los comandos
+
+Los procesos largos escriben mucho. Redirigir la salida a un fichero del
+directorio temporal de la sesión y leer solo el final (`tail -40`) o las líneas
+clave (`grep -E "RESUMEN|OK|FALLO|ERROR"`). No volcar el log entero ni
+consultar tablas sin `LIMIT`.
+
 ## Notas
 
 - Los CSV crudos van a `C:\data\basketball\competitions\<pais>\<competicion>\<matchId>\`.

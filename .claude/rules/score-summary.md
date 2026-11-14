@@ -1,3 +1,10 @@
+---
+paths:
+  - "python-pyppeter/**"
+  - "csv-extra-batch/match-summary/**"
+  - "basketball-match-projector/**"
+---
+
 # SCORE_SUMMARY trae identidad de partido (igual que RESULTS)
 
 `SCORE_SUMMARY_*.csv` incluye, además de marcador/parciales, los campos

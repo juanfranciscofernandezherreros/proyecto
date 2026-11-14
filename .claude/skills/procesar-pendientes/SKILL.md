@@ -88,6 +88,13 @@ pendiente y **no** aparece en esta tabla, es un fallo real de extracción o de
 importación: revisar el log y, para seguirlo de punta a punta, la skill
 `diagnosticar-partido`.
 
+## Salida de los comandos
+
+Los procesos largos escriben mucho. Redirigir la salida a un fichero del
+directorio temporal de la sesión y leer solo el final (`tail -40`) o las líneas
+clave (`grep -E "RESUMEN|OK|FALLO|ERROR"`). No volcar el log entero ni
+consultar tablas sin `LIMIT`.
+
 ## Notas
 
 - Consultas relacionadas ya guardadas en `sql\consultas\`:

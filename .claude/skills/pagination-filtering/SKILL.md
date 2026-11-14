@@ -1,6 +1,7 @@
 ---
 name: pagination-filtering
 description: Make the listing endpoint of a CRUD API paginated and filterable by every entity field, via a dynamic Specification and a Pageable-aware controller.
+disable-model-invocation: true
 ---
 
 # pagination-filtering

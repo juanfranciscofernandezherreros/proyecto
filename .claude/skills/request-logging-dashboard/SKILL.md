@@ -1,6 +1,7 @@
 ---
 name: request-logging-dashboard
 description: Add a structured access-log line for every HTTP request plus a Grafana panel/dashboard that lists them all, reusable across projects (Spring Boot + Loki/Grafana by default, adaptable to other stacks).
+disable-model-invocation: true
 ---
 
 # request-logging-dashboard

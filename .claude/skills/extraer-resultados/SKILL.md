@@ -74,6 +74,13 @@ docker exec -i local-validation-postgres-1 psql -U test -d basketball -c "SELECT
 Si no entra nada nuevo y el paso 1 mostraba partidos pendientes, revisar la salida
 del scraper antes de dar la extracción por buena.
 
+## Salida de los comandos
+
+Los procesos largos escriben mucho. Redirigir la salida a un fichero del
+directorio temporal de la sesión y leer solo el final (`tail -40`) o las líneas
+clave (`grep -E "RESUMEN|OK|FALLO|ERROR"`). No volcar el log entero ni
+consultar tablas sin `LIMIT`.
+
 ## Notas
 
 - Estos resultados son solo marcador y parciales. Para jugada a jugada y

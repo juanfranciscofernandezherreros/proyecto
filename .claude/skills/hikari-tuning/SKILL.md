@@ -1,6 +1,7 @@
 ---
 name: hikari-tuning
 description: Configure HikariCP explicitly (pool size, timeouts, leak detection) instead of relying on Spring Boot's implicit defaults, and prove it works under concurrent load.
+disable-model-invocation: true
 ---
 
 # hikari-tuning

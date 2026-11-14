@@ -1,6 +1,7 @@
 ---
 name: swagger-openapi
 description: Expose complete, accurate OpenAPI/Swagger UI documentation for every REST endpoint in this project.
+disable-model-invocation: true
 ---
 
 # Swagger and OpenAPI Documentation Instructions

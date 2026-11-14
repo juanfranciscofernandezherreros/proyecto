@@ -1,6 +1,7 @@
 ---
 name: crud
 description: Scaffold the layered CRUD architecture (controller/dto/mapper/model/repository/service) for a REST API entity in this project.
+disable-model-invocation: true
 ---
 
 # Instrucciones para APIs REST CRUD

@@ -22,10 +22,8 @@ Parse `$ARGUMENTS` (or the user's message) for:
 
 ## Source of truth
 
-Each phase below has its own standalone skill, installed **globally**
-(`~/.claude/skills/<name>/SKILL.md`) so it is available in every project,
-not just this one — and each can also be invoked on its own (e.g. `/crud`,
-`/pagination-filtering`) when you only want one phase applied in isolation:
+Each phase below has its own standalone skill under this project's
+`.claude/skills/<name>/SKILL.md`:
 
 `crud`, `pagination-filtering`, `english-javadoc`, `cucumber-api-testing`,
 `swagger-openapi`, `service-testing`, `lombok-mapstruct`, `api-first`,
@@ -33,14 +31,13 @@ not just this one — and each can also be invoked on its own (e.g. `/crud`,
 `request-logging-dashboard`, `allure-cucumber-reporting`,
 `explicit-bean-wiring`.
 
-Invoke each by name (via the Skill mechanism, not by manually reading a file
-path) so it resolves correctly whether a project-local copy under
-`.claude/skills/` overrides it or not — **a project-local copy, if one
-exists, takes precedence over the global one** and should be read and
-followed exactly, since it may carry project-specific refinements. Only if
-a phase skill is entirely unavailable (neither project-local nor global —
-shouldn't happen once these are installed globally) fall back to the
-embedded checklist below for that phase.
+The phase skills are marked `disable-model-invocation: true` to keep their
+descriptions out of every session's context, so they do not appear in the
+skill listing and cannot be called through the Skill tool. For each phase,
+**read `.claude/skills/<name>/SKILL.md` with the Read tool and follow it
+exactly**. The user can still run one phase in isolation by typing
+`/<name>` (e.g. `/crud`, `/pagination-filtering`). Only if a phase file is
+missing fall back to the embedded checklist below for that phase.
 
 ## Ground rules
 

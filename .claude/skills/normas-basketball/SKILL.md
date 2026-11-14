@@ -45,7 +45,7 @@ arquitectura está en `docs/SDD.md`; la operación, en `docs/ESPECIFICACIONES.md
 
 ## SQL
 - Toda consulta contra la BD se guarda en `sql/consultas/` con la cabecera
-  obligatoria (ver `CLAUDE.md`). Las de ESCRITURA se guardan antes de ejecutarse.
+  obligatoria (regla `consultas-sql` y `sql/consultas/_PLANTILLA.sql`). Las de ESCRITURA se guardan antes de ejecutarse.
 
 ## Git
 - Multi-repo: cada subproyecto es su propio repo (submódulos en `proyecto`).

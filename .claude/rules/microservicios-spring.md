@@ -1,3 +1,9 @@
+---
+paths:
+  - "**/*.java"
+  - "**/pom.xml"
+---
+
 # Global rules
 
 ## New microservices from scratch

@@ -1,6 +1,6 @@
 ---
 name: extraer-resultados
-description: Extrae los resultados (marcadores y parciales) de una liga de baloncesto o de todas con el scraper de Flashscore y los deja cargados en PostgreSQL (results.results), verificando el resultado. Usar siempre que el usuario pida extraer, actualizar o traer los resultados de la Euroliga, la ACB, la NBA o cualquier otra liga, o pregunte por resultados que aún no están en la base de datos.
+description: Extrae los resultados (marcadores y parciales) de una liga de baloncesto concreta con el scraper de Flashscore y los deja cargados en PostgreSQL (results.results), verificando el resultado. Usar siempre que el usuario pida extraer, actualizar o traer los resultados de la Euroliga, la ACB, la NBA o cualquier otra liga concreta, o pregunte por resultados que aún no están en la base de datos. Para todas las ligas a la vez, usar resultados-todas-las-ligas.
 model: haiku
 ---
 
@@ -23,6 +23,8 @@ Se hace de una vez, sin pedir permiso para cada paso.
 El catálogo real es `LIGAS_BASKET.json`. Si el usuario nombra una liga, usar su
 `code`; si no nombra ninguna, preguntar solo si no se deduce del contexto. En las
 consultas, sustituir `<competicion>` por el valor de la tabla (p. ej. `euroleague`).
+
+Para todas las ligas a la vez, usar la skill `resultados-todas-las-ligas`.
 
 ## 1. Comprobar el estado actual
 

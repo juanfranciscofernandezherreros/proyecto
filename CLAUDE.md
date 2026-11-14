@@ -15,6 +15,7 @@ El detalle vive fuera de este fichero:
 |---|---|
 | Arrancar la web, la API y el projector | skill `arrancar-web` |
 | Extraer resultados de una liga hasta Postgres | skill `extraer-resultados` |
+| Extraer resultados de todas las ligas | skill `resultados-todas-las-ligas` |
 | Extraer jugada a jugada y estadísticas | skill `extraer-datos-partido` |
 | Procesar los partidos pendientes | skill `procesar-pendientes` |
 | Un partido no sale o sale mal en la web | skill `diagnosticar-partido` |

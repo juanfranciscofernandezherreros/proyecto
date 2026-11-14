@@ -173,3 +173,13 @@ local, no versionada; el hook requiere activación manual por repo (diseño de g
 Lo implementado se corresponde con lo pretendido en el SDD y el plan: cada requisito
 tiene cambio, fichero/commit y evidencia de verificación. Quedan tres riesgos abiertos,
 documentados y con mitigación propuesta, ninguno bloqueante para lo entregado.
+
+## 7. Migración de `.bat`/`.ps1` a Python (plan `PLAN-bat-a-python.md`)
+
+Conversión por capas, con paridad de salida como criterio de aceptación. No altera el
+flujo del SDD §4 ni los puertos.
+
+| Paso | Qué | Verificación | OK |
+|---|---|---|---|
+| 0 | `config.ps1` → `scripts/py/config.py`; helper `proc.py`; `estado_lib.py` usa `config.py` | `diff` de `config.py` vs `config.ps1 -FormatoBat`: **sin diferencias**. Imports OK; `estado.py` exit 1 con stack parado (igual que `ESTADO.bat`) | ✅ |
+| 1–8 | Estado/verificar, arranque, importar, extraer, ligas, pendientes/monitor, lanzadores, Programador | Pendiente | ⬜ |

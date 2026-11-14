@@ -10,36 +10,20 @@ import sys
 import re
 from pathlib import Path
 
+import config as _config
+
 RAIZ = Path(__file__).resolve().parents[2]  # C:\Develop\basketball
 EJECUTAR = RAIZ / "1_EJECUTAR"
 ESTADO_BAT = EJECUTAR / "ESTADO.bat"
-CONFIG_PS1 = RAIZ / "scripts" / "config.ps1"
-
-_config_cache = None
 
 
 def leer_config():
-    """Devuelve el dict de variables de config\\basketball.env (via config.ps1)."""
-    global _config_cache
-    if _config_cache is not None:
-        return _config_cache
-    try:
-        out = subprocess.run(
-            ["powershell.exe", "-NoLogo", "-NoProfile", "-ExecutionPolicy", "Bypass",
-             "-File", str(CONFIG_PS1), "-FormatoBat"],
-            capture_output=True, text=True, encoding="utf-8", errors="replace",
-        ).stdout
-        _config_cache = dict(
-            l.split("=", 1) for l in out.splitlines() if "=" in l
-        )
-    except Exception:
-        _config_cache = {}
-    return _config_cache
+    """Devuelve el dict de configuracion del proyecto (via config.py)."""
+    return _config.cargar()
 
 
 def report_dir():
-    cfg = leer_config()
-    d = cfg.get("REPORT_DIR")
+    d = leer_config().get("REPORT_DIR")
     return Path(d) if d else Path(r"C:\data\basketball\reports\orchestrator")
 
 

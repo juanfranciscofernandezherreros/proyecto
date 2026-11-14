@@ -21,9 +21,18 @@ $ErrorActionPreference = 'Stop'
 $workspace = $Config.WORKSPACE
 $python = $Config.PYTHON
 $scraper = $Config.SCRAPER
-$leagues = @(Get-Content -Raw -LiteralPath $ConfigPath | ConvertFrom-Json)
-$selected = if ($League -eq 'ALL') { $leagues } else { @($leagues | Where-Object { $_.code -eq $League }) }
-if (-not $selected.Count) { throw "Liga no encontrada: $League" }
+# Se vuelca liga por liga a una lista tipada. Sin esto, Windows PowerShell 5.1 a veces
+# envuelve el array del JSON en un unico elemento y el filtro por liga deja pasar TODAS
+# las ligas (p.ej. EUROLIGA acababa extrayendo ACB, NBA...). El bucle explicito es inmune
+# a como PowerShell desenvuelve (o no) el resultado de ConvertFrom-Json.
+$leagues = [System.Collections.Generic.List[object]]::new()
+foreach ($lg in (Get-Content -Raw -LiteralPath $ConfigPath | ConvertFrom-Json)) { $leagues.Add($lg) }
+$wantAll = ($League.Trim().ToUpperInvariant() -eq 'ALL')
+$selected = [System.Collections.Generic.List[object]]::new()
+foreach ($lg in $leagues) {
+    if ($wantAll -or ("$($lg.code)".Trim() -eq $League.Trim())) { $selected.Add($lg) }
+}
+if ($selected.Count -eq 0) { throw "Liga no encontrada: $League" }
 # FILTRO_PAIS / FILTRO_COMPETICION (config\basketball.env): vacios = todas las ligas.
 $countryFilter = @("$($Config.FILTRO_PAIS)" -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ })
 $competitionFilter = @("$($Config.FILTRO_COMPETICION)" -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ })

@@ -20,7 +20,7 @@ def main():
     p = subprocess.run(
         ["docker", "compose", "-f", cfg.get("COMPOSE_FILE"), "exec", "-T", "postgres",
          "psql", "-U", cfg.get("DB_USER"), "-d", cfg.get("DB_NAME")],
-        input=SQL.read_text(encoding="utf-8"), text=True, encoding="utf-8", errors="replace",
+        input=SQL.read_bytes(),
     )
     if p.returncode != 0:
         print("Error: no se pudieron consultar los partidos sin resultado.")

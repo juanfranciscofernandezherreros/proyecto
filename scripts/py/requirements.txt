@@ -1,0 +1,4 @@
+# Dependencias de los orquestadores Python (scripts\py\).
+# El resto usa solo la libreria estandar (urllib, json, subprocess, ctypes).
+# Instalar con:  python -m pip install -r scripts\py\requirements.txt
+psutil>=5.9

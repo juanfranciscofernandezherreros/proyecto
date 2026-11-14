@@ -19,7 +19,10 @@ __pycache__/
 # Configuracion local de herramientas (puede llevar credenciales).
 /.codex/
 /.vscode/
-/.claude/
+# De .claude se versionan skills, reglas, agentes y comandos; solo se ignora la
+# configuracion propia de esta maquina.
+/.claude/settings.local.json
+/.claude/launch.json
 
 # Configuracion propia de esta maquina (rutas, contrasenas reales).
 /config/basketball.local.env

@@ -1,15 +1,36 @@
 ---
-name: arrancar-todo
-description: Arranca el proyecto Basketball completo (web, API, projector, Mongo y el launcher que carga los CSV) y verifica que funciona. Usar cuando el usuario diga "arranca todo", "arranca la web", "inícialo como siempre", "levanta el proyecto" o equivalente, o cuando haga falta la web o la API y no estén levantadas.
+name: arrancar-web
+description: Arranca la web, la API y el projector del proyecto Basketball (con Mongo) y, solo si se pide todo, también el launcher que carga los CSV; después verifica que responden. Usar cuando el usuario diga "arranca todo", "arranca la web", "inicia la API", "levanta el projector", "inícialo como siempre", "levanta el proyecto" o equivalente, o cuando haga falta la web o la API y no estén levantadas.
 model: haiku
 ---
 
-# Arrancar todo (web + procesamiento de CSV)
+# Arrancar la web, el projector y la API
 
-Hay que arrancar **dos cosas**, en este orden. **No** se lanzan piezas sueltas con
-`mvn spring-boot:run` ni con `npm run dev`: usan puertos equivocados (8080 y 5173).
+Arrancar **solo lo que el usuario ha pedido**, nada más:
 
-## 1. La web y sus servicios
+| El usuario pide | Qué se arranca |
+|---|---|
+| La web, la API, el projector, o cualquier combinación | Solo el paso 1 |
+| "Todo", "el proyecto entero", "como siempre", o el procesamiento de CSV | Paso 1 y paso 2 |
+
+El paso 1 levanta siempre juntos web, API, projector y Mongo: la API y el projector
+no funcionan sin Mongo, y la web no sirve sin la API. No arrancar el launcher, ni
+Grafana, ni ningún otro servicio por iniciativa propia; si parece que hace falta,
+decirlo y esperar a que el usuario lo pida.
+
+**No** se lanzan piezas sueltas con `mvn spring-boot:run` ni con `npm run dev`:
+usan puertos equivocados (8080 y 5173).
+
+Al terminar, comprobar con una sola llamada:
+
+```bash
+cmd //c "C:\Develop\basketball\1_EJECUTAR\ESTADO.bat"
+```
+
+Los contenedores tardan unos segundos en responder tras el `up`; si la web o la API
+dan `0`, esperar medio minuto y repetir antes de darlo por fallo.
+
+## 1. Web, projector y API
 
 Stack docker de `local-validation\docker-compose.yml`, desde
 `C:\Develop\basketball\local-validation`:
@@ -21,7 +42,7 @@ docker compose up -d --build mongo basketball-match-projector basketball-match-a
 Postgres, Grafana, Prometheus y Loki suelen estar ya levantados; si no, van en el
 mismo compose.
 
-## 2. El procesamiento de los CSV
+## 2. El procesamiento de los CSV (solo si se pide "todo")
 
 El `csv-batch-launcher` de `csv-extra-batch` **no está en el compose**. Carga en
 Postgres los CSV consolidados de `C:\data\basketball-ready\current`, y desde ahí el

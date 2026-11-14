@@ -72,7 +72,7 @@ carga que falló. Cuidado con las cargas `COMPLETED` que no insertaron nada:
 
 ## 4. MongoDB (read model)
 
-Requiere el stack arrancado (skill `arrancar-todo`). El projector reproyecta cada
+Requiere el stack arrancado (skill `arrancar-web`). El projector reproyecta cada
 ~60 s, así que tras una carga hay que esperar un minuto antes de mirar.
 
 ```bash

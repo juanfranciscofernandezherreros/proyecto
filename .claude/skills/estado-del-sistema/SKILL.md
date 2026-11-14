@@ -18,7 +18,7 @@ salida 0 = todo responde, 1 = falta algo. No lanzar comandos sueltos (`docker ps
 
 ## Cómo leerlo
 
-- **CONTENEDORES**: `PARADO` en mongo, projector, api o web → skill `arrancar-todo`.
+- **CONTENEDORES**: `PARADO` en mongo, projector, api o web → skill `arrancar-web`.
 - **SERVICIOS**: código HTTP; `0` = no escucha nadie. El launcher devuelve `404`
   en esa ruta estando levantado: solo es fallo si da `0`.
 - **CARGAS**: buenas son `COMPLETED` con `exit=0`. Si la más reciente es de hace

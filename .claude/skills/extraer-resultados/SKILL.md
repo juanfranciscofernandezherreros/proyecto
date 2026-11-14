@@ -89,5 +89,5 @@ consultar tablas sin `LIMIT`.
 - Las consultas ejecutadas se guardan en `sql\consultas\` (regla `consultas-sql`).
   Para Euroliga ya existe `2026-11-14_1355_euroliga-resultados-pendientes.sql`.
 - La web tarda ~1 min en reflejar los datos (Postgres → projector → Mongo) y solo
-  si el stack está levantado (skill `arrancar-todo`).
+  si el stack está levantado (skill `arrancar-web`).
 - No se hace commit ni push salvo que el usuario lo pida.

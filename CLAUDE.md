@@ -13,7 +13,7 @@ El detalle vive fuera de este fichero:
 
 | Qué | Dónde |
 |---|---|
-| Arrancar la web y el procesamiento de CSV | skill `arrancar-todo` |
+| Arrancar la web, la API y el projector | skill `arrancar-web` |
 | Extraer resultados de una liga hasta Postgres | skill `extraer-resultados` |
 | Extraer jugada a jugada y estadísticas | skill `extraer-datos-partido` |
 | Procesar los partidos pendientes | skill `procesar-pendientes` |

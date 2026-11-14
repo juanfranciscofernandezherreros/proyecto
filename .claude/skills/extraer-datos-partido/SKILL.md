@@ -1,6 +1,7 @@
 ---
 name: extraer-datos-partido
 description: Extrae e importa a PostgreSQL el detalle de los partidos de una liga — jugada a jugada (point-by-point), estadísticas de equipo y estadísticas de jugadores — con el scraper de Flashscore. Usar cuando el usuario pida las estadísticas, el play-by-play, los datos de jugadores o "el resto de CSV" de una liga, o cuando un partido tenga marcador pero le falte el detalle.
+model: haiku
 ---
 
 # Extraer el detalle de los partidos

@@ -1,6 +1,7 @@
 ---
 name: procesar-pendientes
 description: Procesa los partidos pendientes del proyecto Basketball, es decir, los ya jugados a los que les falta algún dataset (resumen, jugada a jugada, estadísticas de equipo o de jugadores): comprueba results y fixtures, lanza la auditoría, extrae e importa lo que falta y explica lo que queda sin datos. Usar cuando el usuario pida procesar los pendientes, completar partidos, ponerse al día, lanzar el ciclo diario, o pregunte cuántos partidos faltan o por qué un partido sigue pendiente.
+model: haiku
 ---
 
 # Procesar los partidos pendientes

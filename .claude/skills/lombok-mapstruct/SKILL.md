@@ -2,6 +2,8 @@
 name: lombok-mapstruct
 description: Wire Lombok and MapStruct consistently across entities/DTOs to remove boilerplate and keep entity<->DTO mapping explicit.
 disable-model-invocation: true
+model: sonnet
+effort: low
 ---
 
 # Lombok and MapStruct Instructions

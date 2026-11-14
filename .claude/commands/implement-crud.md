@@ -1,5 +1,6 @@
 ---
 description: Implement or extend a CRUD capability in the current Spring Boot microservice in one pass
+model: sonnet
 ---
 
 Use the spring-crud-builder agent to implement the requested feature directly in the current repository.

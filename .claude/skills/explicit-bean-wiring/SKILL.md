@@ -2,6 +2,8 @@
 name: explicit-bean-wiring
 description: Replace stereotype annotations (@Service, @Component) and classpath scanning with explicit @Bean methods in a central @Configuration class, so every wire is visible in one place instead of implicit.
 disable-model-invocation: true
+model: sonnet
+effort: low
 ---
 
 # explicit-bean-wiring

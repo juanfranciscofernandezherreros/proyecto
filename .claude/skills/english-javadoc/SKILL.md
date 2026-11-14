@@ -2,6 +2,7 @@
 name: english-javadoc
 description: Add English JavaDoc (purpose, @param, @return, @throws) to every method declared in an interface.
 disable-model-invocation: true
+model: haiku
 ---
 
 ## Interface Method Documentation

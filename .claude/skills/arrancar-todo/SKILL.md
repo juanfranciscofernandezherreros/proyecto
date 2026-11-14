@@ -1,6 +1,7 @@
 ---
 name: arrancar-todo
 description: Arranca el proyecto Basketball completo (web, API, projector, Mongo y el launcher que carga los CSV) y verifica que funciona. Usar cuando el usuario diga "arranca todo", "arranca la web", "inícialo como siempre", "levanta el proyecto" o equivalente, o cuando haga falta la web o la API y no estén levantadas.
+model: haiku
 ---
 
 # Arrancar todo (web + procesamiento de CSV)

@@ -1,6 +1,7 @@
 ---
 name: estado-del-sistema
 description: Vistazo de solo lectura al estado del proyecto Basketball (servicios levantados, últimas cargas, último resultado por liga, partidos pendientes). Usar cuando el usuario pregunte cómo está todo, si funciona, qué está arrancado o qué falta por procesar.
+model: haiku
 ---
 
 # Estado del sistema

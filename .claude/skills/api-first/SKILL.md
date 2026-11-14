@@ -2,6 +2,8 @@
 name: api-first
 description: Make the OpenAPI contract (docs/openapi.yaml/json) the source of truth that implementation, DTOs, controllers, and tests must conform to.
 disable-model-invocation: true
+model: sonnet
+effort: low
 ---
 
 # API-First Development Instructions

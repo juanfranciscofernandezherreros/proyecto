@@ -1,6 +1,7 @@
 ---
 name: extraer-resultados
 description: Extrae los resultados (marcadores y parciales) de una liga de baloncesto o de todas con el scraper de Flashscore y los deja cargados en PostgreSQL (results.results), verificando el resultado. Usar siempre que el usuario pida extraer, actualizar o traer los resultados de la Euroliga, la ACB, la NBA o cualquier otra liga, o pregunte por resultados que aún no están en la base de datos.
+model: haiku
 ---
 
 # Extraer resultados de una liga

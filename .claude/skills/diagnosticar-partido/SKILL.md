@@ -1,6 +1,8 @@
 ---
 name: diagnosticar-partido
 description: Averigua por qué un partido o un conjunto de partidos no aparece en la web del proyecto Basketball, aparece incompleto o con datos erróneos, siguiéndolo por cada etapa — fixtures y results en PostgreSQL, datasets de detalle, MongoDB y la API. Usar cuando el usuario diga que un partido no sale, que falta el marcador, la hora o las estadísticas, que la web no refleja lo cargado, o pregunte dónde se ha quedado un partido.
+model: sonnet
+effort: medium
 ---
 
 # Diagnosticar un partido que no sale bien en la web

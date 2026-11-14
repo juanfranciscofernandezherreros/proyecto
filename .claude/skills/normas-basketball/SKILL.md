@@ -1,6 +1,8 @@
 ---
 name: normas-basketball
 description: Normas de desarrollo del proyecto Basketball. Invocar antes de implementar o revisar cambios de código (Spring Boot/Java, scraper Python, pipeline CSV) para seguir las convenciones del proyecto y el flujo SDD → plan → verificación. Usar cuando se vaya a crear o modificar endpoints, batches, el projector, el scraper o los contratos CSV.
+model: sonnet
+effort: medium
 ---
 
 # Normas de desarrollo — Basketball

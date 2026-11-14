@@ -46,7 +46,15 @@ def _run_capturando(cmd, titulo=None, eco=False):
 
 
 def leer_estado():
-    """Ejecuta ESTADO.bat y devuelve un dict con lo parseado."""
+    """Devuelve el estado del sistema como dict, calculado en Python puro
+    (estado_sys.recoger), sin invocar ESTADO.bat ni PowerShell."""
+    import estado_sys
+    return estado_sys.recoger()
+
+
+def leer_estado_bat():
+    """Variante que ejecuta ESTADO.bat (Estado.ps1) y parsea su texto. Solo se usa
+    para comparar la paridad del Python nuevo con el original."""
     codigo, texto = _run_capturando(["cmd", "/c", str(ESTADO_BAT)])
     return parsear_estado(texto, codigo)
 

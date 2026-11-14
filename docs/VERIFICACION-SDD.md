@@ -182,4 +182,5 @@ flujo del SDD §4 ni los puertos.
 | Paso | Qué | Verificación | OK |
 |---|---|---|---|
 | 0 | `config.ps1` → `scripts/py/config.py`; helper `proc.py`; `estado_lib.py` usa `config.py` | `diff` de `config.py` vs `config.ps1 -FormatoBat`: **sin diferencias**. Imports OK; `estado.py` exit 1 con stack parado (igual que `ESTADO.bat`) | ✅ |
-| 1–8 | Estado/verificar, arranque, importar, extraer, ligas, pendientes/monitor, lanzadores, Programador | Pendiente | ⬜ |
+| 1 | `Estado.ps1` → `estado_sys.py`; `Verificar.ps1` → `verificar.py`; `estado_lib.leer_estado` usa `estado_sys` (ya sin ESTADO.bat) | `estado_sys.py` con paridad de texto frente a `ESTADO.bat` (solo difieren datos en vivo entre ejecuciones). `verificar.py`: comprobaciones 1–4 y código de salida iguales a `VERIFICAR.bat`; la paridad VERDE completa requiere el stack arrancado. `verificar.py` además no se aborta cuando Mongo está caído (el `.ps1` sí) | ✅ |
+| 2–8 | Arranque, importar, extraer, ligas, pendientes/monitor, lanzadores, Programador | Pendiente | ⬜ |

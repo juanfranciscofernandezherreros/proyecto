@@ -51,17 +51,17 @@ colgados sin teclado.
 Cada uno tiene su par extraer / importar, con `<pais> <competicion> [limite]`:
 
 ```bash
-cmd //c "C:\Develop\basketball\scripts\extraer\EXTRAER_POINT_BY_POINT.bat europe euroleague 10"
+python "C:\Develop\basketball\scripts\py\extraer\point_by_point.py" europe euroleague 10
 ```
 
 ```bash
-cmd //c "C:\Develop\basketball\scripts\importar\IMPORTAR_POINT_BY_POINT.bat europe euroleague"
+python "C:\Develop\basketball\scripts\py\importar\point_by_point.py" europe euroleague
 ```
 
 Lo mismo con `TEAM_STATS` y `PLAYER_STATS`. Antes hay que asegurar los servicios:
 
 ```bash
-cmd //c "C:\Develop\basketball\scripts\arranque\ASEGURAR.bat antibloqueo postgres launcher navegador"
+python "C:\Develop\basketball\scripts\py\arranque\asegurar.py" antibloqueo postgres launcher navegador
 ```
 
 ## 3. Verificar

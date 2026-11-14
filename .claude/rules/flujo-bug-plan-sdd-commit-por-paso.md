@@ -14,7 +14,7 @@ que puede ejecutarlo un modelo más barato; y commitear/pushear paso a paso da p
 de control y trazabilidad.
 
 **Cómo aplicarlo:** al empezar un bug o tarea, escribir el plan primero; implementar
-por pasos; tras cada paso verificado (gate `Verificar.ps1`), commit + push en el repo
+por pasos; tras cada paso verificado (gate `scripts\py\verificar.py`), commit + push en el repo
 correspondiente (multi-repo + submódulos en `proyecto`). El push es una acción
 explícita: el usuario ya ha pedido commit + push por paso para este flujo, no para
 otros trabajos. Relacionado con la skill `normas-basketball` y la regla

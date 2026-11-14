@@ -13,6 +13,7 @@ El detalle vive fuera de este fichero:
 
 | Qué | Dónde |
 |---|---|
+| Pipeline en Python (sin PowerShell): config, arranque, extraer, importar, ligas, pendientes, monitor | `scripts\py\` (lanzadores de `1_EJECUTAR` en `scripts\py\lanzadores\`; cada `.bat` es un shim que llama al Python) |
 | Arrancar la web, la API y el projector | skill `arrancar-web` |
 | Extraer resultados de una liga hasta Postgres | skill `extraer-resultados` |
 | Extraer resultados de todas las ligas | skill `resultados-todas-las-ligas` |

@@ -49,7 +49,7 @@ Postgres los CSV consolidados de `C:\data\basketball-ready\current`, y desde ah√
 projector los pasa a MongoDB. Desde `C:\Develop\basketball`:
 
 ```bash
-cmd //c "scripts\arranque\ASEGURAR.bat launcher"
+python "scripts\py\arranque\asegurar.py" launcher
 ```
 
 ## Puertos

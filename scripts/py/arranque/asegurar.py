@@ -207,15 +207,16 @@ def _ensure_antibloqueo():
 
 
 def _ensure_watcher():
-    watcher_bat = WORKSPACE / "scripts" / "monitor" / "watch_csv_imports.bat"
-    if _procesos_cmdline("watch_csv_imports"):
+    watcher_py = AQUI.parent / "monitor" / "watch_csv.py"
+    if _procesos_cmdline("watch_csv.py"):
         estado("watcher", "ya estaba en ejecucion")
         return
-    if not watcher_bat.exists():
-        raise FalloArranque(f"No se encontro {watcher_bat}.")
+    if not watcher_py.exists():
+        raise FalloArranque(f"No se encontro {watcher_py}.")
     estado("watcher", "iniciando")
-    _start_detached(os.environ.get("ComSpec", "cmd.exe"),
-                    ["/c", "call", str(watcher_bat)], str(WORKSPACE), show=7)
+    # Ventana propia: el monitor refresca la pantalla y necesita consola.
+    subprocess.Popen([sys.executable, str(watcher_py)],
+                     creationflags=0x00000010 | CREATE_NEW_PROCESS_GROUP)  # CREATE_NEW_CONSOLE
 
 
 # ---------- launcher ----------
@@ -417,14 +418,13 @@ def _ensure_grafana():
 
 # ---------- consumo ----------
 def _ensure_consumo():
-    if _procesos_cmdline("RECOLECTAR_CONSUMO"):
+    if _procesos_cmdline("recolectar_consumo.py"):
         estado("consumo", "ya estaba en marcha")
         return
     estado("consumo", "arrancando recolector")
-    script = WORKSPACE / "scripts" / "monitor" / "RECOLECTAR_CONSUMO.ps1"
-    _start_detached("powershell.exe", ["-NoLogo", "-NoProfile", "-ExecutionPolicy", "Bypass",
-                    "-File", str(script)], str(WORKSPACE), show=0)
-    esperar_hasta("consumo", 30, lambda: bool(_procesos_cmdline("RECOLECTAR_CONSUMO")))
+    script = AQUI.parent / "monitor" / "recolectar_consumo.py"
+    _start_detached(sys.executable, [str(script)], str(WORKSPACE), show=0)
+    esperar_hasta("consumo", 30, lambda: bool(_procesos_cmdline("recolectar_consumo.py")))
     estado("consumo", "en marcha (log en reports\\consumo\\recolector-consumo.log)")
 
 

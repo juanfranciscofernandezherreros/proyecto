@@ -58,7 +58,7 @@ cmd //c "C:\Develop\basketball\1_EJECUTAR\EXTRAER_RESULTADOS.bat EUROLIGA"
   `IMPORTAR_RESULTADOS.bat`. No hace falta ningún paso más para que quede en la BD.
 - El modo `results` baja la página entera; el límite solo afecta al modo `datos`.
 - Debe procesar **solo** la liga pedida. Si aparecen otras (`RESULTS [ACB]`,
-  `RESULTS [NBA]`...), el filtro de `scripts\ligas\ORQUESTAR_LIGAS.ps1` está roto o
+  `RESULTS [NBA]`...), el filtro de `scripts\py\ligas\orquestar.py` está roto o
   hay un `FILTRO_PAIS` / `FILTRO_COMPETICION` en `config\basketball.env`.
 - Correcto cuando el resumen final dice `<LIGA> RESULTS extraer OK` y
   `<LIGA> RESULTS importar OK`. El resumen queda también en

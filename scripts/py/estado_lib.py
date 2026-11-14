@@ -14,7 +14,6 @@ import config as _config
 
 RAIZ = Path(__file__).resolve().parents[2]  # C:\Develop\basketball
 EJECUTAR = RAIZ / "1_EJECUTAR"
-ESTADO_BAT = EJECUTAR / "ESTADO.bat"
 
 
 def leer_config():
@@ -50,13 +49,6 @@ def leer_estado():
     (estado_sys.recoger), sin invocar ESTADO.bat ni PowerShell."""
     import estado_sys
     return estado_sys.recoger()
-
-
-def leer_estado_bat():
-    """Variante que ejecuta ESTADO.bat (Estado.ps1) y parsea su texto. Solo se usa
-    para comparar la paridad del Python nuevo con el original."""
-    codigo, texto = _run_capturando(["cmd", "/c", str(ESTADO_BAT)])
-    return parsear_estado(texto, codigo)
 
 
 def parsear_estado(texto, codigo=None):

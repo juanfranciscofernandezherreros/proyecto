@@ -24,7 +24,7 @@ usan puertos equivocados (8080 y 5173).
 Al terminar, comprobar con una sola llamada:
 
 ```bash
-cmd //c "C:\Develop\basketball\1_EJECUTAR\ESTADO.bat"
+cmd //c "C:\Develop\basketball\1_EJECUTAR\basket.cmd estado"
 ```
 
 Los contenedores tardan unos segundos en responder tras el `up`; si la web o la API
@@ -85,7 +85,7 @@ python "scripts\py\arranque\asegurar.py" launcher
 
 ## Relacionado
 
-- Ciclo diario completo (extraer de Flashscore + procesar): `1_EJECUTAR\CICLO_DIARIO.bat`.
+- Ciclo diario completo (extraer de Flashscore + procesar): `1_EJECUTAR\basket.cmd ciclo-diario`.
 - Los servicios `*-parser`, `*-persistence`, `csv-watcher`, `csv-match-normalizer` y
   `file-event-router` ya no existen (se eliminaron del compose); el procesamiento
   real lo hace `csv-extra-batch`.

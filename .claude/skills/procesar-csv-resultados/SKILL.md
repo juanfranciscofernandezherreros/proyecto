@@ -14,7 +14,7 @@ sin pedir permiso entre una y otra.
 ## 1. Estado antes
 
 ```bash
-cmd //c "C:\Develop\basketball\1_EJECUTAR\ESTADO.bat"
+cmd //c "C:\Develop\basketball\1_EJECUTAR\basket.cmd estado"
 ```
 
 Guardar de `RESULTADOS POR LIGA` el número de partidos de cada liga. Si Postgres o
@@ -26,7 +26,7 @@ En segundo plano (unos 30 segundos por liga), con ruta completa y la salida a un
 fichero del directorio temporal de la sesión:
 
 ```bash
-cmd //c "C:\Develop\basketball\1_EJECUTAR\PROCESAR_CSV_RESULTADOS.bat"
+cmd //c "C:\Develop\basketball\1_EJECUTAR\basket.cmd procesar-csv"
 ```
 
 | Llamada | Qué procesa |
@@ -50,7 +50,7 @@ cmd //c "C:\Develop\basketball\1_EJECUTAR\PROCESAR_CSV_RESULTADOS.bat"
 ## 3. Estado después
 
 ```bash
-cmd //c "C:\Develop\basketball\1_EJECUTAR\ESTADO.bat"
+cmd //c "C:\Develop\basketball\1_EJECUTAR\basket.cmd estado"
 ```
 
 ## Qué contar al usuario

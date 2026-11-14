@@ -170,7 +170,7 @@ de Grafana).
   Prometheus 8086, Loki 8085, PostgreSQL 55432, MongoDB 27017.
 - **Arranque** (ver ESPECIFICACIONES §4): `docker compose up -d ...` + `ASEGURAR.bat
   launcher`; observabilidad con `Start-BasketballLocal.ps1`.
-- **Operación diaria**: `1_EJECUTAR/CICLO_DIARIO.bat` (extraer RESULTS + procesar
+- **Operación diaria**: `1_EJECUTAR/basket.cmd ciclo-diario` (extraer RESULTS + procesar
   pendientes + archivar). Extracción por liga: `LIGAS_ORQUESTAR.bat <LIGA> results|datos|todo`.
 - **Requisitos**: Docker, JDK 21, Maven, Python (venv), Edge + EdgeDriver (versión
   del driver = versión de Edge).
@@ -241,7 +241,7 @@ Flashscore → CSV en una extracción real de liga completa.
 
 La verificación no es solo manual; está soportada por tres capas:
 
-- **Script de verificación** `scripts/Verificar.ps1` (lanzador `1_EJECUTAR/VERIFICAR.bat`):
+- **Script de verificación** `scripts/Verificar.ps1` (lanzador `1_EJECUTAR/basket.cmd verificar`):
   convierte las comprobaciones de `VERIFICACION-SDD.md` en checks verde/rojo
   (web/API 200, sin slugs no canónicos, filtros limpios, join fixture+result). Código
   de salida 0/1, apto para hook o CI. Requiere el stack arrancado.

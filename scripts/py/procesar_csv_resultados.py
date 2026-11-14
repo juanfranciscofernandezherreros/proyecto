@@ -21,7 +21,7 @@ from estado_lib import (
     leer_estado, imprimir_tabla_ligas, _run_capturando, EJECUTAR,
 )
 
-PROCESAR_BAT = EJECUTAR / "PROCESAR_CSV_RESULTADOS.bat"
+BASKET = EJECUTAR / "basket.cmd"
 
 
 def extraer_bloque_resumen(texto):
@@ -47,7 +47,7 @@ def main():
         print("ERROR: Postgres no responde. Arranca el stack antes (skill arrancar-web).")
         return 1
 
-    cmd = ["cmd", "/c", str(PROCESAR_BAT), liga]
+    cmd = ["cmd", "/c", str(BASKET), "procesar-csv", liga]
     if todos:
         cmd.append("todos")
     etiqueta = f"{liga}" + (" (historico completo)" if todos else " (mas reciente)")

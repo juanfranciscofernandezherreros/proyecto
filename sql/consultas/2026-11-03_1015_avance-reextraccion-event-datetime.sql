@@ -7,7 +7,7 @@
 --
 -- PARA QUÉ SIRVE
 --   Mientras se vuelven a extraer e importar los RESULTS de varias ligas (por ejemplo con
---   1_EJECUTAR\LIGAS_ORQUESTAR.bat ALL results 10), cada liga corrige sus partidos al
+--   1_EJECUTAR\basket.cmd orquestar ALL results 10), cada liga corrige sus partidos al
 --   importarse. Esta consulta muestra, liga a liga, cuántos partidos siguen sin fecha, para
 --   ver el avance y saber cuándo ha terminado de verdad.
 --

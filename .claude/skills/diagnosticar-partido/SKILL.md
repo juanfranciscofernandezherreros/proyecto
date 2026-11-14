@@ -107,7 +107,7 @@ curl -s http://localhost:8082/api/v1/matches/<MATCH_ID>/processing
 
 Para medir huecos en bloque en lugar de partido a partido:
 `sql\consultas\2026-11-07_1915_auditoria-integridad-read-model.sql`. Y para el
-estado general, `1_EJECUTAR\VERIFICAR.bat` (skill `estado-del-sistema`).
+estado general, `1_EJECUTAR\basket.cmd verificar` (skill `estado-del-sistema`).
 
 ## Al terminar
 

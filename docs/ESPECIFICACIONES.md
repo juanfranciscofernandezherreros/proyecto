@@ -153,14 +153,14 @@ Lanzador canónico (levanta data stores y toda la observabilidad):
 O solo Grafana + dashboard de pendientes (reimporta el dashboard):
 
 ```bash
-cmd //c "1_EJECUTAR\GRAFANA_PENDIENTES.bat"
+cmd //c "1_EJECUTAR\basket.cmd grafana"
 ```
 
 Grafana queda en http://localhost:8084 (admin / `local-dashboard-admin`).
 
 ### 4.4 Arranque automático completo
 
-`1_EJECUTAR\AUTOMATICO_INICIO.bat` (lo lanza la tarea programada al iniciar sesión):
+`1_EJECUTAR\basket.cmd inicio-automatico` (lo lanza la tarea programada al iniciar sesión):
 arranca Docker y todos los servicios, abre Grafana + dashboard de pendientes, y
 —solo si `INICIO_RESULTS=1`— extrae RESULTS y procesa pendientes.
 
@@ -182,7 +182,7 @@ El catálogo está en `LIGAS_BASKET.json`. Ligas disponibles:
 ### 5.1 Orquestador por liga (recomendado)
 
 ```text
-1_EJECUTAR\LIGAS_ORQUESTAR.bat [ALL|EUROLIGA|NBA|ACB|...] [results|datos|todo] [limite]
+1_EJECUTAR\basket.cmd orquestar [ALL|EUROLIGA|NBA|ACB|...] [results|datos|todo] [limite]
 ```
 
 - `results` → solo marcadores (RESULTS).
@@ -193,8 +193,8 @@ El catálogo está en `LIGAS_BASKET.json`. Ligas disponibles:
 Ejemplos:
 
 ```bash
-cmd //c "1_EJECUTAR\LIGAS_ORQUESTAR.bat EUROLIGA results"
-cmd //c "1_EJECUTAR\LIGAS_ORQUESTAR.bat ALL results"
+cmd //c "1_EJECUTAR\basket.cmd orquestar EUROLIGA results"
+cmd //c "1_EJECUTAR\basket.cmd orquestar ALL results"
 ```
 
 Antes de orquestar asegura: `antibloqueo postgres launcher navegador`.
@@ -202,8 +202,8 @@ Antes de orquestar asegura: `antibloqueo postgres launcher navegador`.
 ### 5.2 Todas las ligas / menú
 
 ```bash
-cmd //c "1_EJECUTAR\LIGAS_RESULTADOS.bat"        # menú interactivo
-cmd //c "1_EJECUTAR\LIGAS_RESULTADOS.bat <args>" # todas las ligas (EJECUTAR_TODAS_LAS_LIGAS.ps1)
+cmd //c "1_EJECUTAR\basket.cmd ligas"        # menú interactivo
+cmd //c "1_EJECUTAR\basket.cmd ligas <args>" # todas las ligas (EJECUTAR_TODAS_LAS_LIGAS.ps1)
 ```
 
 ### 5.3 Qué produce
@@ -225,7 +225,7 @@ launcher en `results.results`.
 Tras tener RESULTS, se extrae el detalle. Flujo guiado para una competición:
 
 ```text
-1_EJECUTAR\DATOS_EUROLIGA.bat [pais] [competicion] [limite]
+1_EJECUTAR\basket.cmd datos [pais] [competicion] [limite]
 ```
 
 Opciones del menú: `[1] POINT_BY_POINT`, `[2] TEAM_STATS`, `[3] PLAYER_STATS`
@@ -248,7 +248,7 @@ También con el orquestador: `LIGAS_ORQUESTAR.bat <LIGA> datos`.
 ### 7.1 Procesar todos los partidos pendientes
 
 ```text
-1_EJECUTAR\MATCHIDS_PENDIENTES.bat [csv_seleccion] [limite]
+1_EJECUTAR\basket.cmd pendientes [csv_seleccion] [limite]
 ```
 
 Consulta la auditoría global y procesa solo los `matchId` pendientes
@@ -258,13 +258,13 @@ Consulta la auditoría global y procesa solo los `matchId` pendientes
 ### 7.2 Procesar los últimos partidos (completo)
 
 ```bash
-cmd //c "1_EJECUTAR\ULTIMOS_PARTIDOS.bat"
+cmd //c "1_EJECUTAR\basket.cmd ultimos"
 ```
 
 ### 7.3 Ciclo diario (lo que corre la tarea programada)
 
 ```bash
-cmd //c "1_EJECUTAR\CICLO_DIARIO.bat"
+cmd //c "1_EJECUTAR\basket.cmd ciclo-diario"
 ```
 
 1. (si `CICLO_RESULTS=1`) extrae RESULTS de todas las ligas.
@@ -275,7 +275,7 @@ cmd //c "1_EJECUTAR\CICLO_DIARIO.bat"
 ### 7.4 Vigilancia de servicios
 
 ```text
-1_EJECUTAR\VIGILAR_SERVICIOS.bat [minutos] [servicio...]
+1_EJECUTAR\basket.cmd vigilar [minutos] [servicio...]
 ```
 
 Por defecto cada 5 min revisa `antibloqueo postgres auditoria launcher grafana` y
@@ -285,7 +285,7 @@ arranca lo que esté parado. `VIGILAR_SERVICIOS.bat una-vez` hace una sola pasad
 
 ## 8. Verificar
 
-**Rápido (verde/rojo):** con el stack arrancado, `1_EJECUTAR\VERIFICAR.bat` (o
+**Rápido (verde/rojo):** con el stack arrancado, `1_EJECUTAR\basket.cmd verificar` (o
 `scripts\Verificar.ps1`) ejecuta las comprobaciones del SDD y devuelve 0/1. Cada
 subrepo trae además CI (`.github/workflows/ci.yml`) y un hook `pre-push`
 (`.githooks/pre-push`, se activa con `git config core.hooksPath .githooks`). Detalle en

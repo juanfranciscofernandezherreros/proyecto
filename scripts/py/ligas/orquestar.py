@@ -238,10 +238,10 @@ def _pendientes(selected, failed, report_file):
             w.writerows(rows)
         print("")
         print(f"{len(rows)} partidos pendientes en las ligas con fallos: {pending_file}")
-        print(f'Para recuperarlos: 1_EJECUTAR\\MATCHIDS_PENDIENTES.bat "{pending_file}"')
+        print(f'Para recuperarlos: 1_EJECUTAR\\basket.cmd pendientes "{pending_file}"')
     except Exception as e:
         print(f"No se pudo generar la lista de pendientes ({e}).")
-        print("Se pueden recuperar igualmente con 1_EJECUTAR\\MATCHIDS_PENDIENTES.bat (procesa todos los pendientes).")
+        print("Se pueden recuperar igualmente con 1_EJECUTAR\\basket.cmd pendientes (procesa todos los pendientes).")
 
 
 if __name__ == "__main__":

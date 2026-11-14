@@ -21,7 +21,7 @@ from estado_lib import (
     _run_capturando, EJECUTAR, report_dir,
 )
 
-EXTRAER_BAT = EJECUTAR / "EXTRAER_RESULTADOS.bat"
+BASKET = EJECUTAR / "basket.cmd"
 
 
 def resumen_orquestador(desde_ts):
@@ -61,7 +61,7 @@ def main():
 
     print(f"\n== 2/3 Extrayendo RESULTS de {liga} (puede tardar ~15 min) ==")
     codigo, _ = _run_capturando(
-        ["cmd", "/c", str(EXTRAER_BAT), liga], eco=True,
+        ["cmd", "/c", str(BASKET), "resultados", liga], eco=True,
     )
 
     print("\n== 3/3 Estado despues ==")

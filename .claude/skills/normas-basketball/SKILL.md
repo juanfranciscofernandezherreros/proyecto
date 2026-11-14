@@ -15,7 +15,7 @@ arquitectura está en `docs/SDD.md`; la operación, en `docs/ESPECIFICACIONES.md
 2. **Plan**: si el cambio es grande, escribe un plan por áreas (como
    `docs/PLAN-normalizacion-competiciones.md`).
 3. **Implementa** siguiendo las normas de abajo.
-4. **Verifica**: ejecuta `scripts\py\verificar.py` (o `1_EJECUTAR/VERIFICAR.bat`) y,
+4. **Verifica**: ejecuta `scripts\py\verificar.py` (o `1_EJECUTAR/basket.cmd verificar`) y,
    si tocaste código, el build/tests del repo (`mvn verify`, `npm run build`,
    `python -m unittest`).
 5. **Documenta la evidencia** en `docs/VERIFICACION-SDD.md` (matriz

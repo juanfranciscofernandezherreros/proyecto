@@ -39,7 +39,7 @@ docker exec -i local-validation-postgres-1 psql -U test -d basketball -c "SELECT
 La segunda lista los partidos ya jugados según `fixtures` que todavía no tienen
 marcador en `results`: son los que debe traer el scraper. Apuntar el `total`.
 
-Para todas las ligas a la vez sirve `1_EJECUTAR\COMPROBAR_RESULTS_FIXTURES.bat`
+Para todas las ligas a la vez sirve `1_EJECUTAR\basket.cmd comprobar`
 (solo lectura; `a_revisar = 0` significa que no falta nada).
 
 ## 2. Extraer e importar
@@ -48,7 +48,7 @@ Desde bash, con ruta completa (un `cd` previo no llega al `cmd`) y en segundo
 plano: cada liga tarda entre 1 y 2 minutos, y `ALL` unos 15.
 
 ```bash
-cmd //c "C:\Develop\basketball\1_EJECUTAR\EXTRAER_RESULTADOS.bat EUROLIGA"
+cmd //c "C:\Develop\basketball\1_EJECUTAR\basket.cmd resultados EUROLIGA"
 ```
 
 - Es el envoltorio de `LIGAS_ORQUESTAR.bat <LIGA> results`: asegura antibloqueo,

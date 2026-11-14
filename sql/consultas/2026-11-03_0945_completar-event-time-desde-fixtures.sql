@@ -30,7 +30,7 @@
 --
 -- QUÉ HACER DESPUÉS
 --   Los que sigan sin hora no tienen otra fuente en la base de datos: hay que volver a
---   extraer los RESULTS de su liga (1_EJECUTAR\LIGAS_ORQUESTAR.bat <LIGA> results 10) y
+--   extraer los RESULTS de su liga (1_EJECUTAR\basket.cmd orquestar <LIGA> results 10) y
 --   seguir el avance con 2026-11-03_1015_avance-reextraccion-event-datetime.sql.
 --
 -- RESULTADO EL 2026-11-03

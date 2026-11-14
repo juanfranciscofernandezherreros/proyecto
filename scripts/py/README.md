@@ -1,32 +1,45 @@
-# Orquestadores en Python (sin gastar tokens)
+# Pipeline en Python (`scripts\py\`)
 
-Versión en Python de tres skills que eran secuencias fijas sin decisiones. Las
-ejecutas tú directamente (token cero); la skill del mismo nombre queda como
-*fallback* para cuando el script falle o quieras que Claude interprete la salida.
+Todo el pipeline del proyecto corre en **Python puro, sin PowerShell**. El punto de
+entrada único es el CLI **`basket`**.
 
-Cada script hace: **ESTADO antes → la carga → ESTADO después** y te imprime una
-tabla liga a liga con los partidos nuevos y lo que sigue fallando.
-
-| Script | Equivale a la skill | Qué hace |
-|---|---|---|
-| `estado.py` | `estado-del-sistema` | Resumen del estado, ordenado por lo que falla y con el script que lo arregla. Solo lectura. |
-| `resultados_todas.py` | `resultados-todas-las-ligas` | Extrae RESULTS de las 11 ligas (`EXTRAER_RESULTADOS.bat ALL`, ~15 min) y compara antes/después. |
-| `procesar_csv_resultados.py` | `procesar-csv-resultados` | Carga en Postgres los CSV de RESULTS ya en disco (`PROCESAR_CSV_RESULTADOS.bat`). No toca Flashscore. |
-
-## Uso
+## Uso rápido
 
 ```bash
-python scripts\py\estado.py
-python scripts\py\resultados_todas.py
-python scripts\py\procesar_csv_resultados.py            # más reciente de cada liga
-python scripts\py\procesar_csv_resultados.py EUROLIGA   # solo una liga
-python scripts\py\procesar_csv_resultados.py ALL todos  # histórico completo
+basket                      # menú interactivo (o doble clic en 1_EJECUTAR\basket.cmd)
+basket ayuda               # lista de comandos
+basket estado              # estado del sistema
+basket resultados EUROLIGA # extraer RESULTS de una liga
+basket ciclo-diario        # ciclo diario completo
 ```
 
-Código de salida: 0 = bien, 1 = falta algo (el mismo de los `.bat`).
+`basket.cmd` (en `1_EJECUTAR\`) es solo el punto de entrada de Windows; llama a
+`scripts\py\basket.py`, que despacha a los lanzadores de `scripts\py\lanzadores\`.
 
-`estado_lib.py` es la librería compartida: ejecuta `ESTADO.bat`, parsea su salida
-y lee la configuración vía `scripts\config.ps1`. No se ejecuta directamente.
+## Estructura
 
-No sustituyen a las skills que sí necesitan criterio (`arrancar-web`,
-`procesar-pendientes`, `commit-multirepo`, diagnósticos): esas siguen igual.
+| Carpeta | Qué |
+|---|---|
+| `config.py` | Configuración única (lee `config\basketball.env`). Fundacional. |
+| `basket.py` | CLI con subcomandos coherentes. |
+| `lanzadores\` | Un módulo por comando (`estado`, `arrancar_todo`, `ciclo_diario`…). |
+| `arranque\` | Docker/servicios (`asegurar.py`), antibloqueo, driver de Edge, tareas del Programador. |
+| `extraer\` | Scraper de Flashscore (resultados y datasets por partido). |
+| `importar\` | Carga en Postgres vía launcher. |
+| `ligas\` | Orquestación por liga (`orquestar.py`, `ejecutar_liga.py`…). |
+| `pendientes\` | Procesar pendientes, archivar, comprobaciones. |
+| `monitor\` | Monitores en vivo y recolector de consumo. |
+
+Dependencias: Python 3 + `psutil` (ver `requirements.txt`); el resto es librería estándar.
+
+## Programador de tareas
+
+`python scripts\py\arranque\tareas.py <diaria|inicio|vigilancia> <instalar|quitar|estado|ejecutar> [valor]`
+registra las tareas de Windows apuntando a `basket.cmd <comando>`.
+
+## Scripts de resumen (opcionales)
+
+`estado.py`, `resultados_todas.py` y `procesar_csv_resultados.py` (en esta carpeta)
+son envoltorios que hacen **estado antes → carga → estado después** con una tabla
+liga a liga. Equivalen a `basket estado` / `basket resultados` / `basket procesar-csv`
+pero añadiendo la comparación antes/después.

@@ -21,7 +21,7 @@
 --
 -- QUÉ HACER DESPUÉS
 --   Si aparece alguno, volver a extraer los RESULTS de esa liga con el scraper corregido
---   (KAN-343): 1_EJECUTAR\LIGAS_ORQUESTAR.bat <LIGA> results 10. El importador sustituye
+--   (KAN-343): 1_EJECUTAR\basket.cmd orquestar <LIGA> results 10. El importador sustituye
 --   home_team / away_team por el valor nuevo.
 --
 -- RESULTADO EL 2026-11-03

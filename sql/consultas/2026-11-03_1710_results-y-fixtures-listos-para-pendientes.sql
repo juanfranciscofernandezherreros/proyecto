@@ -3,7 +3,7 @@
 -- =============================================================================
 -- Fecha:     2026-11-03 17:10
 -- Tipo:      LECTURA
--- Ejecutar:  1_EJECUTAR\COMPROBAR_RESULTS_FIXTURES.bat
+-- Ejecutar:  1_EJECUTAR\basket.cmd comprobar
 --            (o: docker exec -i local-validation-postgres-1 psql -U test -d basketball < sql\consultas\2026-11-03_1710_results-y-fixtures-listos-para-pendientes.sql)
 --
 -- PARA QUÉ SIRVE
@@ -36,7 +36,7 @@
 --
 -- QUÉ HACER DESPUÉS
 --   · RESULTS NO ES DE HOY o SIN IMPORTAR: relanzar esa liga con
---     1_EJECUTAR\LIGAS_ORQUESTAR.bat <CODIGO> results  y volver a ejecutar esta consulta.
+--     1_EJECUTAR\basket.cmd orquestar <CODIGO> results  y volver a ejecutar esta consulta.
 --   · JUGADOS SIN RESULTADO: ver el detalle con scripts\pendientes\FIXTURES_SIN_RESULTS.bat
 --     (suelen ser partidos aplazados o que Flashscore aún no ha cerrado).
 --

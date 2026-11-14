@@ -15,7 +15,7 @@ http://localhost:8090/fixtures-processing-audit).
 Solo lectura; requiere Postgres arrancado:
 
 ```bash
-cmd //c "C:\Develop\basketball\1_EJECUTAR\COMPROBAR_RESULTS_FIXTURES.bat"
+cmd //c "C:\Develop\basketball\1_EJECUTAR\basket.cmd comprobar"
 ```
 
 Si al final `a_revisar = 0`, todo está registrado. Si no, hay ligas con partidos
@@ -26,7 +26,7 @@ ligas. La explicación completa de cada columna está en
 ## 2. Ver cuántos pendientes hay
 
 ```bash
-cmd //c "C:\Develop\basketball\1_EJECUTAR\AUDITORIA_FIXTURES.bat"
+cmd //c "C:\Develop\basketball\1_EJECUTAR\basket.cmd auditoria"
 ```
 
 Lanza una auditoría nueva, imprime `Fixtures`, `Elegibles` y `Pendientes`, y deja
@@ -40,7 +40,7 @@ http://localhost:8090/fixtures-processing-audit/latest.
 En segundo plano y con ruta completa: puede tardar horas si hay muchos partidos.
 
 ```bash
-cmd //c "C:\Develop\basketball\1_EJECUTAR\MATCHIDS_PENDIENTES.bat"
+cmd //c "C:\Develop\basketball\1_EJECUTAR\basket.cmd pendientes"
 ```
 
 - Argumentos opcionales: `[csv_de_seleccion] [limite]`. El CSV limita el trabajo a
@@ -55,7 +55,7 @@ cmd //c "C:\Develop\basketball\1_EJECUTAR\MATCHIDS_PENDIENTES.bat"
 El ciclo diario completo (lo que corre la tarea programada) es:
 
 ```bash
-cmd //c "C:\Develop\basketball\1_EJECUTAR\CICLO_DIARIO.bat"
+cmd //c "C:\Develop\basketball\1_EJECUTAR\basket.cmd ciclo-diario"
 ```
 
 Hace tres cosas: extrae los resultados de todas las ligas solo si

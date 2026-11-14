@@ -5,7 +5,7 @@
 -- Tipo:      LECTURA
 -- Ejecutar:  docker exec -i local-validation-postgres-1 psql -U test -d basketball < sql\consultas\2026-11-14_1528_liga-turca-partido-sin-resultado.sql
 --
--- PARA QUÉ SIRVE   1_EJECUTAR\ESTADO.bat marca una liga como "atrasada" cuando
+-- PARA QUÉ SIRVE   1_EJECUTAR\basket.cmd estado marca una liga como "atrasada" cuando
 --                  fixtures.fixtures tiene partidos con hora ya pasada y
 --                  posteriores al último resultado de results.results. Esta
 --                  consulta dice qué partido es y permite distinguir un fallo de

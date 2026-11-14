@@ -192,3 +192,12 @@ flujo del SDD §4 ni los puertos.
 | 8 | Programador de tareas (`TAREA_*` → `arranque/tareas.py` vía schtasks/XML) y limpieza: borrados todos los `.ps1`/`.bat` reemplazados; `asegurar.py` repuntado a watcher/consumo Python; skills/CLAUDE.md actualizados | Las tareas ya registradas apuntan a los shims de `1_EJECUTAR` y siguen operativas (confirmada "Basketball - Ciclo diario"). `tareas.py estado` OK. Tras borrar: `ESTADO.bat` y `asegurar docker postgres` OK, todo `scripts\py` compila. Cero `.ps1`/`.bat` del pipeline fuera de `1_EJECUTAR` (shims) y `scripts\py`. Quedan solo `.ps1` de terceros (node_modules, .venv, hooks CI) y backups en `_archivo` | ✅ |
 
 **Resultado de la migración:** el pipeline activo (CSV → launcher → Postgres → projector → Mongo → API → web) corre íntegramente en Python, sin PowerShell. Puertos y flujo del SDD §4 intactos.
+
+## 8.bis Consolidación en el CLI `basket`
+
+Los 20 `.bat` de `1_EJECUTAR` se sustituyen por un CLI único `basket` (`scripts\py\basket.py`)
+con subcomandos coherentes, más `1_EJECUTAR\basket.cmd` como punto de entrada de Windows
+(doble clic = menú). Verificado: `basket estado` y `basket procesar-csv EUROLIGA` (cadena
+completa, 110 OK, idempotente); la tarea programada "Basketball - Ciclo diario" re-registrada
+a `basket.cmd ciclo-diario` a las 06:00; 23 ficheros de docs/skills/SQL actualizados a
+`basket.cmd <comando>`; todo `scripts\py` compila.

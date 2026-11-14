@@ -13,7 +13,7 @@ una y otra.
 ## 1. Estado antes
 
 ```bash
-cmd //c "C:\Develop\basketball\1_EJECUTAR\ESTADO.bat"
+cmd //c "C:\Develop\basketball\1_EJECUTAR\basket.cmd estado"
 ```
 
 De la sección `RESULTADOS POR LIGA`, guardar por cada liga el número de partidos y
@@ -26,7 +26,7 @@ En segundo plano (unos 15 minutos), con ruta completa y la salida a un fichero d
 directorio temporal de la sesión:
 
 ```bash
-cmd //c "C:\Develop\basketball\1_EJECUTAR\EXTRAER_RESULTADOS.bat ALL"
+cmd //c "C:\Develop\basketball\1_EJECUTAR\basket.cmd resultados ALL"
 ```
 
 - Para cada liga baja la página de resultados de Flashscore, genera el CSV y lo
@@ -41,7 +41,7 @@ cmd //c "C:\Develop\basketball\1_EJECUTAR\EXTRAER_RESULTADOS.bat ALL"
 ## 3. Estado después
 
 ```bash
-cmd //c "C:\Develop\basketball\1_EJECUTAR\ESTADO.bat"
+cmd //c "C:\Develop\basketball\1_EJECUTAR\basket.cmd estado"
 ```
 
 ## Qué contar al usuario

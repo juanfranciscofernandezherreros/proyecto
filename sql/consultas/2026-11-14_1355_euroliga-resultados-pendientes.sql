@@ -10,7 +10,7 @@
 --                  fixtures.fixtures el calendario completo. Un partido de fixtures
 --                  con fecha pasada y posterior al último resultado cargado es un
 --                  partido jugado cuyo marcador aún no se ha extraído.
--- CUÁNDO USARLA    Antes y después de 1_EJECUTAR\EXTRAER_RESULTADOS.bat EUROLIGA
+-- CUÁNDO USARLA    Antes y después de 1_EJECUTAR\basket.cmd resultados EUROLIGA
 --                  (skill extraer-euroliga): antes para ver qué falta, después para
 --                  comprobar que ha entrado.
 -- CÓMO LEER EL RESULTADO

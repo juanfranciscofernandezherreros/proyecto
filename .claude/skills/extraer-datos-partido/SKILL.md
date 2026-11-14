@@ -24,7 +24,7 @@ Desde bash, con ruta completa y en segundo plano (tarda varios minutos por
 partido):
 
 ```bash
-cmd //c "C:\Develop\basketball\1_EJECUTAR\LIGAS_ORQUESTAR.bat EUROLIGA datos 10"
+cmd //c "C:\Develop\basketball\1_EJECUTAR\basket.cmd orquestar EUROLIGA datos 10"
 ```
 
 - Argumentos: `<LIGA> datos <limite>`. La liga es un `code` de `LIGAS_BASKET.json`
@@ -39,7 +39,7 @@ cmd //c "C:\Develop\basketball\1_EJECUTAR\LIGAS_ORQUESTAR.bat EUROLIGA datos 10"
 Alternativa que además completa los pendientes al acabar:
 
 ```bash
-cmd //c "C:\Develop\basketball\1_EJECUTAR\EXTRAER_CSV_COMPLETO.bat EUROLIGA 10"
+cmd //c "C:\Develop\basketball\1_EJECUTAR\basket.cmd extraer-todo EUROLIGA 10"
 ```
 
 No usar `DATOS_EUROLIGA.bat` ni `ULTIMOS_PARTIDOS.bat` desde aquí: el primero abre

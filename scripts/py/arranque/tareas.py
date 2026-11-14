@@ -20,18 +20,19 @@ try:  # la salida localizada de schtasks puede traer caracteres fuera de cp1252
 except Exception:
     pass
 
-WORKSPACE = Path(__file__).resolve().parents[2]
+WORKSPACE = Path(__file__).resolve().parents[3]
 EJECUTAR = WORKSPACE / "1_EJECUTAR"
 USER = os.environ.get("USERNAME") or getpass.getuser()
 COMSPEC = os.environ.get("ComSpec", r"C:\Windows\System32\cmd.exe")
 
+BASKET = EJECUTAR / "basket.cmd"
 TAREAS = {
-    "diaria": {"name": "Basketball - Ciclo diario", "script": EJECUTAR / "CICLO_DIARIO.bat",
+    "diaria": {"name": "Basketball - Ciclo diario", "cmd": "ciclo-diario",
                "titulo": "Basketball ciclo diario"},
     "inicio": {"name": "Basketball - Procesamiento automatico al iniciar",
-               "script": EJECUTAR / "AUTOMATICO_INICIO.bat", "titulo": "Basketball automatico"},
+               "cmd": "inicio-automatico", "titulo": "Basketball automatico"},
     "vigilancia": {"name": "Basketball - Vigilar servicios",
-                   "script": EJECUTAR / "VIGILAR_SERVICIOS.bat", "titulo": "Vigilante"},
+                   "cmd": "vigilar", "titulo": "Vigilante"},
 }
 
 CABECERA = '<?xml version="1.0" encoding="UTF-16"?>\n<Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">'
@@ -39,7 +40,7 @@ CABECERA = '<?xml version="1.0" encoding="UTF-16"?>\n<Task version="1.2" xmlns="
 
 def _xml(clave, valor):
     t = TAREAS[clave]
-    arg_min = f'/c start "{t["titulo"]}" /min "{t["script"]}"'
+    arg_min = f'/c start "{t["titulo"]}" /min "{BASKET}" {t["cmd"]}'
     if clave == "diaria":
         trigger = (f'<CalendarTrigger><StartBoundary>2026-01-01T{valor}:00</StartBoundary>'
                    f'<Enabled>true</Enabled><ScheduleByDay><DaysInterval>1</DaysInterval></ScheduleByDay></CalendarTrigger>')
@@ -51,7 +52,7 @@ def _xml(clave, valor):
         wake = ""
         start_when = "<StartWhenAvailable>true</StartWhenAvailable>" if clave == "inicio" else ""
         if clave == "vigilancia":
-            arg_min = f'/c start "{t["titulo"]}" /min "{t["script"]}" {valor}'
+            arg_min = f'/c start "{t["titulo"]}" /min "{BASKET}" {t["cmd"]} {valor}'
     return (f'{CABECERA}\n<Triggers>{trigger}</Triggers>'
             f'<Principals><Principal id="Author"><UserId>{USER}</UserId>'
             f'<LogonType>InteractiveToken</LogonType><RunLevel>LeastPrivilege</RunLevel></Principal></Principals>'
@@ -60,7 +61,7 @@ def _xml(clave, valor):
             f'<StopIfGoingOnBatteries>false</StopIfGoingOnBatteries>{wake}{start_when}'
             f'<ExecutionTimeLimit>PT0S</ExecutionTimeLimit><Enabled>true</Enabled></Settings>'
             f'<Actions Context="Author"><Exec><Command>{COMSPEC}</Command>'
-            f'<Arguments>{arg_min}</Arguments><WorkingDirectory>{t["script"].parent}</WorkingDirectory></Exec></Actions></Task>')
+            f'<Arguments>{arg_min}</Arguments><WorkingDirectory>{EJECUTAR}</WorkingDirectory></Exec></Actions></Task>')
 
 
 def _schtasks(*args):

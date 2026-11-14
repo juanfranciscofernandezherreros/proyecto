@@ -9,7 +9,7 @@ model: haiku
 Una sola llamada, de solo lectura:
 
 ```bash
-cmd //c "C:\Develop\basketball\1_EJECUTAR\ESTADO.bat"
+cmd //c "C:\Develop\basketball\1_EJECUTAR\basket.cmd estado"
 ```
 
 Imprime unas 30 líneas y termina con `RESUMEN`, que lista lo que falla. Código de
@@ -29,7 +29,7 @@ salida 0 = todo responde, 1 = falta algo. No lanzar comandos sueltos (`docker ps
   `procesar-pendientes`.
 
 Solo si web, API, Postgres y Mongo están levantados, se puede añadir la
-verificación del SDD: `cmd //c "C:\Develop\basketball\1_EJECUTAR\VERIFICAR.bat"`.
+verificación del SDD: `cmd //c "C:\Develop\basketball\1_EJECUTAR\basket.cmd verificar"`.
 
 ## Cómo contarlo
 

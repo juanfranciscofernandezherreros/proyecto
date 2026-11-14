@@ -18,7 +18,7 @@ un repositorio propio, enlazado como submódulo:
 | `basketball-match-web` | Node / Vite | `main` | `npm run build` y `npm test` |
 | `python-pyppeter` | Python | `KAN-341/readme-extraccion-csv` | `python -m unittest` |
 | `local-validation` | docker compose | `main` | — |
-| raíz (`scripts`, `docs`, `sql`, `1_EJECUTAR`, `.claude`) | padre | `main` | `1_EJECUTAR\VERIFICAR.bat` si toca operación |
+| raíz (`scripts`, `docs`, `sql`, `1_EJECUTAR`, `.claude`) | padre | `main` | `1_EJECUTAR\basket.cmd verificar` si toca operación |
 
 `python-pyppeter` no está en `main`: confirmar la rama con
 `git -C python-pyppeter rev-parse --abbrev-ref HEAD` antes de subir, y no cambiarla.

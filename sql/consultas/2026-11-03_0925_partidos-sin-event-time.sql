@@ -35,7 +35,7 @@
 -- QUÉ HACER DESPUÉS
 --   · Si fecha_en_fixtures tiene valor → 2026-11-03_0945_completar-event-time-desde-fixtures.sql
 --   · Si no lo tiene → volver a extraer los RESULTS de esa liga:
---       1_EJECUTAR\LIGAS_ORQUESTAR.bat <LIGA> results 10
+--       1_EJECUTAR\basket.cmd orquestar <LIGA> results 10
 --     y seguir el avance con 2026-11-03_1015_avance-reextraccion-event-datetime.sql
 --
 -- RESULTADO EL 2026-11-03

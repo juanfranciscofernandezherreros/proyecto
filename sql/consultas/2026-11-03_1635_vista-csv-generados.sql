@@ -40,7 +40,7 @@
 --
 -- QUÉ HACER DESPUÉS
 --   Si hay SIN ENVIAR antiguos, mirar el informe C:\data\basketball\reports\<pais>\<competicion>\
---   o relanzar con 1_EJECUTAR\MATCHIDS_PENDIENTES.bat.
+--   o relanzar con 1_EJECUTAR\basket.cmd pendientes.
 --
 -- RESULTADO EL 2026-11-03
 --   CREATE VIEW. 138 CSV procesados hoy. En la última hora: los 11 RESULTS COMPLETED (con

@@ -1,5 +1,45 @@
 # Orquestador de CSV de baloncesto
 
+## Skills de Claude
+
+Las skills están en `.claude\skills\`. Se activan solas al pedir la tarea con tus
+palabras, o escribiendo `/nombre`. La columna "Sin Claude" es el lanzador
+equivalente, por si prefieres hacerlo con doble clic.
+
+### Operación diaria
+
+| Skill | Qué decir | Qué hace | Sin Claude |
+|---|---|---|---|
+| `/arrancar-web` | "arranca la web" | Levanta web, API y projector (con Mongo). El launcher de CSV solo si pides "todo" | `1_EJECUTAR\ARRANCAR_TODO.bat` |
+| `/estado-del-sistema` | "¿cómo está todo?" | Servicios, últimas cargas, último resultado por liga y pendientes | `1_EJECUTAR\ESTADO.bat` |
+| `/resultados-todas-las-ligas` | "extrae los resultados de todas las ligas" | Baja de Flashscore los marcadores de las 11 ligas y los carga en Postgres | `1_EJECUTAR\EXTRAER_RESULTADOS.bat ALL` |
+| `/extraer-resultados` | "extrae los resultados de la Euroliga" | Lo mismo para una liga concreta | `1_EJECUTAR\EXTRAER_RESULTADOS.bat EUROLIGA` |
+| `/procesar-csv-resultados` | "procesa los CSV de resultados" | Carga en Postgres los CSV de resultados que ya están en disco, sin extraer | `1_EJECUTAR\PROCESAR_CSV_RESULTADOS.bat` |
+| `/extraer-datos-partido` | "quiero las estadísticas de la ACB" | Jugada a jugada y estadísticas de equipo y de jugadores | `1_EJECUTAR\LIGAS_ORQUESTAR.bat ACB datos 10` |
+| `/procesar-pendientes` | "procesa los pendientes" | Completa los partidos jugados a los que les falta algún dataset | `1_EJECUTAR\MATCHIDS_PENDIENTES.bat` |
+| `/diagnosticar-partido` | "este partido no sale en la web" | Sigue el partido por Postgres, launcher, Mongo y API hasta encontrar dónde falla | — |
+
+Códigos de liga: `EUROLIGA`, `ACB`, `NBA`, `BSL`, `GBL`, `LEGA_A`, `LNB`, `BBL`,
+`LKL`, `KLS`, `WINNER` (catálogo en `LIGAS_BASKET.json`).
+
+### Desarrollo
+
+| Skill | Qué decir | Qué hace |
+|---|---|---|
+| `/normas-basketball` | Se activa al tocar código | Convenciones del proyecto y flujo SDD → plan → verificación |
+| `/commit-multirepo` | "haz commit y push" | Commit en el submódulo, push, puntero en el repo padre y evidencia en `docs\VERIFICACION-SDD.md` |
+| `/create-microservice` | "crea un microservicio para…" | Microservicio Spring Boot completo, fase a fase |
+| `/implement-crud` | "añade un CRUD de…" | CRUD completo en un microservicio existente (agente `spring-crud-builder`) |
+
+Fases de `create-microservice`, que también se pueden lanzar sueltas escribiendo su
+nombre: `/crud`, `/pagination-filtering`, `/english-javadoc`, `/cucumber-api-testing`,
+`/swagger-openapi`, `/service-testing`, `/lombok-mapstruct`, `/api-first`,
+`/dockerization`, `/hikari-tuning`, `/observability-grafana`,
+`/request-logging-dashboard`, `/allure-cucumber-reporting`, `/explicit-bean-wiring`.
+
+Las reglas que se aplican siempre (idioma, consultas SQL, flujo de bugs) están en
+`.claude\rules\`.
+
 ## Configuración
 
 Todas las rutas, el JDK, las URLs de los servicios y las credenciales están en

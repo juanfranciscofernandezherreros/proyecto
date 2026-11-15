@@ -26,7 +26,7 @@ Un commit + push por paso. Cada paso se marca al quedar hecho y verificado.
 - [x] 9. Comprobar si los extractores existentes pasan la ruta del driver de Edge al scraper — **no la pasaban**: fallo real desde la migración a Python. `scripts\py\config.py` no exportaba `EDGEDRIVER_PATH` (los `.bat` sí, y `python\proyecto_config.py` también, por eso los pendientes funcionaban). Afectaba a `basket resultados`, `orquestar`, `datos`, `extraer-todo` y `ultimos`. Arreglado exportando `FLASHSCORE_BROWSER` y `EDGEDRIVER_PATH` en `config.cargar()`
 - [x] 10. Tests para `scripts\py` (catálogo de ligas, jornadas, límites, argumentos y progreso de `reextraer`, configuración) — `tests\test_scripts_py.py`, 16 tests nuevos; `python -m unittest discover -s tests`: 18 en verde. No cubren los importadores ni nada que necesite Postgres o Flashscore
 - [ ] 11. Trazabilidad: fecha de relanzamiento en el launcher y de actualización en jugadas y resumen
-- [ ] 12. Limpieza: `python\`, carpetas con solo `target\`, referencias a `.ps1` en el SDD
+- [x] 12. Limpieza — hecho en parte, a propósito: (a) `python\` **no se toca**: sigue en uso (`proyecto_config.py`, `resolve_flashscore_redirect.py`, `process_pending_match_csvs.py` y otros los llaman `scripts\py`); solo 4 ficheros no tienen ninguna referencia (`basketball_mcp_server.py`, `extract_missing_match_ids.py`, `recent_competition_status.py`, `seed_datasets_vacios.py`) y se dejan para que el usuario decida; (b) borradas `csv-stats-player-batch\` y `real-time-basketball-stats\`, que solo tenían carpetas vacías y no estaban en git; (c) corregidas en `SDD.md` las referencias a `.ps1`/`.bat` que ya no existen
 - [ ] 13. Web: clasificación, calendario y página de jugador
 
 ## 2. Encaje con el SDD

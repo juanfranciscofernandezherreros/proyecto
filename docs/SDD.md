@@ -73,7 +73,7 @@ flowchart TD
 | Componente | Repo/Carpeta | Tecnología | Responsabilidad |
 |---|---|---|---|
 | Scraper | `python-pyppeter/` | Python + Selenium (Edge) | Extraer CSV de Flashscore según contratos |
-| Orquestador | `python/`, `scripts/`, `1_EJECUTAR/` | Python + .bat/.ps1 | Extraer, auditar, recuperar, consolidar, publicar |
+| Orquestador | `scripts/py/` (CLI `1_EJECUTAR/basket.cmd`), `python/` (pipeline por partido, resolvedor de URL) | Python | Extraer, auditar, recuperar, consolidar, publicar |
 | Launcher | `csv-extra-batch/launcher/` | Spring Boot | Cola en PostgreSQL; ejecuta el JAR por tipo de CSV |
 | Batches | `csv-extra-batch/{results,match-summary,point-by-point,team-stats,stats-player,fixtures}` | Spring Batch | Cargar cada sección en su schema de PostgreSQL |
 | Projector | `basketball-match-projector/` | Spring Boot | Unir secciones por `matchId` → documento en MongoDB |
@@ -168,10 +168,13 @@ de Grafana).
   mongo, projector, api, web; `python-pyppeter` bajo perfil `generator`).
 - **Puertos**: web 8083, API 8082, launcher 8088, auditoría 8090, Grafana 8084,
   Prometheus 8086, Loki 8085, PostgreSQL 55432, MongoDB 27017.
-- **Arranque** (ver ESPECIFICACIONES §4): `docker compose up -d ...` + `ASEGURAR.bat
-  launcher`; observabilidad con `Start-BasketballLocal.ps1`.
+- **Arranque** (ver ESPECIFICACIONES §4): `1_EJECUTAR/basket.cmd arrancar`
+  (por debajo `scripts/py/arranque/asegurar.py`); observabilidad con
+  `local-validation/scripts/Start-BasketballLocal.ps1`.
 - **Operación diaria**: `1_EJECUTAR/basket.cmd ciclo-diario` (extraer RESULTS + procesar
-  pendientes + archivar). Extracción por liga: `LIGAS_ORQUESTAR.bat <LIGA> results|datos|todo`.
+  pendientes + archivar + auditoría de datos). Extracción por liga:
+  `1_EJECUTAR/basket.cmd orquestar <LIGA> results|datos|todo`. Partidos concretos:
+  `basket.cmd reextraer`. Calidad de datos: `basket.cmd auditar`.
 - **Requisitos**: Docker, JDK 21, Maven, Python (venv), Edge + EdgeDriver (versión
   del driver = versión de Edge).
 
@@ -241,7 +244,7 @@ Flashscore → CSV en una extracción real de liga completa.
 
 La verificación no es solo manual; está soportada por tres capas:
 
-- **Script de verificación** `scripts/Verificar.ps1` (lanzador `1_EJECUTAR/basket.cmd verificar`):
+- **Script de verificación** `scripts/py/verificar.py` (lanzador `1_EJECUTAR/basket.cmd verificar`):
   convierte las comprobaciones de `VERIFICACION-SDD.md` en checks verde/rojo
   (web/API 200, sin slugs no canónicos, filtros limpios, join fixture+result). Código
   de salida 0/1, apto para hook o CI. Requiere el stack arrancado.

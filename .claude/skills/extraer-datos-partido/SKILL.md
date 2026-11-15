@@ -64,6 +64,21 @@ Lo mismo con `TEAM_STATS` y `PLAYER_STATS`. Antes hay que asegurar los servicios
 python "C:\Develop\basketball\scripts\py\arranque\asegurar.py" antibloqueo postgres launcher navegador
 ```
 
+## 2 bis. Reextraer partidos concretos
+
+Los comandos anteriores saltan los partidos que ya tienen filas en Postgres. Para
+volver a extraer y reimportar partidos concretos (datos mal cargados), por `match_id`:
+
+```bash
+cmd //c "C:\Developasketball_EJECUTARasket.cmd reextraer --dataset equipo juVOVk74 IRWGXBxh"
+```
+
+- `--dataset`: `equipo`, `jugadores`, `resumen`, `jugadas` o `todo` (por defecto).
+- `--fichero lista.txt`: un `match_id` por línea, para lotes grandes (en segundo plano).
+- Tarda alrededor de un minuto por partido y dataset. Acaba con `RESUMEN: n OK, m con fallo`.
+- Los batches hacen UPSERT: las filas antiguas que no coinciden con ninguna nueva
+  siguen ahí y hay que borrarlas aparte (skill `auditar-datos`, control 15).
+
 ## 3. Verificar
 
 Cargas del launcher (deben salir `COMPLETED` y `exit_code = 0`):

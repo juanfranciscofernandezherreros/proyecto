@@ -27,6 +27,7 @@ El detalle vive fuera de este fichero:
 | Normas de desarrollo y flujo SDD → plan → verificación | skill `normas-basketball` |
 | Formato de los ficheros de `sql\consultas\` | `.claude\rules\consultas-sql.md` |
 | SCORE_SUMMARY con identidad de partido | `.claude\rules\score-summary.md` |
+| Backlog de pasos antes de desarrollar (y marcarlo) | `.claude\rules\backlog-de-pasos.md` |
 | Idioma, flujo de bugs y microservicios Spring | `.claude\rules\` |
 | Skills, agente y comando de CRUD/microservicios | `.claude\skills\`, `.claude\agents\`, `.claude\commands\` |
 | Arquitectura y operación | `docs\SDD.md`, `docs\ESPECIFICACIONES.md` |

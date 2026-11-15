@@ -241,6 +241,20 @@ Opciones del menú: `[1] POINT_BY_POINT`, `[2] TEAM_STATS`, `[3] PLAYER_STATS`
 
 También con el orquestador: `LIGAS_ORQUESTAR.bat <LIGA> datos`.
 
+### 6.1 Reextraer partidos concretos
+
+Los extractores anteriores saltan los partidos que ya tienen filas en Postgres. Para
+volver a extraer y reimportar partidos concretos (datos mal cargados):
+
+```text
+1_EJECUTARasket.cmd reextraer [--dataset equipo|jugadores|resumen|jugadas|todo] [--fichero lista.txt] <match_id...>
+```
+
+Por defecto `todo`. País y competición salen de `results.results` (o de `fixtures`).
+Un fallo en un partido no detiene los demás; termina con `RESUMEN` y código 1 si hubo
+fallos. Los batches hacen UPSERT: las filas antiguas que no coinciden con ninguna nueva
+no se borran solas. Código: `scripts\py\extraereextraer.py`.
+
 ---
 
 ## 7. Procesar pendientes y ciclo diario

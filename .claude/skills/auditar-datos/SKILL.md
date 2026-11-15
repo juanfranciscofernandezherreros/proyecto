@@ -46,13 +46,13 @@ control está a cero no devuelven filas.
 | 03 results_sin_hora | La API oculta el partido (`finished` exige `result.eventTime`) | `sql\consultas\2026-11-07_1830_results-sin-event-time-no-salen-en-web.sql` |
 | 04, 05 sin país, competición o fecha | El partido cae fuera de los filtros | Skill `extraer-resultados` de esa liga |
 | 06 results_fecha_futura | Año mal inferido | `sql\consultas\2026-11-04_0900_results-fecha-futura-ano-mal.sql` |
-| 07, 08 empate o parciales que no suman | Marcador mal leído | Reextraer el partido (skill `extraer-resultados`) |
+| 07, 08 empate o parciales que no suman | Marcador mal leído | `basket.cmd reextraer --dataset resumen <match_id>` |
 | 09 fixtures_jugadas_sin_result | Partido jugado sin marcador (desglose en PASO 3) | Skill `extraer-resultados` o `resultados-todas-las-ligas` |
 | 10 slug_distinto_fixture_result | Calendario y resultado con competición distinta (PASO 4) | `docs\PLAN-normalizacion-competiciones.md` y `sql\consultas\2026-11-08_0000_normalizar-competiciones-fixtures.sql` |
 | 11 results_sin_fixture | INFO: se clasifica solo por el result | Nada |
 | 12–14 sin jugadas o estadísticas | Falta detalle que la fuente sí publica (PASO 5) | Skill `procesar-pendientes` o `extraer-datos-partido` |
-| 15 team_stats_metrica_invalida | Filas cuya métrica es un valor (`51.4%`, `(38/72)`), restos del scraper antiguo (PASO 6) | `sql\consultas\2026-11-04_1135_team-stats-duplicadas-tras-reextraer.sql`, adaptada a los partidos afectados |
-| 16 stats_player_duplicados | Mismo jugador dos veces en un partido | Reimportar PLAYER_STATS del partido |
+| 15 team_stats_metrica_invalida | Filas cuya métrica es un valor (`51.4%`, `(38/72)`), del scraper antiguo (PASO 6) | Primero `basket.cmd reextraer --dataset equipo --fichero <lista>` y después `sql\consultas\2026-11-15_1525_limpiar-team-stats-descuadradas.sql` |
+| 16 stats_player_duplicados | Mismo jugador dos veces en un partido | `basket.cmd reextraer --dataset jugadores <match_id>` |
 | 17 cargas_fallidas_7_dias | Cargas del launcher que no terminaron bien (PASO 7) | Mirar el error y reenviar (skill `procesar-pendientes`) |
 
 Matices para no dar falsas alarmas:

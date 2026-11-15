@@ -55,7 +55,8 @@ docker exec -i local-validation-postgres-1 psql -U test -d basketball -c "SELECT
 ```
 
 Si falta y no está registrado como no disponible → skill `extraer-datos-partido`
-o `procesar-pendientes`.
+o `procesar-pendientes`. Si está pero con datos erróneos →
+`1_EJECUTARasket.cmd reextraer <MATCH_ID>` (skill `extraer-datos-partido`).
 
 ## 3. Cargas del launcher
 

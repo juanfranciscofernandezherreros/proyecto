@@ -215,3 +215,18 @@ No altera el flujo del SDD §4 ni los puertos.
 
 No se ha ejecutado `basket verificar`: exige web, API y Mongo levantados y este cambio no
 toca código ni servicios (solo se arrancó Postgres para probar la consulta).
+
+## 10. Comando `basket reextraer` (plan `PLAN-basket-reextraer.md`)
+
+Reextrae y reimporta partidos concretos aunque ya estén importados. Usa el mismo camino
+scraper → CSV → launcher → Postgres (SDD §4); sin puertos ni servicios nuevos.
+
+| Paso | Qué | Verificación | OK |
+|---|---|---|---|
+| 1 | `scripts\py\extraer\reextraer.py` | `basket.cmd reextraer juVOVk74` (2026-11-15): `RESUMEN: 4 OK, 0 con fallo`, código 0. En Postgres, `team_stats` (60 filas) y `stats_player` (23) con `updated_at` de hoy y el mismo número de filas que antes (idempotente); `point_by_point` 83 y `match_summary` 1, sin cambio de recuento (esas tablas no tienen `updated_at`, así que ahí solo consta el `COMPLETED` del launcher) | ✅ |
+| 2 | Lanzador `lanzadores\reextraer.py` y alta en `basket.py` | `basket ayuda` lo lista. Sin argumentos, con id inválido, con dataset inválido y con un id que no existe: mensaje claro y código 1 | ✅ |
+| 3 | Documentación: `ESPECIFICACIONES.md` §6.1, skills `extraer-datos-partido`, `diagnosticar-partido` y `auditar-datos` | Referencias presentes | ✅ |
+
+El mismo núcleo (resolvedor + `match bundle` + launcher) es el que está reextrayendo las
+TEAM_STATS de 262 partidos el 2026-11-15. No se ha ejecutado `basket verificar` (web, API y
+Mongo parados). Además se añade la regla `.claude\rules\backlog-de-pasos.md`.

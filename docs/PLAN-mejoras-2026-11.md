@@ -1,0 +1,45 @@
+# Plan — Mejoras de noviembre de 2026 (fiabilidad de datos, vigilancia y calidad)
+
+> **Fecha:** 2026-11-15 · **Relacionado:** [SDD.md](SDD.md) (§4 flujo, §5 modelo de datos,
+> §6 interfaces, §11 riesgos, §13 verificación continua),
+> [VERIFICACION-SDD.md](VERIFICACION-SDD.md). **Repos:** raíz, `csv-extra-batch`,
+> `basketball-match-api`. **Estado:** en curso.
+
+## 1. Origen
+
+Lista ordenada acordada con el usuario el 2026-11-15, tras la auditoría de datos
+(`PLAN-skill-auditar-datos.md`) y la limpieza de TEAM_STATS
+(`PLAN-limpieza-team-stats-descuadradas.md`, pausada y **fuera** de este plan).
+
+## Backlog
+
+Un commit + push por paso. Cada paso se marca al quedar hecho y verificado.
+
+- [ ] 1. Activar `CICLO_RESULTS=1` en `config\basketball.env`
+- [ ] 2. Validar la métrica en el batch de `team_stats` (`csv-extra-batch`): rechazar filas cuya métrica es un valor
+- [ ] 3. Reemplazar el partido entero al reimportar TEAM_STATS (borrar + insertar en una transacción)
+- [ ] 4. `basket reextraer` reanudable (fichero de progreso; salta lo ya hecho)
+- [ ] 5. Dos controles nuevos en la auditoría: rebotes en categoría `Scoring` y filas con etiqueta válida y valores erróneos
+- [ ] 6. `basket auditar` y su ejecución en el ciclo diario
+- [ ] 7. Arreglar los tests de la API que no compilan (`PLAN-ci-api-tests.md`)
+- [ ] 8. Filtro `finished` de la API basado en el marcador, no en `result.eventTime`
+- [ ] 9. Comprobar si los extractores existentes pasan la ruta del driver de Edge al scraper
+- [ ] 10. Tests para `scripts\py` (catálogo de ligas, jornadas, argumentos de `reextraer`)
+- [ ] 11. Trazabilidad: fecha de relanzamiento en el launcher y de actualización en jugadas y resumen
+- [ ] 12. Limpieza: `python\`, carpetas con solo `target\`, referencias a `.ps1` en el SDD
+- [ ] 13. Web: clasificación, calendario y página de jugador
+
+## 2. Encaje con el SDD
+
+- §4: ningún paso cambia el flujo CSV → launcher → Postgres → projector → Mongo → API → web
+  ni los puertos.
+- §5.1: los pasos 2, 3 y 5 protegen y vigilan las tablas fuente.
+- §6: el paso 8 cambia el criterio de un filtro, no el contrato de la API.
+- §11: los pasos 2 y 3 atacan la causa de los datos descuadrados; el 8, la de los
+  partidos con marcador que no salen en la web.
+- §13: los pasos 6, 7 y 10 refuerzan la verificación continua.
+
+## 3. Notas por paso
+
+Se rellenan al ejecutar cada paso (qué se cambió y cómo se verificó); la evidencia
+completa va a `VERIFICACION-SDD.md`.

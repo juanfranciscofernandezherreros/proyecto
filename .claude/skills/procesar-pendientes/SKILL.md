@@ -59,7 +59,7 @@ cmd //c "C:\Develop\basketball\1_EJECUTAR\basket.cmd ciclo-diario"
 ```
 
 Hace tres cosas: extrae los resultados de todas las ligas solo si
-`CICLO_RESULTS=1` en `config\basketball.env` (hoy está a `0`), lanza
+`CICLO_RESULTS=1` en `config\basketball.env` (activado desde el 2026-11-15), lanza
 `MATCHIDS_PENDIENTES` y archiva los CSV repetidos. Log en
 `C:\data\basketball\reports\orchestrator\ciclo-diario-<fecha>.log`.
 

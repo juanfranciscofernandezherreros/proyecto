@@ -2,7 +2,7 @@
 
 > **Fecha:** 2026-11-08 · **Relacionado:** [SDD.md](SDD.md) (§6 interfaces, §13
 > verificación continua), [VERIFICACION-SDD.md](VERIFICACION-SDD.md). **Repo:**
-> `basketball-match-api`. **Estado:** propuesto.
+> `basketball-match-api`. **Estado:** ejecutado (commit `35f2fd5` de `basketball-match-api`; comprobado el 2026-11-15: 22 tests en verde).
 
 ## 1. Problema
 El CI de `basketball-match-api` falla porque los tests **no compilan**: usan firmas

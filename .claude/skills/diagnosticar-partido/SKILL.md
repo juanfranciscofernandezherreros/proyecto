@@ -32,8 +32,9 @@ docker exec -i local-validation-postgres-1 psql -U test -d basketball -c "SELECT
 Qué mirar:
 
 - **Sin fila `result`**: el marcador no se ha extraído → skill `extraer-resultados`.
-- **`result` con `event_time` vacío**: la API filtra los finalizados por
-  `result.eventTime` y oculta el partido. Es el caso más frecuente. Rescate en
+- **`result` con `event_time` vacío**: desde el 2026-11-15 la API ya no lo oculta
+  (el filtro de finalizados mira solo el marcador), pero el partido sale sin hora.
+  Una API desplegada antes de ese cambio sí lo oculta. Rescate de la hora en
   `sql\consultas\2026-11-07_1830_results-sin-event-time-no-salen-en-web.sql`.
 - **`country` o `competition` vacíos**, o con un slug no canónico (`acb`,
   `super-league` en vez de `liga-endesa`, `winner-league`): el partido cae fuera de
@@ -99,7 +100,7 @@ curl -s http://localhost:8082/api/v1/matches/<MATCH_ID>/processing
 ```
 
 - La ficha responde pero el partido no sale en el listado: lo descarta un filtro
-  (`status=finished` exige `result.eventTime`; país y competición deben coincidir
+  (`status=finished` exige marcador en `result`; país y competición deben coincidir
   con `GET /api/v1/matches/filters`).
 - La API lo devuelve bien y la web no: caché del navegador o nginx
   (`basketball-match-web`, http://localhost:8083).

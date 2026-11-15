@@ -16,7 +16,8 @@ competition` (contrato en `python-pyppeter/csv_contracts.py`).
 - El JAR `csv-extra-batch/match-summary` los carga en `results.results`
   (`event_time` / `event_datetime` / `country` / `competition`), de modo que un
   partido que llega solo por SCORE_SUMMARY ya no queda sin hora ni país y **sí
-  aparece en la web** (la API filtra `finished` por `result.eventTime`).
+  aparece en la web** con su hora (desde el 2026-11-15 la API filtra
+  `finished` solo por marcador, así que la hora ya no decide si aparece).
 - Los SCORE_SUMMARY antiguos de 15 columnas se siguen aceptando.
 - Si el scrape de la hora falla, queda el backfill desde `fixtures` en
   `sql\consultas\`.

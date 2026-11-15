@@ -41,7 +41,7 @@ control está a cero no devuelven filas.
 | Control | Qué significa | Arreglo |
 |---|---|---|
 | 01, 02 duplicados | Dos filas con el mismo `match_id` | No debería pasar: revisar el batch de importación |
-| 03 results_sin_hora | La API oculta el partido (`finished` exige `result.eventTime`) | `sql\consultas\2026-11-07_1830_results-sin-event-time-no-salen-en-web.sql` |
+| 03 results_sin_hora | El partido sale sin hora (y una API anterior al 2026-11-15 lo oculta) | `sql\consultas\2026-11-07_1830_results-sin-event-time-no-salen-en-web.sql` |
 | 04, 05 sin país, competición o fecha | El partido cae fuera de los filtros | Skill `extraer-resultados` de esa liga |
 | 06 results_fecha_futura | Año mal inferido | `sql\consultas\2026-11-04_0900_results-fecha-futura-ano-mal.sql` |
 | 07, 08 empate o parciales que no suman | Marcador mal leído | `basket.cmd reextraer --dataset resumen <match_id>` |

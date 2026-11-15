@@ -21,8 +21,8 @@ Un commit + push por paso. Cada paso se marca al quedar hecho y verificado.
 - [x] 4. `basket reextraer` reanudable: opción `--progreso <fichero>` que anota OK o FALLO por partido y dataset y salta lo ya hecho
 - [x] 5. Dos controles nuevos en la auditoría: 18 rebotes en categoría `Scoring` (3783 filas) y 19 métricas de tiro con valor sin `%` (831 filas en 167 partidos, 0 en partidos ya reextraídos)
 - [x] 6. `basket auditar` y su ejecución al final del ciclo diario (el ciclo completo no se ha lanzado; se verá en el log de las 06:00)
-- [ ] 7. Arreglar los tests de la API que no compilan (`PLAN-ci-api-tests.md`)
-- [ ] 8. Filtro `finished` de la API basado en el marcador, no en `result.eventTime`
+- [x] 7. Arreglar los tests de la API que no compilan (`PLAN-ci-api-tests.md`) — **ya estaba hecho** (commit `35f2fd5` de la API); el plan seguía como "propuesto". Comprobado: `mvnw test`, 22 tests en verde. Solo se ha corregido el estado del plan
+- [x] 8. Filtro `finished` de la API basado en el marcador, no en `result.eventTime` — commit `a0fb102` de la API, 23 tests. Entra en vigor al reconstruir la imagen de la API (el stack está parado)
 - [ ] 9. Comprobar si los extractores existentes pasan la ruta del driver de Edge al scraper
 - [ ] 10. Tests para `scripts\py` (catálogo de ligas, jornadas, argumentos de `reextraer`)
 - [ ] 11. Trazabilidad: fecha de relanzamiento en el launcher y de actualización en jugadas y resumen

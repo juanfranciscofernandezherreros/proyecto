@@ -146,7 +146,7 @@ Definidos en `python-pyppeter/csv_contracts.py`. Los principales:
 Base `/api/v1/matches`:
 - `GET /` — listado paginado/filtrable (`country`, `competition`, `status`, `q`,
   `minPlays`, `maxPlays`, `page`, `size`, `sort`). `status=finished` exige
-  `result.eventTime` no vacío + marcador.
+  marcador (`result.homeScore` y `result.awayScore`); la hora ya no es obligatoria.
 - `GET /filters` — países y competiciones disponibles.
 - `GET /{matchId}` · `/{matchId}/stats` · `/{matchId}/players` · `/{matchId}/point-by-point`.
 - `GET /performances`.
@@ -222,7 +222,7 @@ Detalle en [ESPECIFICACIONES.md §11](ESPECIFICACIONES.md).
 
 | Riesgo | Impacto | Mitigación / estado |
 |---|---|---|
-| Filtro `finished` atado a `result.eventTime` | Partidos con marcador pero sin hora no salen en la web | Resuelto en origen (§8) + backfill desde `fixtures` en `sql/consultas/` |
+| Filtro `finished` atado a `result.eventTime` | Partidos con marcador pero sin hora no salen en la web | **Cerrado** el 2026-11-15: el filtro usa solo el marcador (API `a0fb102`). Antes: resuelto en origen (§8) + backfill desde `fixtures` |
 | Projector no proyecta el objeto `fixture` cuando `fixtures.event_time` es nulo | ~1337 "scheduled" sin equipos/fecha y sin filtrar por liga | **Cerrado** — eran docs obsoletos; `PROJECTION_VERSION` en el sourceHash fuerza reproyección (0 rotos; scheduled NBA 0→1068) |
 | Exporters con `restart: "no"` | Se quedan `Exited` y los dashboards dejan de actualizarse | **Abierto** — poner `restart: unless-stopped` o `VIGILAR_SERVICIOS.bat` |
 | `results` de euroleague con `country/competition` vacíos (SCORE_SUMMARY antiguos) | Dependen de la `fixture` para clasificarse | Resuelto para extracciones nuevas (§8) |

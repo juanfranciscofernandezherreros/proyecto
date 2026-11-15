@@ -68,7 +68,7 @@ Hace tres cosas: extrae los resultados de todas las ligas solo si
 Volver a lanzar el paso 2: `Pendientes` debe haber bajado. Y comprobar las cargas:
 
 ```bash
-docker exec -i local-validation-postgres-1 psql -U test -d basketball -c "SELECT batch_type, status, exit_code, created_at FROM public.batch_launch_request ORDER BY created_at DESC LIMIT 15;"
+docker exec -i local-validation-postgres-1 psql -U test -d basketball -c "SELECT batch_type, status, exit_code, attempts, finished_at FROM public.batch_launch_request ORDER BY coalesce(finished_at, created_at) DESC LIMIT 15;"
 ```
 
 ## 5. Explicar lo que sigue pendiente

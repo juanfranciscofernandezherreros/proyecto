@@ -86,7 +86,7 @@ cmd //c "C:\Developasketball_EJECUTARasket.cmd reextraer --dataset equipo juV
 Cargas del launcher (deben salir `COMPLETED` y `exit_code = 0`):
 
 ```bash
-docker exec -i local-validation-postgres-1 psql -U test -d basketball -c "SELECT batch_type, status, exit_code, created_at FROM public.batch_launch_request ORDER BY created_at DESC LIMIT 15;"
+docker exec -i local-validation-postgres-1 psql -U test -d basketball -c "SELECT batch_type, status, exit_code, attempts, finished_at FROM public.batch_launch_request ORDER BY coalesce(finished_at, created_at) DESC LIMIT 15;"
 ```
 
 Cobertura por partido de la liga (sustituir `<competicion>`):

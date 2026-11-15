@@ -65,7 +65,7 @@ Si los CSV existen en `C:\data\basketball\competitions\<pais>\<competicion>\<MAT
 pero no llegaron a Postgres:
 
 ```bash
-docker exec -i local-validation-postgres-1 psql -U test -d basketball -c "SELECT batch_type, status, exit_code, created_at FROM public.batch_launch_request ORDER BY created_at DESC LIMIT 20;"
+docker exec -i local-validation-postgres-1 psql -U test -d basketball -c "SELECT batch_type, status, exit_code, attempts, finished_at FROM public.batch_launch_request ORDER BY coalesce(finished_at, created_at) DESC LIMIT 20;"
 ```
 
 Filas con `status` distinto de `COMPLETED` o `exit_code` distinto de 0 señalan la

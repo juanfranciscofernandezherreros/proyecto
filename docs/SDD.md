@@ -149,7 +149,9 @@ Base `/api/v1/matches`:
   marcador (`result.homeScore` y `result.awayScore`); la hora ya no es obligatoria.
 - `GET /filters` — países y competiciones disponibles.
 - `GET /{matchId}` · `/{matchId}/stats` · `/{matchId}/players` · `/{matchId}/point-by-point`.
-- `GET /performances`.
+- `GET /performances` — actuaciones de jugador. Incluye `eventDatetime`, `competition`,
+  `teamScore` y `opponentScore` (opcionales: `null` si el partido no tiene marcador o el
+  equipo del jugador no se puede emparejar con el resultado; ver `PLAN-pagina-jugador.md` §3b).
 - Procesamiento: `/{matchId}/processing`, `/processing/pending`, `/processing`.
 
 ### 6.2 Launcher (`:8088`)

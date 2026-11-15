@@ -249,3 +249,14 @@ Evidencia por paso. Ningún paso cambia el flujo del SDD §4 ni los puertos.
 | 10 | `tests\test_scripts_py.py`: jornadas (`matchday`), límites (`proc`), catálogo de ligas y `LIGAS_BASKET.json`, argumentos y progreso de `reextraer`, exportación del driver en `config` | `python -m unittest discover -s tests`: 18 tests, 0 fallos (16 nuevos + 2 que ya había). Solo lógica pura: no cubren importadores, launcher ni scraper | ✅ |
 | 12 | Limpieza: `SDD.md` sin referencias a `.ps1`/`.bat` desaparecidos; borradas dos carpetas vacías (`csv-stats-player-batch`, `real-time-basketball-stats`: 0 ficheros, fuera de git). `python\` se conserva: está en uso | `grep` en `SDD.md`: solo queda `Start-BasketballLocal.ps1`, que existe en `local-validation\scripts`. Recuento de referencias a cada fichero de `python\` anotado en el plan | ✅ |
 | 11 | Trazabilidad de relanzamientos | Sin cambio de código: ya existía. `batch_launch_request` de `juVOVk74`: `created_at` del 7-nov, pero `started_at`/`finished_at` del 15-nov y `attempts` = 3 tras la reextracción; las jugadas tienen `point_by_point_import` (`updated_at`, `completed_at`). Esto confirma además que en la prueba del §10 el `POINT_BY_POINT` sí se volvió a ejecutar. Corregidas 4 skills para ordenar por `finished_at` y mostrar `attempts` | ✅ |
+
+## 12. Página de jugador (plan `PLAN-pagina-jugador.md`)
+
+| # | Cambio | Evidencia | Estado |
+|---|---|---|---|
+| 1 | API: `PlayerPerformanceResponse` con `eventDatetime`, `competition`, `teamScore`, `opponentScore` (opcionales) | `./mvnw verify` en `basketball-match-api`: 32 tests, cobertura de líneas 82,14 % (umbral 80 %). Tests nuevos en `MatchServiceImplTest` (partido con datos y partido ausente) | ✅ |
+| 2 | API: cobertura de `PostgresProcessingStatusProvider` (pendientes, relanzamiento, lectura de CSV) | 9 tests en `PostgresProcessingStatusProviderTest`; la cobertura del conjunto pasa de 61,5 % a 82,14 % | ✅ |
+| 3 | Web: `utils/playerSummary.ts` (promedios, porcentajes acumulados, mejores marcas) | `playerSummary.test.ts`: 8 tests | ✅ |
+| 4 | Web: resumen e historial en `PlayerPerformancesPage.tsx`, ordenado por fecha | Comprobado en `/performances/Wembanyama%20V.`: 12 partidos, promedio de puntos 25,7 = 308 / 12 | ✅ |
+| 5 | Web: nombre del jugador enlazado desde `MatchDetailPage.tsx` | `typecheck` y `npm test` (31 tests) en verde | ✅ |
+| 6 | Hallazgo: `teamScore`/`opponentScore` casi siempre `null` | Los jugadores llevan la abreviatura del equipo (`DAL`, `BRE`...) y el resultado el nombre completo. De 200 actuaciones, 2 con marcador (BBL). Pendiente de decidir (ver plan, §3b) | ⚠️ Abierto |

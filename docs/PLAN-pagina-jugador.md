@@ -48,16 +48,23 @@ Cada paso se marca `[x]` al quedar hecho y verificado (regla `backlog-de-pasos`)
 - [x] `mvnw verify` en verde en `basketball-match-api`: 32 tests, cobertura de JaCoCo cumplida.
 
 **Web (`basketball-match-web`)**
-- [ ] `src\utils\playerSummary.ts`: promedios, porcentajes acumulados y mejores marcas, con `playerSummary.test.ts`.
-- [ ] `PlayerPerformancesPage.tsx`: bloque de resumen y tabla de historial con fecha, competición, rival y resultado.
-- [ ] `MatchDetailPage.tsx`: el nombre de cada jugador enlaza a `/performances/:playerName`.
-- [ ] `npm run typecheck` y `npm test` en verde.
+- [x] `src\utils\playerSummary.ts`: promedios, porcentajes acumulados y mejores marcas, con `playerSummary.test.ts`.
+- [x] `PlayerPerformancesPage.tsx`: bloque de resumen y tabla de historial con fecha, competición, rival y resultado.
+- [x] `MatchDetailPage.tsx`: el nombre de cada jugador enlaza a `/performances/:playerName`.
+- [x] `npm run typecheck` y `npm test` en verde.
 
 **Verificación y cierre (raíz)**
-- [ ] Arrancar el stack con la skill `arrancar-web` y abrir la página de un jugador real (con partidos en Mongo) en el navegador.
-- [ ] Comprobar que el promedio de puntos del resumen coincide con la media de la tabla de historial para ese jugador (cálculo a mano sobre la respuesta de la API).
-- [ ] Registrar la evidencia en `docs\VERIFICACION-SDD.md` y actualizar §6.1 de `docs\SDD.md`.
-- [ ] Commit + push por submódulo (API, web) y el puntero en la raíz, con la skill `commit-multirepo`.
+- [x] Arrancar el stack y abrir la página de un jugador real en el navegador (Wembanyama V., 12 partidos). Resumen e historial correctos; la columna Resultado sale `—` (ver hallazgo).
+- [x] Comprobar que el promedio de puntos del resumen coincide con la media de la tabla de historial para ese jugador (cálculo a mano sobre la respuesta de la API: 308 puntos / 12 partidos = 25,7, igual que en pantalla).
+- [x] Registrar la evidencia en `docs\VERIFICACION-SDD.md` y actualizar §6.1 de `docs\SDD.md`.
+- [ ] Nombre completo del equipo en `PLAYER_STATS` (`python-pyppeter\csv_contracts.py` y extracción, `csv-extra-batch\stats-player`, tabla `stats_player`) y reprocesado de los partidos con jugadores. **Pendiente, fuera de esta entrega:** requiere re-extraer de Flashscore miles de partidos; sin esto `teamScore`/`opponentScore` siguen en `null` salvo en BBL.
+- [x] Commit + push por submódulo (API, web) y el puntero en la raíz.
+
+## 3b. Hallazgo de la verificación (2026-11-15)
+
+- El emparejamiento de `teamScore`/`opponentScore` compara `players[].team` con `result.homeTeam`/`awayTeam`. Los jugadores usan abreviaturas (`BRE`, `MAN`, `DAL`), así que casi nunca coinciden.
+- Las `teamStats` tampoco sirven de referencia: en algunos partidos el lado local/visitante no coincide con `result`.
+- Opciones: (a) que la extracción de jugadores guarde el nombre completo del equipo (cambio en `csv-extra-batch`, requiere reprocesar); (b) mapear abreviatura → nombre con una tabla por liga; (c) dejar la columna en `—` y no mostrar marcador.
 
 ## 4. Criterios de aceptación
 

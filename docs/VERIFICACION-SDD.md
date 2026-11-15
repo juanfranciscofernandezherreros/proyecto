@@ -201,3 +201,17 @@ con subcomandos coherentes, más `1_EJECUTAR\basket.cmd` como punto de entrada d
 completa, 110 OK, idempotente); la tarea programada "Basketball - Ciclo diario" re-registrada
 a `basket.cmd ciclo-diario` a las 06:00; 23 ficheros de docs/skills/SQL actualizados a
 `basket.cmd <comando>`; todo `scripts\py` compila.
+
+## 9. Skill `auditar-datos` (plan `PLAN-skill-auditar-datos.md`)
+
+Auditoría de integridad de solo lectura sobre las tablas fuente de Postgres (SDD §5.1).
+No altera el flujo del SDD §4 ni los puertos.
+
+| Paso | Qué | Verificación | OK |
+|---|---|---|---|
+| 1 | `sql\consultas\2026-11-15_1445_auditoria-datos.sql`: 17 controles en un resumen (PASO 1) y 6 desgloses (PASOS 2–7) | Ejecutada el 2026-11-15 con `ON_ERROR_STOP=1`, sin errores. 10 controles a cero; con afectados: 09 = 30 (jornada del 14–15 nov sin RESULTS), 12/13/14 = 24/24/25, 15 = 7480 filas en 262 partidos, 17 = 1. El control 15 cuadra con el recuento independiente por etiqueta (47385 filas − 39905 de las 13 etiquetas reales = 7480) | ✅ |
+| 2 | Skill `.claude\skills\auditar-datos\SKILL.md` | Lanza el mismo comando probado en el paso 1; cada control remite a la skill o consulta que lo arregla | ✅ |
+| 3 | Enlaces: tabla de `CLAUDE.md` y skill `diagnosticar-partido` | Presentes | ✅ |
+
+No se ha ejecutado `basket verificar`: exige web, API y Mongo levantados y este cambio no
+toca código ni servicios (solo se arrancó Postgres para probar la consulta).

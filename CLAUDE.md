@@ -22,6 +22,7 @@ El detalle vive fuera de este fichero:
 | Procesar los partidos pendientes | skill `procesar-pendientes` |
 | Un partido no sale o sale mal en la web | skill `diagnosticar-partido` |
 | Ver qué está levantado y qué falta | skill `estado-del-sistema` |
+| Auditar la calidad de los datos en Postgres | skill `auditar-datos` |
 | Commit y push con submódulos | skill `commit-multirepo` |
 | Normas de desarrollo y flujo SDD → plan → verificación | skill `normas-basketball` |
 | Formato de los ficheros de `sql\consultas\` | `.claude\rules\consultas-sql.md` |

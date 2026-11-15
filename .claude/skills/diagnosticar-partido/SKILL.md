@@ -105,8 +105,9 @@ curl -s http://localhost:8082/api/v1/matches/<MATCH_ID>/processing
 
 ## Varios partidos a la vez
 
-Para medir huecos en bloque en lugar de partido a partido:
-`sql\consultas\2026-11-07_1915_auditoria-integridad-read-model.sql`. Y para el
+Para medir huecos en bloque en lugar de partido a partido: skill `auditar-datos`
+(Postgres) y `sql\consultas\2026-11-07_1915_auditoria-integridad-read-model.sql`
+(desfase con Mongo). Y para el
 estado general, `1_EJECUTAR\basket.cmd verificar` (skill `estado-del-sistema`).
 
 ## Al terminar

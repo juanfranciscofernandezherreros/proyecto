@@ -18,3 +18,12 @@ Petición del 2026-11-15: una skill que consulte los últimos resultados agregad
 - [x] Ejecutar la consulta tal como la lanza la skill y anotar el resultado en el fichero.
 - [x] Añadir la skill a la tabla de `CLAUDE.md`.
 - [x] Commit + push (pedido por el usuario el 2026-11-15).
+
+### Cambio del 2026-11-15 (20:30): la skill enseña solo la lista de los 50 últimos
+
+El usuario quiere ver la lista de resultados, no el resumen por liga.
+
+- [x] Guardar `sql\consultas\2026-11-15_2030_ultimos-50-resultados-agregados.sql` (una sola tabla, 50 filas).
+- [x] Apuntar `.claude\skills\ultimos-resultados\SKILL.md` a la consulta nueva y pedir que enseñe la lista entera.
+- [x] Ejecutarla (50 filas) y anotar el resultado en el fichero.
+- [x] Commit + push de este cambio (pedido por el usuario el 2026-11-15).

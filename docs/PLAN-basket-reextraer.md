@@ -46,7 +46,7 @@ basket reextraer [--dataset equipo|jugadores|resumen|jugadas|todo] [--fichero li
 - [x] Probar una reextracción real de un partido con cada dataset
 - [x] Documentar: `ESPECIFICACIONES.md`, skills `extraer-datos-partido` y `diagnosticar-partido`
 - [x] Anotar la evidencia en `VERIFICACION-SDD.md`
-- [ ] Commit + push
+- [x] Commit + push
 
 ## 4. Encaje con el SDD
 

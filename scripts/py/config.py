@@ -92,6 +92,13 @@ def cargar():
         cfg["JAVA_HOME"] = _buscar_jdk21()
     cfg["JAVA_EXE"] = str(Path(cfg["JAVA_HOME"]) / "bin" / "java.exe") if cfg.get("JAVA_HOME") else ""
 
+    # El scraper (flashscore.py) lee el navegador y la ruta del driver del entorno, no de
+    # este fichero. Los .bat antiguos exportaban toda la configuracion; aqui se exportan
+    # solo estas dos claves para que cualquier subproceso lanzado desde scripts\py las herede.
+    for clave in ("FLASHSCORE_BROWSER", "EDGEDRIVER_PATH"):
+        if cfg.get(clave):
+            os.environ.setdefault(clave, str(cfg[clave]))
+
     _cache = cfg
     return cfg
 

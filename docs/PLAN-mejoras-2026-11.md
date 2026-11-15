@@ -23,7 +23,7 @@ Un commit + push por paso. Cada paso se marca al quedar hecho y verificado.
 - [x] 6. `basket auditar` y su ejecución al final del ciclo diario (el ciclo completo no se ha lanzado; se verá en el log de las 06:00)
 - [x] 7. Arreglar los tests de la API que no compilan (`PLAN-ci-api-tests.md`) — **ya estaba hecho** (commit `35f2fd5` de la API); el plan seguía como "propuesto". Comprobado: `mvnw test`, 22 tests en verde. Solo se ha corregido el estado del plan
 - [x] 8. Filtro `finished` de la API basado en el marcador, no en `result.eventTime` — commit `a0fb102` de la API, 23 tests. Entra en vigor al reconstruir la imagen de la API (el stack está parado)
-- [ ] 9. Comprobar si los extractores existentes pasan la ruta del driver de Edge al scraper
+- [x] 9. Comprobar si los extractores existentes pasan la ruta del driver de Edge al scraper — **no la pasaban**: fallo real desde la migración a Python. `scripts\py\config.py` no exportaba `EDGEDRIVER_PATH` (los `.bat` sí, y `python\proyecto_config.py` también, por eso los pendientes funcionaban). Afectaba a `basket resultados`, `orquestar`, `datos`, `extraer-todo` y `ultimos`. Arreglado exportando `FLASHSCORE_BROWSER` y `EDGEDRIVER_PATH` en `config.cargar()`
 - [ ] 10. Tests para `scripts\py` (catálogo de ligas, jornadas, argumentos de `reextraer`)
 - [ ] 11. Trazabilidad: fecha de relanzamiento en el launcher y de actualización en jugadas y resumen
 - [ ] 12. Limpieza: `python\`, carpetas con solo `target\`, referencias a `.ps1` en el SDD

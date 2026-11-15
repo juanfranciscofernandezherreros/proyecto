@@ -230,3 +230,13 @@ scraper → CSV → launcher → Postgres (SDD §4); sin puertos ni servicios nu
 El mismo núcleo (resolvedor + `match bundle` + launcher) es el que está reextrayendo las
 TEAM_STATS de 262 partidos el 2026-11-15. No se ha ejecutado `basket verificar` (web, API y
 Mongo parados). Además se añade la regla `.claude\rules\backlog-de-pasos.md`.
+
+## 11. Mejoras de noviembre de 2026 (plan `PLAN-mejoras-2026-11.md`)
+
+Evidencia por paso. Ningún paso cambia el flujo del SDD §4 ni los puertos.
+
+| Paso | Qué | Verificación | OK |
+|---|---|---|---|
+| 1 | `CICLO_RESULTS=1` en `config\basketball.env` | `scripts\py\config.py` lo lee como `1`. No se ha lanzado el ciclo: el efecto se verá en la ejecución programada de las 06:00 | ✅ |
+| 2 | `csv-extra-batch/team-stats`: `TeamStatsRow.rejection()` rechaza filas cuya métrica es un valor (`51.4%`, `(38/72)`) o cuyo valor no tiene dígitos (commit `67f684e`) | `mvn -pl team-stats -am test`: 7 tests, 0 fallos (2 nuevos). Consulta previa `sql\consultas\2026-11-15_1730_team-stats-valores-sin-digitos.sql`: ninguna fila buena de las 47385 incumple la regla | ✅ |
+| 3 | `csv-extra-batch/team-stats`: paso `replaceStaleRows` del job; borra las filas antiguas del mismo partido y periodo que el CSV nuevo no ha escrito (commit `a14fcaf`). Corregido el IT del JAR, que buscaba `target/app.jar` | `mvn -pl team-stats -am verify`: 7 unitarios + 4 de integración (Testcontainers), 0 fallos. Extremo a extremo: `basket.cmd reextraer --dataset equipo 04Lm2Xkm` dejó el partido en 65 filas (antes 80: 30 con métrica-valor y 15 rebotes duplicados en `Scoring`), 0 descuadradas, un único `source_event_id`, sin SQL manual | ✅ |

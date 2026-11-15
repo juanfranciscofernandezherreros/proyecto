@@ -75,6 +75,8 @@ cmd //c "C:\Developasketball_EJECUTARasket.cmd reextraer --dataset equipo juV
 
 - `--dataset`: `equipo`, `jugadores`, `resumen`, `jugadas` o `todo` (por defecto).
 - `--fichero lista.txt`: un `match_id` por línea, para lotes grandes (en segundo plano).
+- `--progreso progreso.txt`: anota cada partido como OK o FALLO; al relanzar con el
+  mismo fichero salta lo ya hecho. Usarlo siempre en lotes grandes.
 - Tarda alrededor de un minuto por partido y dataset. Acaba con `RESUMEN: n OK, m con fallo`.
 - Los batches hacen UPSERT: las filas antiguas que no coinciden con ninguna nueva
   siguen ahí y hay que borrarlas aparte (skill `auditar-datos`, control 15).

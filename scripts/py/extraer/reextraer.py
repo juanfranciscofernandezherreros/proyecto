@@ -7,9 +7,11 @@ Pais y competicion se leen de results.results (o de fixtures.fixtures). Un fallo
 partido no detiene los demas.
 
 Uso:  python scripts\py\extraer\reextraer.py [--dataset equipo|jugadores|resumen|jugadas|todo]
-                                             [--fichero lista.txt] <match_id...>
+                                             [--fichero lista.txt] [--progreso progreso.txt] <match_id...>
       --dataset  por defecto: todo
       --fichero  un match_id por linea (se ignora lo que haya tras un '|')
+      --progreso fichero donde se anota cada partido y dataset (OK o FALLO). Si ya
+                 existe, lo anotado como OK se salta: sirve para retomar un lote largo.
 """
 import os
 import re
@@ -107,7 +109,24 @@ def _extraer(cfg, env, nombre, match_id, url, raiz):
     raise Fallo(f"{ultimo} tras 3 intentos")
 
 
-def reextraer(match_ids, nombres):
+def _leer_progreso(progreso):
+    """Devuelve el conjunto de (match_id, etiqueta) ya anotados como OK."""
+    hechos = set()
+    if progreso and progreso.exists():
+        for linea in progreso.read_text(encoding="utf-8").splitlines():
+            partes = linea.split("|")
+            if len(partes) >= 3 and partes[2] == "OK":
+                hechos.add((partes[0], partes[1]))
+    return hechos
+
+
+def _anotar(progreso, match_id, etiqueta, estado, detalle):
+    if progreso:
+        with open(progreso, "a", encoding="utf-8") as fh:
+            fh.write(f"{match_id}|{etiqueta}|{estado}|{detalle}\n")
+
+
+def reextraer(match_ids, nombres, progreso=None):
     cfg = _config.cargar()
     python, scraper = Path(cfg["PYTHON"]), Path(cfg["SCRAPER"])
     resolver = Path(cfg["WORKSPACE"]) / "python" / "resolve_flashscore_redirect.py"
@@ -127,12 +146,20 @@ def reextraer(match_ids, nombres):
         print(f"[ERROR] {e}")
         return 1
 
+    hechos = _leer_progreso(progreso)
+    if hechos:
+        antes = len(match_ids)
+        match_ids = [m for m in match_ids
+                     if any((m, DATASETS[n][0]) not in hechos for n in nombres)]
+        print(f"Progreso en {progreso}: {antes - len(match_ids)} partidos ya completos; se saltan.", flush=True)
     total = len(match_ids)
     print(f"Partidos a reextraer: {total}. Datasets: {', '.join(DATASETS[n][0] for n in nombres)}", flush=True)
     ok = fallo = 0
     for n, match_id in enumerate(match_ids, 1):
         if match_id not in ligas:
             print(f"[{n}/{total}] {match_id} FALLO no esta en results ni en fixtures (sin pais/competicion)", flush=True)
+            for nombre in nombres:
+                _anotar(progreso, match_id, DATASETS[nombre][0], "FALLO", "sin pais/competicion")
             fallo += len(nombres)
             continue
         country, competition = ligas[match_id]
@@ -142,36 +169,44 @@ def reextraer(match_ids, nombres):
             url = _url(python, resolver, match_id)
         except (Fallo, subprocess.TimeoutExpired) as e:
             print(f"[{n}/{total}] {match_id} {country}/{competition} FALLO {e}", flush=True)
+            for nombre in nombres:
+                _anotar(progreso, match_id, DATASETS[nombre][0], "FALLO", str(e)[:200])
             fallo += len(nombres)
             continue
         for nombre in nombres:
             etiqueta = DATASETS[nombre][0]
+            if (match_id, etiqueta) in hechos:
+                continue
             try:
                 csv_f = _extraer(cfg, env, nombre, match_id, url, raiz)
                 resp = L.submit_and_wait(cfg, csv_f, timeout_min=15)
                 if resp.get("status") != "COMPLETED":
                     raise Fallo(f"launcher {resp.get('status')}")
                 print(f"[{n}/{total}] {match_id} {country}/{competition} {etiqueta} OK {csv_f.name}", flush=True)
+                _anotar(progreso, match_id, etiqueta, "OK", csv_f.name)
                 ok += 1
             except Exception as e:  # se anota y se sigue con el siguiente
                 print(f"[{n}/{total}] {match_id} {country}/{competition} {etiqueta} FALLO {str(e)[:300]}", flush=True)
+                _anotar(progreso, match_id, etiqueta, "FALLO", " ".join(str(e)[:200].split()))
                 fallo += 1
     print(f"RESUMEN: {ok} OK, {fallo} con fallo", flush=True)
     return 0 if fallo == 0 else 1
 
 
 def _argumentos(args):
-    """Devuelve (match_ids, nombres de dataset) o lanza ValueError."""
-    dataset, ids = "todo", []
+    """Devuelve (match_ids, nombres de dataset, fichero de progreso o None) o lanza ValueError."""
+    dataset, ids, progreso = "todo", [], None
     i = 0
     while i < len(args):
         a = args[i]
-        if a in ("--dataset", "--fichero"):
+        if a in ("--dataset", "--fichero", "--progreso"):
             if i + 1 >= len(args):
                 raise ValueError(f"Falta el valor de {a}.")
             valor = args[i + 1]
             if a == "--dataset":
                 dataset = valor.lower()
+            elif a == "--progreso":
+                progreso = Path(valor)
             else:
                 fichero = Path(valor)
                 if not fichero.exists():
@@ -192,17 +227,17 @@ def _argumentos(args):
     malos = [m for m in unicos if not ID_VALIDO.match(m)]
     if malos:
         raise ValueError(f"match_id invalido: {', '.join(malos[:5])}")
-    return unicos, (list(DATASETS) if dataset == "todo" else [dataset])
+    return unicos, (list(DATASETS) if dataset == "todo" else [dataset]), progreso
 
 
 def main():
     try:
-        match_ids, nombres = _argumentos(sys.argv[1:])
+        match_ids, nombres, progreso = _argumentos(sys.argv[1:])
     except ValueError as e:
         print(f"[ERROR] {e}")
-        print("Uso: basket reextraer [--dataset equipo|jugadores|resumen|jugadas|todo] [--fichero lista.txt] <match_id...>")
+        print("Uso: basket reextraer [--dataset equipo|jugadores|resumen|jugadas|todo] [--fichero lista.txt] [--progreso progreso.txt] <match_id...>")
         return 1
-    return reextraer(match_ids, nombres)
+    return reextraer(match_ids, nombres, progreso)
 
 
 if __name__ == "__main__":

@@ -18,7 +18,7 @@ Un commit + push por paso. Cada paso se marca al quedar hecho y verificado.
 - [ ] 1. Activar `CICLO_RESULTS=1` en `config\basketball.env`
 - [x] 2. Validar la métrica en el batch de `team_stats` (`csv-extra-batch`): rechazar filas cuya métrica es un valor o cuyo valor no tiene dígitos — commit `67f684e`, 7 tests unitarios
 - [x] 3. Reemplazar el partido al reimportar TEAM_STATS — hecho como paso `replaceStaleRows` del job: borra las filas antiguas de los periodos que trae el CSV nuevo y conserva los periodos que no trae (más prudente que borrar el partido entero). Commit `a14fcaf`, 4 tests de integración
-- [ ] 4. `basket reextraer` reanudable (fichero de progreso; salta lo ya hecho)
+- [x] 4. `basket reextraer` reanudable: opción `--progreso <fichero>` que anota OK o FALLO por partido y dataset y salta lo ya hecho
 - [ ] 5. Dos controles nuevos en la auditoría: rebotes en categoría `Scoring` y filas con etiqueta válida y valores erróneos
 - [ ] 6. `basket auditar` y su ejecución en el ciclo diario
 - [ ] 7. Arreglar los tests de la API que no compilan (`PLAN-ci-api-tests.md`)

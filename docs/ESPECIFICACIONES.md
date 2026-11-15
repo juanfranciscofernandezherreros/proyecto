@@ -250,7 +250,8 @@ volver a extraer y reimportar partidos concretos (datos mal cargados):
 1_EJECUTARasket.cmd reextraer [--dataset equipo|jugadores|resumen|jugadas|todo] [--fichero lista.txt] <match_id...>
 ```
 
-Por defecto `todo`. País y competición salen de `results.results` (o de `fixtures`).
+Por defecto `todo`. Con `--progreso` anota cada partido y, si se relanza, salta lo ya hecho.
+País y competición salen de `results.results` (o de `fixtures`).
 Un fallo en un partido no detiene los demás; termina con `RESUMEN` y código 1 si hubo
 fallos. Los batches hacen UPSERT: las filas antiguas que no coinciden con ninguna nueva
 no se borran solas. Código: `scripts\py\extraereextraer.py`.

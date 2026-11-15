@@ -17,8 +17,9 @@ que debe contar como elegible.
 
 - [x] Escribir este plan.
 - [x] Revisar `FixtureProcessingAuditServiceTest` (el test `excludesTodayRegardlessOfMatchTime` sigue valiendo: no tiene resultado).
-- [ ] Cambiar la condición de `toAuditRow` en `FixtureProcessingAuditService.java`.
-- [ ] Añadir tests: hoy con resultado es PENDIENTE; futuro con resultado sigue HOY_O_FUTURO.
-- [ ] Ejecutar `mvn test` en `csv-extra-batch\fixtures-processing-audit`.
-- [ ] Commit + push en el submódulo `csv-extra-batch` y puntero en el padre.
-- [ ] Reiniciar el servicio de auditoría y comprobar que pendientes sube con los partidos de hoy.
+- [x] Cambiar la condición de `toAuditRow` en `FixtureProcessingAuditService.java`.
+- [x] Añadir tests: hoy con resultado es PENDIENTE; futuro con resultado sigue HOY_O_FUTURO.
+- [x] Ejecutar `mvn test` en `csv-extra-batch\fixtures-processing-audit`.
+- [x] Commit + push en el submódulo `csv-extra-batch` y puntero en el padre.
+- [x] Reiniciar el servicio de auditoría y comprobar: elegibles 821→847, pendientes 49→75 (26 del 15/11).
+- Nota: `mvn package` falló una vez mientras el jar viejo estaba en uso; tras parar el proceso compiló bien.

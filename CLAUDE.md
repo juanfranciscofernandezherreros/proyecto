@@ -18,6 +18,7 @@ El detalle vive fuera de este fichero:
 | Extraer resultados de una liga hasta Postgres | skill `extraer-resultados` |
 | Extraer resultados de todas las ligas | skill `resultados-todas-las-ligas` |
 | Cargar en Postgres los CSV de resultados ya extraídos | skill `procesar-csv-resultados` |
+| Consultar los últimos resultados agregados a Postgres | skill `ultimos-resultados` |
 | Extraer jugada a jugada y estadísticas | skill `extraer-datos-partido` |
 | Procesar los partidos pendientes | skill `procesar-pendientes` |
 | Un partido no sale o sale mal en la web | skill `diagnosticar-partido` |

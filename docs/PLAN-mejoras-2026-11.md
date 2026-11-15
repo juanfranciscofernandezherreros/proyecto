@@ -15,7 +15,7 @@ Lista ordenada acordada con el usuario el 2026-11-15, tras la auditoría de dato
 
 Un commit + push por paso. Cada paso se marca al quedar hecho y verificado.
 
-- [ ] 1. Activar `CICLO_RESULTS=1` en `config\basketball.env`
+- [x] 1. Activar `CICLO_RESULTS=1` en `config\basketball.env` — `config.py` lo lee como `1`; el efecto real se verá en el próximo ciclo diario (no lo he lanzado: extrae las 11 ligas)
 - [x] 2. Validar la métrica en el batch de `team_stats` (`csv-extra-batch`): rechazar filas cuya métrica es un valor o cuyo valor no tiene dígitos — commit `67f684e`, 7 tests unitarios
 - [x] 3. Reemplazar el partido al reimportar TEAM_STATS — hecho como paso `replaceStaleRows` del job: borra las filas antiguas de los periodos que trae el CSV nuevo y conserva los periodos que no trae (más prudente que borrar el partido entero). Commit `a14fcaf`, 4 tests de integración
 - [x] 4. `basket reextraer` reanudable: opción `--progreso <fichero>` que anota OK o FALLO por partido y dataset y salta lo ya hecho
@@ -27,7 +27,7 @@ Un commit + push por paso. Cada paso se marca al quedar hecho y verificado.
 - [x] 10. Tests para `scripts\py` (catálogo de ligas, jornadas, límites, argumentos y progreso de `reextraer`, configuración) — `tests\test_scripts_py.py`, 16 tests nuevos; `python -m unittest discover -s tests`: 18 en verde. No cubren los importadores ni nada que necesite Postgres o Flashscore
 - [x] 11. Trazabilidad: fecha de relanzamiento en el launcher y de actualización en jugadas y resumen — **no hacía falta código: ya existe y yo lo había mirado mal**. `batch_launch_request` conserva `created_at` pero actualiza `started_at`, `finished_at` y `attempts` en cada relanzamiento; las jugadas tienen su propia tabla `point_by_point_import` con `updated_at` y `completed_at`; el resumen escribe en `results.results`, que tiene `updated_at`. Solo se han corregido las consultas de verificación de las skills para que usen `finished_at` y `attempts`
 - [x] 12. Limpieza — hecho en parte, a propósito: (a) `python\` **no se toca**: sigue en uso (`proyecto_config.py`, `resolve_flashscore_redirect.py`, `process_pending_match_csvs.py` y otros los llaman `scripts\py`); solo 4 ficheros no tienen ninguna referencia (`basketball_mcp_server.py`, `extract_missing_match_ids.py`, `recent_competition_status.py`, `seed_datasets_vacios.py`) y se dejan para que el usuario decida; (b) borradas `csv-stats-player-batch\` y `real-time-basketball-stats\`, que solo tenían carpetas vacías y no estaban en git; (c) corregidas en `SDD.md` las referencias a `.ps1`/`.bat` que ya no existen
-- [ ] 13. Web: clasificación, calendario y página de jugador
+- [ ] 13. Web: clasificación, calendario y página de jugador — **sin empezar**. Son tres funcionalidades nuevas (API + web) que necesitan el stack arrancado para verificarse y que el usuario decida por cuál empezar y qué debe mostrar cada una
 
 ## 2. Encaje con el SDD
 

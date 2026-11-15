@@ -247,7 +247,7 @@ Los extractores anteriores saltan los partidos que ya tienen filas en Postgres. 
 volver a extraer y reimportar partidos concretos (datos mal cargados):
 
 ```text
-1_EJECUTARasket.cmd reextraer [--dataset equipo|jugadores|resumen|jugadas|todo] [--fichero lista.txt] <match_id...>
+1_EJECUTARasket.cmd reextraer [--dataset equipo|jugadores|resumen|jugadas|todo] [--fichero lista.txt] [--progreso progreso.txt] <match_id...>
 ```
 
 Por defecto `todo`. Con `--progreso` anota cada partido y, si se relanza, salta lo ya hecho.
@@ -285,6 +285,8 @@ cmd //c "1_EJECUTAR\basket.cmd ciclo-diario"
 1. (si `CICLO_RESULTS=1`) extrae RESULTS de todas las ligas.
 2. `MATCHIDS_PENDIENTES` → procesa pendientes.
 3. `ARCHIVAR_CSV_REPETIDOS` → deja un CSV vigente por partido/dataset, el resto al histórico.
+4. `basket auditar` → auditoría de integridad de datos (solo lectura); el resumen por
+   control queda en el log. También se puede lanzar suelta: `1_EJECUTAR\basket.cmd auditar`.
    Log en `C:\data\basketball\reports\orchestrator\ciclo-diario-<fecha>.log`.
 
 ### 7.4 Vigilancia de servicios

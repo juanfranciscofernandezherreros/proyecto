@@ -43,6 +43,14 @@
 --   16 stats_player_duplicados   reimportar PLAYER_STATS del partido.
 --   17 cargas_fallidas_7_dias    mirar el error (PASO 7) y reenviar el CSV
 --        (skill procesar-csv-resultados o procesar-pendientes).
+--   18 team_stats_rebotes_en_scoring   rebotes guardados con categoría 'Scoring' (scraper
+--        antiguo; el corregido usa 'Rebounds'). basket reextraer --dataset equipo <match_id>:
+--        desde el 2026-11-15 el batch borra solo las filas antiguas al reimportar.
+--   19 team_stats_tiro_sin_porcentaje  métrica de tiro (acaba en " %") con etiqueta válida
+--        pero cuyo valor no lleva "%" (p. ej. "(8/16)"): fila descuadrada que el control 15
+--        no ve. Mismo arreglo que el 18.
+--   Los controles 15, 18 y 19 son tres caras del mismo problema: se arreglan a la vez
+--   reextrayendo el partido. El PASO 6 da los partidos afectados por liga.
 --
 -- RESULTADO EL 2026-11-15
 --   A cero: 01–08, 10 y 16 (sin duplicados, sin results sin hora/país/fecha, sin
@@ -144,6 +152,16 @@ SELECT '17 cargas_fallidas_7_dias', 'MEDIA',
        (SELECT count(*) FROM public.batch_launch_request
         WHERE created_at > now() - interval '7 days'
           AND (status <> 'COMPLETED' OR coalesce(exit_code, 0) <> 0))
+UNION ALL
+SELECT '18 team_stats_rebotes_en_scoring', 'MEDIA',
+       (SELECT count(*) FROM team_stats.team_stats
+        WHERE category = 'Scoring'
+          AND metric IN ('Offensive rebounds', 'Defensive rebounds', 'Total rebounds'))
+UNION ALL
+SELECT '19 team_stats_tiro_sin_porcentaje', 'MEDIA',
+       (SELECT count(*) FROM team_stats.team_stats
+        WHERE metric ~ ' %$'
+          AND (home_value !~ '%' OR away_value !~ '%'))
 ORDER BY control;
 
 -- PASO 2 · Desglose por liga de los controles sobre results (03, 04, 06, 07 y 08).

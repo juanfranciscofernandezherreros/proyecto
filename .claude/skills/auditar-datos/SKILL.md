@@ -12,17 +12,15 @@ Postgres y cuenta las filas que rompen cada regla.
 
 ## 1. Ejecutar
 
-Necesita Postgres levantado. Si no lo está:
+Un solo comando; arranca Postgres si hace falta:
 
 ```bash
-python C:\Develop\basketball\scripts\py\arranque\asegurar.py docker postgres
+cmd //c "C:\Develop\basketball\1_EJECUTAR\basket.cmd auditar"
 ```
 
-La auditoría:
-
-```bash
-docker exec -i local-validation-postgres-1 psql -U test -d basketball < C:\Develop\basketball\sql\consultas\2026-11-15_1445_auditoria-datos.sql
-```
+Por debajo ejecuta `sql\consultas\2026-11-15_1445_auditoria-datos.sql`. El ciclo
+diario la lanza al final y deja el resultado en su log
+(`C:\data\basketball\reports\orchestrator\ciclo-diario-<fecha>.log`).
 
 Esa consulta ya está en `sql\consultas\`, así que no hay que volver a guardarla.
 Si para profundizar se lanza cualquier otra consulta, esa sí se guarda antes como
@@ -54,6 +52,11 @@ control está a cero no devuelven filas.
 | 15 team_stats_metrica_invalida | Filas cuya métrica es un valor (`51.4%`, `(38/72)`), del scraper antiguo (PASO 6) | Primero `basket.cmd reextraer --dataset equipo --fichero <lista>` y después `sql\consultas\2026-11-15_1525_limpiar-team-stats-descuadradas.sql` |
 | 16 stats_player_duplicados | Mismo jugador dos veces en un partido | `basket.cmd reextraer --dataset jugadores <match_id>` |
 | 17 cargas_fallidas_7_dias | Cargas del launcher que no terminaron bien (PASO 7) | Mirar el error y reenviar (skill `procesar-pendientes`) |
+| 18 team_stats_rebotes_en_scoring | Rebotes guardados con categoría `Scoring` (scraper antiguo) | `basket.cmd reextraer --dataset equipo <match_id>`; el batch borra solo las filas antiguas |
+| 19 team_stats_tiro_sin_porcentaje | Métrica de tiro con etiqueta válida pero valor sin `%` (p. ej. `(8/16)`): descuadre que el 15 no ve | Igual que el 18 |
+
+Los controles 15, 18 y 19 son el mismo problema visto de tres formas y se arreglan a
+la vez reextrayendo el partido; no hace falta SQL de limpieza desde el 2026-11-15.
 
 Matices para no dar falsas alarmas:
 

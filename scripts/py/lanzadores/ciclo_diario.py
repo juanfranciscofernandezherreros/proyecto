@@ -51,6 +51,11 @@ def main():
         fh.write("--- Archivado de CSV repetidos:\n")
     _run_log("pendientes/archivar_csv.py", log, "aplicar")
     with open(log, "a", encoding="utf-8") as fh:
+        fh.write("--- Auditoria de datos (afectados = 0 es lo bueno):\n")
+    if _run_log("lanzadores/auditar.py", log):
+        with open(log, "a", encoding="utf-8") as fh:
+            fh.write("[AVISO] La auditoria de datos no se pudo ejecutar.\n")
+    with open(log, "a", encoding="utf-8") as fh:
         fh.write(f"[{datetime.now():%d/%m/%Y %H:%M:%S}] Fin del ciclo diario. Codigo {rc}\n")
     print(f"Terminado con codigo {rc}. Registro: {log}")
     return rc

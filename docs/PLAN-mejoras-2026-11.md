@@ -19,8 +19,8 @@ Un commit + push por paso. Cada paso se marca al quedar hecho y verificado.
 - [x] 2. Validar la métrica en el batch de `team_stats` (`csv-extra-batch`): rechazar filas cuya métrica es un valor o cuyo valor no tiene dígitos — commit `67f684e`, 7 tests unitarios
 - [x] 3. Reemplazar el partido al reimportar TEAM_STATS — hecho como paso `replaceStaleRows` del job: borra las filas antiguas de los periodos que trae el CSV nuevo y conserva los periodos que no trae (más prudente que borrar el partido entero). Commit `a14fcaf`, 4 tests de integración
 - [x] 4. `basket reextraer` reanudable: opción `--progreso <fichero>` que anota OK o FALLO por partido y dataset y salta lo ya hecho
-- [ ] 5. Dos controles nuevos en la auditoría: rebotes en categoría `Scoring` y filas con etiqueta válida y valores erróneos
-- [ ] 6. `basket auditar` y su ejecución en el ciclo diario
+- [x] 5. Dos controles nuevos en la auditoría: 18 rebotes en categoría `Scoring` (3783 filas) y 19 métricas de tiro con valor sin `%` (831 filas en 167 partidos, 0 en partidos ya reextraídos)
+- [x] 6. `basket auditar` y su ejecución al final del ciclo diario (el ciclo completo no se ha lanzado; se verá en el log de las 06:00)
 - [ ] 7. Arreglar los tests de la API que no compilan (`PLAN-ci-api-tests.md`)
 - [ ] 8. Filtro `finished` de la API basado en el marcador, no en `result.eventTime`
 - [ ] 9. Comprobar si los extractores existentes pasan la ruta del driver de Edge al scraper

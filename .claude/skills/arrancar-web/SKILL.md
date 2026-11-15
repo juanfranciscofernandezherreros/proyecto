@@ -78,7 +78,7 @@ python "scripts\py\arranque\asegurar.py" launcher
 - Launcher procesando (filas `COMPLETED` y `exit_code = 0`):
 
   ```bash
-  docker exec -i local-validation-postgres-1 psql -U test -d basketball -c "SELECT batch_type, status, exit_code FROM public.batch_launch_request ORDER BY created_at DESC LIMIT 15;"
+  docker exec -i local-validation-postgres-1 psql -U test -d basketball -c "SELECT batch_type, status, exit_code, attempts, finished_at FROM public.batch_launch_request ORDER BY coalesce(finished_at, created_at) DESC LIMIT 15;"
   ```
 
 - Tras cargar CSV, la web tarda ~1 min en reflejarlo (Postgres → projector → Mongo).

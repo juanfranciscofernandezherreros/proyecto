@@ -5,7 +5,7 @@ la web, el procesamiento y la observabilidad (Grafana). Pensada para repetir el
 flujo sin conocer el proyecto por dentro.
 
 > Toda la configuración (rutas, puertos, credenciales, JDK) vive en
-> `config\basketball.env` y la leen igual los `.bat`, los `.ps1` y los `.py`.
+> `config\basketball.env` y la lee `scripts\py\config.py` (actualizado 2026-11-17).
 > Para cambios solo de esta máquina, crear `config\basketball.local.env` (fuera de git).
 
 ---

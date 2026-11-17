@@ -77,6 +77,10 @@ cmd //c "C:\Develop\basketball\1_EJECUTAR\basket.cmd pronostico publicar <ruta-d
 - Guarda el artículo en `prediction_articles` de MongoDB. Si ya hay una previa de esa
   competición, jornada y fecha de inicio, la actualiza (dice "Artículo actualizado");
   si no, la crea. Imprime la dirección del artículo.
+- Envía al bot de Telegram solo la predicción: el título, una línea por partido
+  (`17/11 17:00  Dubai - Anadolu Efes → Dubai 63%`) y el enlace. Ni introducción ni
+  análisis. Imprime `Telegram: prediccion enviada al bot.`; si Telegram falla o no
+  está configurado, solo avisa y la publicación queda hecha.
 - Comprobar que se ve: abrir esa dirección (`http://localhost:8083/predictions/<id>`).
   Si la web no responde, skill `arrancar-web`.
 

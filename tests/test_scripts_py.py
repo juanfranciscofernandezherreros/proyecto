@@ -509,3 +509,17 @@ class TelegramCsvTests(unittest.TestCase):
         for linea in texto.splitlines():
             if linea.startswith(("TELEGRAM_BOT_TOKEN=", "TELEGRAM_CHAT_ID=")):
                 self.assertEqual(linea.split("=", 1)[1].strip(), "", linea.split("=")[0])
+
+    def test_mensaje_pronostico_solo_prediccion_y_enlace(self):
+        articulo = {"title": "Euroliga — Jornada 12", "introduction": "texto largo",
+                    "games": [{"homeTeam": "Besiktas", "awayTeam": "Real Madrid", "winner": "Real Madrid",
+                               "winnerProbability": 78.4, "startsAt": "2026-11-18T17:00:00Z", "analysis": "x"},
+                              {"homeTeam": "Dubai", "awayTeam": "Efes", "winner": "Dubai",
+                               "winnerProbability": 63.3, "startsAt": "2026-11-17T16:00:00Z", "analysis": "y"}]}
+        msg = self.T.mensaje_pronostico(articulo, "http://localhost:8083/predictions/j12")
+        self.assertEqual(msg.splitlines(), [
+            "\U0001F3C0 Euroliga — Jornada 12",
+            "17/11 17:00  Dubai - Efes → Dubai 63%",
+            "18/11 18:00  Besiktas - Real Madrid → Real Madrid 78%",
+            "http://localhost:8083/predictions/j12"])
+        self.assertNotIn("texto largo", msg)

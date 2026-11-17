@@ -127,9 +127,32 @@ def _curl(metodo, campos, fichero=None):
     return r
 
 
+def enviar_texto(texto):
+    """Envia un mensaje de texto al chat configurado (lanza RuntimeError si falla)."""
+    _curl("sendMessage", {"chat_id": CFG["TELEGRAM_CHAT_ID"].strip(), "text": texto[:LIMITE_TEXTO]})
+
+
+LIMITE_TEXTO = 4096  # caracteres por mensaje de Telegram
+
+
 def enviar(fila):
     """Un mensaje por CSV: estado, nombre y hora (ni el fichero ni sus datos)."""
-    _curl("sendMessage", {"chat_id": CFG["TELEGRAM_CHAT_ID"].strip(), "text": aviso(fila)})
+    enviar_texto(aviso(fila))
+
+
+def mensaje_pronostico(articulo, url):
+    """La prediccion de una previa para el bot: titulo, una linea por partido (hora de
+    Madrid, equipos, ganador previsto y probabilidad) y el enlace. Sin textos."""
+    lineas = ["\U0001F3C0 " + (articulo.get("title") or "Pronostico")]
+    for p in sorted(articulo.get("games") or [], key=lambda g: g.get("startsAt") or ""):
+        prob = p.get("winnerProbability")
+        prob = f"{prob:.0f}%" if isinstance(prob, (int, float)) else "?"
+        hora = hora_local(p.get("startsAt"))[:-3]  # sin segundos
+        lineas.append(f"{hora + '  ' if hora else ''}{p.get('homeTeam')} - {p.get('awayTeam')} "
+                      f"→ {p.get('winner')} {prob}")
+    if url:
+        lineas.append(url)
+    return "\n".join(lineas)
 
 
 def pasada():

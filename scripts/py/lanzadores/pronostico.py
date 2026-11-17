@@ -84,7 +84,23 @@ def _publicar(args):
         return 1
     print(("Artículo creado: " if resultado["nuevo"] else "Artículo actualizado: ") + resultado["id"])
     print(WEB + resultado["id"])
+    _enviar_a_telegram(articulo, WEB + resultado["id"])
     return 0
+
+
+def _enviar_a_telegram(articulo, url):
+    """Manda al bot solo la prediccion (partidos, ganador y probabilidad) y el enlace.
+    Si Telegram no esta configurado o falla, solo avisa: la publicacion ya esta hecha."""
+    sys.path.insert(0, str(SCRIPTS_PY / "monitor"))
+    import telegram_csv
+    if not telegram_csv.configurado():
+        print("Telegram: no configurado; no se envia la prediccion.")
+        return
+    try:
+        telegram_csv.enviar_texto(telegram_csv.mensaje_pronostico(articulo, url))
+        print("Telegram: prediccion enviada al bot.")
+    except Exception as error:
+        print(f"[AVISO] Telegram: no se pudo enviar la prediccion: {error}")
 
 
 if __name__ == "__main__":

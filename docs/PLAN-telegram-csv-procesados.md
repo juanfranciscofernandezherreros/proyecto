@@ -79,3 +79,17 @@ estado (`✅ COMPLETADO` / `❌ FALLIDO`), nombre del CSV y hora de Madrid en qu
 - [x] `.claude\skills\aviso-telegram\SKILL.md`: arrancar, comprobar, probar y arreglar el aviso, sin mandar a otras skills.
 - [x] Fila en la tabla de `CLAUDE.md`.
 - [x] Commit + push.
+
+## Predicción de la jornada al bot
+
+Al publicar una previa (`basket pronostico publicar`), se envía al bot solo la
+predicción: título, una línea por partido (hora de Madrid, equipos, ganador previsto y
+probabilidad) y el enlace al artículo. Ni introducción ni análisis. Si Telegram falla
+o no está configurado, la publicación no falla: solo avisa.
+
+- [x] `telegram_csv.py`: `enviar_texto()` reutilizable y `mensaje_pronostico()`.
+- [x] `lanzadores\pronostico.py`: enviar tras publicar.
+- [x] Tests del mensaje de predicción.
+- [x] Prueba real con el borrador `euroliga-jornada-12-2026-11-17.json`.
+- [x] Skill `pronostico-jornada` (paso 4 y qué contar) y evidencia en `VERIFICACION-SDD.md`.
+- [x] Commit + push.

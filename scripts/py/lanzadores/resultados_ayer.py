@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 r"""Lanzador: resultados de ayer de todas las ligas en un solo fichero.
 
-Uso: resultados_ayer.py [AAAA-MM-DD] [--solo-csv]   (por defecto, ayer en Europe/Madrid)
+Uso: resultados_ayer.py [AAAA-MM-DD] [--solo-csv] [--forzar]   (por defecto, ayer en Europe/Madrid)
+
+Antes de extraer hace el cuadre previo (fixtures / Mongo, como cuadrar_dia): si todos
+los partidos del dia ya estan en Mongo con su marcador, termina sin extraer; si no,
+extrae solo las ligas con pendientes. --forzar se lo salta y extrae todas.
 
 Sin opciones lo hace todo: extrae de Flashscore los resultados de cada liga (en una
 carpeta temporal, sin tocar competitions\), se queda con los partidos de ese dia y
@@ -61,11 +65,61 @@ def nombre_fichero(dia):
     return f"RESULTS_YESTERDAY_{dia:%Y%m%d}.csv"
 
 
+def ligas_pendientes(fixtures, flashscore, mongo):
+    """Cuadre previo (logica de cuadrar_dia.cuadrar). Devuelve (pendientes, total):
+    las ligas ("pais/competicion") con algun partido que no esta en Mongo, no tiene
+    marcador o lo tiene distinto al de Flashscore, y cuantos partidos se cuadraron.
+    Las secciones (jugadas, estadisticas) no cuentan: son de los pendientes."""
+    pendientes = set()
+    filas = C.cuadrar(flashscore, fixtures, mongo)
+    for f in filas:
+        marcador = f["marcador_mongo"]
+        if (f["match_id"] not in mongo or not marcador or None in marcador
+                or "marcador distinto en Mongo" in f["problemas"]):
+            pendientes.add(f["liga"])
+    return pendientes, len(filas)
+
+
+def leer_results_yesterday(salida, dia):
+    """Partidos de un RESULTS_YESTERDAY ya generado, en el formato de cuadrar_dia
+    ({id: {liga, local, visitante, marcador}}). Vacio si no existe."""
+    if not salida.exists():
+        return {}
+    with open(salida, encoding="utf-8-sig", newline="") as fh:
+        filas = list(csv.DictReader(fh))
+    datos = C.filas_del_dia(filas, dia)
+    ligas = {f.get("matchId"): f"{f.get('country')}/{f.get('competition')}" for f in filas}
+    for mid, d in datos.items():
+        d["liga"] = ligas.get(mid)
+    return datos
+
+
+def cuadre_previo(dia, salida):
+    """Devuelve el conjunto de ligas que hay que extraer, o None si hay que extraer
+    todas (fixtures vacio o el cuadre no se pudo hacer)."""
+    try:
+        fx = C.leer_fixtures(dia)
+        fs = leer_results_yesterday(salida, dia)
+        mg = C.leer_mongo(set(fx) | set(fs))
+    except RuntimeError as e:
+        print(f"AVISO: no se pudo hacer el cuadre previo ({e}); se extraen todas las ligas.")
+        return None
+    if not fx:
+        print(f"Cuadre previo: fixtures no tiene partidos el {dia.isoformat()}; "
+              "se extraen todas las ligas.")
+        return None
+    pendientes, total = ligas_pendientes(fx, fs, mg)
+    print(f"Cuadre previo (fixtures / Mongo): {total} partidos el "
+          f"{dia.isoformat()}; ligas con pendientes: {', '.join(sorted(pendientes)) or 'ninguna'}")
+    return pendientes
+
+
 def main(argv):
     procesar = "--solo-csv" not in argv
-    argv = [a for a in argv if a not in ("--solo-csv", "--procesar")]
+    forzar = "--forzar" in argv
+    argv = [a for a in argv if a not in ("--solo-csv", "--procesar", "--forzar")]
     if len(argv) > 1:
-        print("Uso: basket resultados-ayer [AAAA-MM-DD] [--solo-csv]")
+        print("Uso: basket resultados-ayer [AAAA-MM-DD] [--solo-csv] [--forzar]")
         return 1
     try:
         dia = C.validar_fecha(argv[0] if argv else None)
@@ -76,9 +130,32 @@ def main(argv):
     if ensure("antibloqueo", "postgres", "launcher", "runtime", "navegador"):
         print("ERROR: no se pudieron arrancar los servicios.")
         return 1
+    salida = Path(CFG.get("REPORTS_DIR")) / "resultados-ayer" / nombre_fichero(dia)
+    ligas = catalogo.cargar_ligas()
+    if not forzar:
+        pendientes = cuadre_previo(dia, salida)
+        if pendientes is not None:
+            if not pendientes:
+                print(f"Ya estan todos los partidos del {dia.isoformat()} en Mongo con su "
+                      "marcador; no se extrae nada (--forzar para extraer igualmente).")
+                return 0
+            ligas = [l for l in ligas if f"{l['country']}/{l['competition']}" in pendientes]
+
+    # Las ligas que no se extraen conservan sus filas del RESULTS_YESTERDAY anterior.
+    extraidas = {(l["country"], l["competition"]) for l in ligas}
+    previas, cabecera_previa = [], []
+    if salida.exists():
+        with open(salida, encoding="utf-8-sig", newline="") as fh:
+            lector = csv.DictReader(fh)
+            cabecera_previa = list(lector.fieldnames or [])
+            previas = [f for f in lector if (f.get("country"), f.get("competition")) not in extraidas]
+
     extraccion = Path(CFG.get("REPORTS_DIR")) / "resultados-ayer" / f"{dia:%Y%m%d}" / "extraccion"
     filas, cabecera, resumen = [], ["country", "competition"], []
-    for liga in catalogo.cargar_ligas():
+    for col in cabecera_previa:
+        if col not in cabecera:
+            cabecera.append(col)
+    for liga in ligas:
         print(f"Extrayendo de Flashscore [{liga['code']}]...")
         try:
             fichero = extraer_liga(liga, extraccion / liga["code"])
@@ -95,17 +172,17 @@ def main(argv):
         filas.extend(de_liga)
         resumen.append((liga["code"], len(de_liga), fichero.name))
 
-    salida = Path(CFG.get("REPORTS_DIR")) / "resultados-ayer" / nombre_fichero(dia)
     salida.parent.mkdir(parents=True, exist_ok=True)
     with open(salida, "w", encoding="utf-8", newline="") as fh:
         w = csv.DictWriter(fh, fieldnames=cabecera, extrasaction="ignore")
         w.writeheader()
-        w.writerows(filas)
+        w.writerows(previas + filas)
 
     print(f"== RESULTADOS DEL {dia.isoformat()} ==")
     for code, n, origen in resumen:
         print(f"  {code:<9} {n:>3}  ({origen})")
-    print(f"Total: {len(filas)} partidos -> {salida}")
+    print(f"Total: {len(filas)} partidos extraidos"
+          + (f" (+{len(previas)} que ya estaban)" if previas else "") + f" -> {salida}")
     if procesar:
         return procesar_en_postgres(salida, cabecera, filas, dia)
     return 0

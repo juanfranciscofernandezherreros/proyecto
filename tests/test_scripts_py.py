@@ -445,3 +445,31 @@ class ResultadosAyerTests(unittest.TestCase):
         self.assertEqual([f["matchId"] for f in r], ["a"])
         self.assertEqual((r[0]["country"], r[0]["competition"]), ("usa", "nba"))
         self.assertEqual(R.nombre_fichero(date(2026, 11, 16)), "RESULTS_YESTERDAY_20261116.csv")
+
+
+class ResultadosAyerCuadrePrevioTests(unittest.TestCase):
+    """resultados-ayer: el cuadre previo decide que ligas extraer."""
+
+    def setUp(self):
+        sys.path.insert(0, str(RAIZ / "scripts" / "py" / "lanzadores"))
+        import resultados_ayer
+        self.R = resultados_ayer
+        self.fx = {"a": {"liga": "usa/nba", "local": "X", "visitante": "Y"},
+                   "b": {"liga": "israel/winner-league", "local": "Z", "visitante": "W"}}
+
+    def test_todos_en_mongo_no_hay_pendientes(self):
+        mg = {"a": {"marcador": (100, 90), "secciones": []},
+              "b": {"marcador": (80, 70), "secciones": []}}
+        self.assertEqual(self.R.ligas_pendientes(self.fx, {}, mg), (set(), 2))
+
+    def test_falta_en_mongo_o_sin_marcador(self):
+        mg = {"a": {"marcador": (None, None), "secciones": []}}
+        pend, total = self.R.ligas_pendientes(self.fx, {}, mg)
+        self.assertEqual(pend, {"usa/nba", "israel/winner-league"})
+        self.assertEqual(total, 2)
+
+    def test_marcador_distinto_al_de_flashscore(self):
+        fs = {"a": {"liga": "usa/nba", "local": "X", "visitante": "Y", "marcador": (101, 90)}}
+        mg = {"a": {"marcador": (100, 90), "secciones": []},
+              "b": {"marcador": (80, 70), "secciones": []}}
+        self.assertEqual(self.R.ligas_pendientes(self.fx, fs, mg)[0], {"usa/nba"})

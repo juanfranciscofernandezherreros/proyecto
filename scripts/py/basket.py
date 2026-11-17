@@ -32,7 +32,7 @@ COMANDOS = {
     "verificar":         ("verificar",                 "Verificacion del SDD (verde/rojo)"),
     "antibloqueo":       ("antibloqueo",               "Mantener el PC despierto"),
     "resultados":        ("extraer_resultados",        "Extraer RESULTS [LIGA] [limite]"),
-    "resultados-ayer":   ("resultados_ayer",           "Resultados de ayer: RESULTS_YESTERDAY_<fecha>.csv, Postgres y projector [AAAA-MM-DD] [--solo-csv]"),
+    "resultados-ayer":   ("resultados_ayer",           "Resultados de ayer: RESULTS_YESTERDAY_<fecha>.csv, Postgres y projector; si ya estan en Mongo no extrae [AAAA-MM-DD] [--solo-csv] [--forzar]"),
     "procesar-csv":      ("procesar_csv_resultados",   "Cargar en Postgres los RESULTS ya en disco [LIGA] [todos]"),
     "orquestar":         ("ligas_orquestar",           "Orquestar ligas [LIGA] [results|datos|todo] [limite]"),
     "ligas":             ("ligas_resultados",          "Ejecutar ligas (menu o todas)"),

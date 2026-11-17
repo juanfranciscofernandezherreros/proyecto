@@ -301,6 +301,7 @@ Evidencia por paso. Ningún paso cambia el flujo del SDD §4 ni los puertos.
 | 3 | Skill `.claude\skills\resultados-ayer\SKILL.md` y fila en `CLAUDE.md` | Skill listada en la sesión | ✅ |
 | 4 | Sin opciones lo hace todo: CSV → Postgres (launcher, por liga) → projector → comprobación en Mongo; tarea "Basketball - Resultados de ayer al iniciar" (al iniciar sesión) y desactivadas las otras dos de inicio | `basket resultados-ayer` (16-nov): winner-league 3 y nba 5 → COMPLETED; tras 90 s, 8 de 8 en Mongo con su marcador; 37 tests OK | ✅ |
 | 5 | Extrae de Flashscore cada liga (python-pyppeter), asegura también el runtime (Mongo, projector) y da por fallida una liga a los 3 min de carga | `basket resultados-ayer` (17-nov, 16-nov): 11 ligas extraídas, winner-league 3 y nba 5 → COMPLETED, 8 de 8 en Mongo, código 0 | ✅ |
+| 6 | Cuadre previo con la lógica de `cuadrar_dia` (fixtures / Mongo): si ya están todos no extrae; si no, solo las ligas con pendientes; `--forzar` extrae todas (plan `PLAN-resultados-ayer-cuadre-previo.md`) | `basket resultados-ayer` (17-nov 10:28, día 16): 8 partidos, ninguna liga con pendientes, código 0 sin extraer; 45 tests OK (`ResultadosAyerCuadrePrevioTests`); gate VERDE | ✅ |
 
 ## 18. Logs de `basket` en Grafana (plan `PLAN-logs-basket-en-grafana.md`)
 

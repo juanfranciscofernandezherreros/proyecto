@@ -1,6 +1,6 @@
 ---
 name: arrancar-web
-description: Arranca la web, la API y el projector del proyecto Basketball (con Mongo) y, solo si se pide todo, también el launcher que carga los CSV; después verifica que responden. Usar cuando el usuario diga "arranca todo", "arranca la web", "inicia la API", "levanta el projector", "inícialo como siempre", "levanta el proyecto" o equivalente, o cuando haga falta la web o la API y no estén levantadas.
+description: Arranca web, API y projector (y el launcher si se pide todo) y comprueba que responden. Usar cuando pidan arrancar o levantar el proyecto.
 model: haiku
 ---
 

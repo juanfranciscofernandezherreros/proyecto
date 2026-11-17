@@ -1,6 +1,6 @@
 ---
 name: resultados-todas-las-ligas
-description: Extrae solo los resultados (marcadores y parciales) de todas las ligas de baloncesto a la vez y los carga en PostgreSQL, sin jugada a jugada ni estadísticas. Usar cuando el usuario pida los resultados de todas las ligas, actualizar todas las ligas, o ponerse al día de marcadores en general. Para una sola liga, usar extraer-resultados.
+description: Extrae los resultados de todas las ligas a la vez y los carga en Postgres (basket resultados). Usar cuando pidan actualizar todas las ligas.
 model: haiku
 ---
 

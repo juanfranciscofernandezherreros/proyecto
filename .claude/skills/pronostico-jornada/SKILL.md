@@ -1,6 +1,6 @@
 ---
 name: pronostico-jornada
-description: Hace el pronóstico de la próxima jornada de una liga (por defecto la Euroliga) con los resultados de PostgreSQL, redacta el artículo de previa y lo publica en la sección Pronósticos de la web del proyecto Basketball. Usar cuando el usuario pida un pronóstico, una previa, una predicción o un artículo de la próxima jornada, quién va a ganar los próximos partidos, o actualizar la previa ya publicada. No extrae resultados (para eso, resultados-todas-las-ligas) ni usa cuotas o lesiones.
+description: Pronóstico y artículo de previa de la próxima jornada de una liga, publicado en la web y en el bot. Usar cuando pidan una previa o predicción.
 ---
 
 # Pronóstico y previa de la próxima jornada

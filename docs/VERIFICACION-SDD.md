@@ -363,3 +363,10 @@ Evidencia por paso. Ningún paso cambia el flujo del SDD §4 ni los puertos.
 | 2 | Tests `ResultadosAyerResumenTests` (ya estaban, todos, faltan + liga con fallo, error, sin partidos) | 56 tests OK | ✅ |
 | 3 | Skill `resultados-ayer` fina: `model: haiku`, descripción 148 caracteres (antes 704), fichero 1.549 (antes 4.721), lee solo `RESUMEN:` | Revisada a mano | ✅ |
 | 4 | La tarea programada "Basketball - Resultados de ayer al iniciar" ya existía (último resultado 0); ahora su resultado llega al bot | `schtasks /query` | ✅ |
+
+## 23. Descripciones cortas de las skills (plan `PLAN-pendientes-sin-tokens.md`)
+
+| # | Cambio | Evidencia | Estado |
+|---|---|---|---|
+| 1 | Descripción de 14 skills recortada a 124–148 caracteres (qué hace + cuándo usarla, sin mencionar otras skills); se cargan en cada mensaje | Total de descripciones cargadas: **6.230 → 2.177 caracteres** (−65 %, ~1.000 tokens menos por mensaje) | ✅ |
+| 2 | `model: haiku` en `aviso-telegram` y `cuadrar-partidos-dia` | Frontmatter revisado | ✅ |

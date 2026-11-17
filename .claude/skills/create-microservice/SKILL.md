@@ -1,6 +1,6 @@
 ---
 name: create-microservice
-description: Scaffold a full-featured Spring Boot 3 / Java 17 CRUD microservice (entity, two-tier testing, OpenAPI, Lombok+MapStruct, Docker, Prometheus/Loki/Grafana, Allure) from one instruction, phase by phase with real verification and explicit commit gates.
+description: Crea un microservicio CRUD Spring Boot 3 / Java 17 completo, fase a fase y verificado. Usar cuando pidan un microservicio nuevo.
 model: sonnet
 effort: medium
 ---

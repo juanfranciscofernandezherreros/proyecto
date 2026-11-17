@@ -1,6 +1,6 @@
 ---
 name: auditar-datos
-description: Audita la integridad de los datos del proyecto Basketball en PostgreSQL con una sola consulta de solo lectura — duplicados, results sin hora, país o fecha, fechas futuras, marcadores incoherentes, partidos jugados sin resultado, slugs de competición que no coinciden, partidos sin jugadas o estadísticas, team stats descuadradas y cargas fallidas — y dice qué arregla cada problema. Usar cuando el usuario pida auditar o revisar la calidad de los datos, pregunte si los datos están bien o qué datos están mal, tras una extracción o un procesado de pendientes, o antes de dar por bueno un cambio en el scraper, los batches o el projector. Para un partido concreto usar diagnosticar-partido; para saber qué servicios están levantados, `basket estado`.
+description: Audita la integridad de los datos en Postgres (basket auditar, solo lectura). Usar cuando pregunten si los datos están bien o tras una carga.
 model: sonnet
 effort: medium
 ---

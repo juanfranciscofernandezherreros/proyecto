@@ -1,6 +1,6 @@
 ---
 name: commit-multirepo
-description: Hace commit y push en el proyecto Basketball respetando su estructura de varios repositorios — commit en el submódulo que cambió, verificación previa, push, actualización del puntero en el repositorio padre y registro de la evidencia en docs\VERIFICACION-SDD.md. Usar cuando el usuario pida commitear, hacer push, subir los cambios, o cerrar un paso de una tarea, y siempre que haya cambios dentro de un submódulo.
+description: Commit y push respetando los submódulos y la evidencia en VERIFICACION-SDD. Usar cuando pidan commitear, subir o cerrar un paso.
 model: sonnet
 effort: low
 ---

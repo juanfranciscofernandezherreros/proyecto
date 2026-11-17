@@ -1,6 +1,7 @@
 ---
 name: cuadrar-partidos-dia
-description: Comprueba que los partidos de un día (por defecto ayer) son los mismos y con el mismo marcador en Flashscore, en fixtures (Postgres) y en MongoDB (la web), y que en Mongo tienen todas las secciones. Usar cada día, o cuando el usuario pregunte si en la web están todos los partidos de ayer, si cuadran con Flashscore o con fixtures, o pida el cuadre diario. Solo lectura. Para arreglar un partido concreto, diagnosticar-partido.
+description: Cuadra los partidos de un día entre Flashscore, fixtures y Mongo (basket cuadrar, solo lectura). Usar para el cuadre diario.
+model: haiku
 ---
 
 # Cuadrar los partidos de un día

@@ -1,6 +1,6 @@
 ---
 name: procesar-csv-resultados
-description: Lee los CSV de resultados (RESULTS) que ya están en disco y los carga en PostgreSQL para todas las ligas o para una, sin volver a extraer nada de Flashscore. Usar cuando el usuario pida procesar, importar, cargar o reprocesar los CSV de resultados, o cuando los CSV existan pero los datos no estén en la base de datos. Si lo que quiere es traer resultados nuevos de la web, usar resultados-todas-las-ligas o extraer-resultados.
+description: Carga en Postgres los CSV de resultados ya extraídos, sin volver a Flashscore (basket procesar-csv). Usar si los CSV existen pero no están en la BD.
 model: haiku
 ---
 

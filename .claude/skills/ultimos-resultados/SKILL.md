@@ -1,6 +1,6 @@
 ---
 name: ultimos-resultados
-description: Muestra los 50 últimos resultados agregados a PostgreSQL (results.results) en el proyecto Basketball, con su marcador, en una consulta de solo lectura. Usar cuando el usuario pregunte qué resultados han entrado, cuáles son los últimos resultados cargados o agregados, si ya está el partido de ayer o de hoy, o para ver qué ha traído una extracción. Para extraer resultados nuevos usar extraer-resultados o resultados-todas-las-ligas; para un partido que no sale en la web, diagnosticar-partido.
+description: Muestra los 50 últimos resultados cargados en Postgres (solo lectura). Usar cuando pregunten qué resultados han entrado o si ya está un partido.
 model: haiku
 ---
 

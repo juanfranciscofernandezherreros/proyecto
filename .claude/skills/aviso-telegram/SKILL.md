@@ -1,6 +1,7 @@
 ---
 name: aviso-telegram
-description: Aviso por Telegram de cada CSV procesado en el proyecto Basketball — arranca, comprueba, prueba y arregla el vigilante que envía al bot @MiGrafanaDashboardOutOfHome_bot una línea por CSV que termina en el launcher (estado COMPLETADO/FALLIDO, nombre del CSV y hora de Madrid; nunca el fichero ni su contenido). Usar cuando el usuario pida el aviso de Telegram, que le lleguen los CSV al móvil, pregunte si el bot funciona, por qué no le llegan los avisos, o quiera arrancarlo, pararlo o cambiar el token o el chat.
+description: Aviso al bot de Telegram de cada CSV procesado (basket telegram). Usar si no llegan los avisos o para arrancarlo, probarlo o cambiar token o chat.
+model: haiku
 ---
 
 # Aviso por Telegram de cada CSV procesado

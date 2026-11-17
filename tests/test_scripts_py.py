@@ -345,6 +345,29 @@ class BasketLogsTests(unittest.TestCase):
         for panel in d["dashboard"]["panels"]:
             self.assertEqual(panel["datasource"]["uid"], "loki-local")
 
+    def _observabilidad(self, comando, env=None):
+        """Ejecuta _asegurar_observabilidad sin Docker ni navegador; devuelve lo abierto."""
+        from unittest import mock
+        import basket
+        ok = mock.Mock(returncode=0)
+        with mock.patch.object(basket.subprocess, "run", return_value=ok), \
+             mock.patch.object(basket.webbrowser, "open") as abrir, \
+             mock.patch.dict(basket.os.environ, env or {}, clear=False):
+            basket.os.environ.pop("BASKET_SIN_GRAFANA", None)
+            if not env:
+                basket.os.environ.pop("BASKET_NO_ABRIR_GRAFANA", None)
+            basket._asegurar_observabilidad(comando, None)
+        return abrir
+
+    def test_abre_dashboard_de_logs_por_defecto(self):
+        abrir = self._observabilidad("pendientes")
+        abrir.assert_called_once()
+        self.assertIn("/d/basket-logs/", abrir.call_args[0][0])
+
+    def test_no_abre_en_tareas_programadas_ni_con_variable(self):
+        self._observabilidad("ciclo-diario").assert_not_called()
+        self._observabilidad("pendientes", {"BASKET_NO_ABRIR_GRAFANA": "1"}).assert_not_called()
+
 if __name__ == "__main__":
     unittest.main()
 

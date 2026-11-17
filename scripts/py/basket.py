@@ -11,6 +11,7 @@ Ejemplos:  basket estado | basket resultados EUROLIGA | basket ciclo-diario
 import os
 import subprocess
 import sys
+import webbrowser
 from datetime import datetime
 from pathlib import Path
 
@@ -24,6 +25,8 @@ CFG = _config.cargar()
 # Comandos que no levantan Grafana al empezar (rapidos, de vigilancia o que ya la abren).
 SIN_OBSERVABILIDAD = {"estado", "antibloqueo", "vigilar", "monitor", "grafana", "tokens"}
 DASHBOARD_LOGS = "basket-logs"
+# Tareas programadas: corren sin nadie delante, no abren el navegador.
+SIN_ABRIR_NAVEGADOR = {"ciclo-diario", "inicio-automatico"}
 
 # comando coherente -> (modulo lanzador, descripcion)
 COMANDOS = {
@@ -76,9 +79,16 @@ def _asegurar_observabilidad(comando, log):
         return
     url = (CFG.get("GRAFANA_URL") or "http://localhost:8084").rstrip("/")
     # Enlace fijo pedido por el usuario: todos los comandos y ejecuciones de las últimas 3 h.
-    print(f"Logs en vivo: {url}/d/{DASHBOARD_LOGS}/basketball-logs-de-basket?orgId=1"
-          f"&from=now-3h&to=now&timezone=browser&var-comando=$__all&var-ejecucion=$__all"
-          f"&var-buscar=&refresh=5s", flush=True)
+    enlace = (f"{url}/d/{DASHBOARD_LOGS}/basketball-logs-de-basket?orgId=1"
+              f"&from=now-3h&to=now&timezone=browser&var-comando=$__all&var-ejecucion=$__all"
+              f"&var-buscar=&refresh=5s")
+    print(f"Logs en vivo: {enlace}", flush=True)
+    # Pedido por el usuario: abrir el dashboard por defecto, salvo en tareas programadas.
+    if comando not in SIN_ABRIR_NAVEGADOR and os.environ.get("BASKET_NO_ABRIR_GRAFANA") != "1":
+        try:
+            webbrowser.open(enlace)
+        except Exception as e:  # sin navegador no se corta el comando
+            print(f"AVISO: no se pudo abrir el navegador ({e}).", flush=True)
 
 
 def _ejecutar(comando, args):

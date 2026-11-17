@@ -33,13 +33,28 @@ def _mas_reciente(paths):
     return max(paths, key=lambda p: p.stat().st_mtime) if paths else None
 
 
+def _escribir_consola(linea, salida=None):
+    """Escribe en la consola sin fallar nunca por la codificacion.
+
+    La consola de Windows suele ser cp1252: un caracter que no cabe (letras turcas,
+    el '\\ufffd' de errors="replace") lanzaba UnicodeEncodeError y tumbaba la
+    extraccion entera. Si no se puede codificar, se sustituye el caracter.
+    """
+    salida = salida or sys.stdout
+    try:
+        salida.write(linea)
+    except UnicodeEncodeError:
+        cod = getattr(salida, "encoding", None) or "ascii"
+        salida.write(linea.encode(cod, errors="replace").decode(cod))
+
+
 def _run_tee(cmd, log_path):
     """Ejecuta un comando, muestra su salida y la anade al log. Devuelve el codigo."""
     with open(log_path, "a", encoding="utf-8") as log:
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                              text=True, encoding="utf-8", errors="replace", bufsize=1)
         for linea in p.stdout:
-            sys.stdout.write(linea)
+            _escribir_consola(linea)
             log.write(linea)
         p.wait()
     return p.returncode

@@ -181,3 +181,35 @@ class DatosAyerTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class RunTeeTests(unittest.TestCase):
+    """_run_tee no debe caerse si la consola es cp1252 (fallo de nov-2026 en la BSL)."""
+
+    def _consola_cp1252(self):
+        import io
+        bruto = io.BytesIO()
+        return bruto, io.TextIOWrapper(bruto, encoding="cp1252", errors="strict", newline="")
+
+    def test_escribir_consola_sustituye_lo_que_no_cabe(self):
+        import dataset
+        bruto, consola = self._consola_cp1252()
+        dataset._escribir_consola("Bağcılar � ok\n", consola)
+        consola.flush()
+        self.assertEqual(bruto.getvalue().decode("cp1252"), "Ba?c?lar ? ok\n")
+
+    def test_run_tee_completa_y_el_log_guarda_utf8(self):
+        import dataset
+        _, consola = self._consola_cp1252()
+        with tempfile.TemporaryDirectory() as d:
+            log = Path(d) / "x.log"
+            cmd = [sys.executable, "-c",
+                   r"import sys; sys.stdout.buffer.write(b'\xc5\x9eehir\n')"]
+            original = sys.stdout
+            sys.stdout = consola
+            try:
+                rc = dataset._run_tee(cmd, log)
+            finally:
+                sys.stdout = original
+            self.assertEqual(rc, 0)
+            self.assertEqual(log.read_text(encoding="utf-8"), "Şehir\n")

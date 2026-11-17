@@ -20,8 +20,8 @@ Situación de partida:
 - [x] 3. `procesar_matchids.py`: tras la auditoría, si hay N > 0 partidos, envía a
   Telegram «⏳ Pendientes: N partidos por procesar (~N min)». Si falla Telegram,
   avisa y sigue.
-- [ ] 4. Seguimiento sin Claude: el dashboard de logs ya se abre solo (commit fd1682d)
+- [x] 4. Seguimiento sin Claude: el dashboard de logs ya se abre solo (commit fd1682d)
   y los RESUMEN ya llegan al bot. Se actualizan la skill `resultados-ayer` (incluye
   los pendientes) y la memoria (no relanzar pendientes tras resultados-ayer).
-- [ ] 5. Tests, `basket verificar` en VERDE, evidencia en `docs/VERIFICACION-SDD.md`
+- [x] 5. Tests (65 OK), `basket verificar` en VERDE el 17/11, evidencia en `docs/VERIFICACION-SDD.md`
   y commit + push.

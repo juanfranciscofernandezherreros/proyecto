@@ -13,8 +13,11 @@ segundo plano, con la salida a un fichero del directorio temporal de la sesión:
 cmd //c "C:\Develop\basketball\1_EJECUTAR\basket.cmd resultados-ayer" > <fichero> 2>&1
 ```
 
-Al terminar, leer **solo** la línea `RESUMEN:` (`grep "^RESUMEN:" <fichero>`), que
-también llega al bot de Telegram, y contarla tal cual. No leer el log entero.
+Al terminar encadena solo `basket pendientes` (no lanzarlo aparte; `--solo-csv` o
+`RESULTADOS_AYER_PENDIENTES=0` lo evitan), así que tarda ~1 min por pendiente. Al
+terminar, leer **solo** las líneas `RESUMEN:` (`grep "^RESUMEN:" <fichero>`): la primera
+es la de resultados y la última la de pendientes; las dos llegan al bot de Telegram.
+Contarlas tal cual. No leer el log entero.
 
 Otra fecha: `resultados-ayer 2026-11-16`. Extraer todas sin cuadre previo: `--forzar`.
 

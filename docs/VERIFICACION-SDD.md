@@ -381,3 +381,13 @@ Evidencia por paso. Ningún paso cambia el flujo del SDD §4 ni los puertos.
 | 2 | `procesar_matchids.py`: un primer argumento vacío o solo comillas (`""`) cuenta como sin CSV de selección (antes fallaba con `No existe el CSV indicado: ""`) | La misma prueba procesó 1 partido | ✅ |
 | 3 | Tests `PendientesResumenTests` y `TokensTests`; skill `procesar-pendientes` fina (lee solo `RESUMEN:`) | 61 tests OK | ✅ |
 | 4 | `basket tokens` y `AHORRO-TOKENS.md` en la raíz (plan `PLAN-ahorro-tokens.md`) | Carga fija medida: 9.963 caracteres, ~2.490 tokens por mensaje | ✅ |
+
+## Flujo diario sin tokens (`docs/PLAN-flujo-diario-sin-tokens.md`, 2026-11-17)
+
+| # | Requisito | Evidencia | Estado |
+|---|---|---|---|
+| 1 | `resultados-ayer` encadena `pendientes` al terminar (salvo `--solo-csv` o `RESULTADOS_AYER_PENDIENTES=0`); el código de salida es el peor de los dos | Tests `test_encadena_pendientes_salvo_solo_csv_o_variable` y `test_main_lanza_pendientes_y_devuelve_el_peor_codigo` | ✅ |
+| 2 | La tarea activa «Resultados de ayer al iniciar» cubre el día; «Ciclo diario» sigue deshabilitada | `schtasks /query` el 17/11; documentado en `ESPECIFICACIONES.md` §7.2b | ✅ |
+| 3 | `pendientes` avisa a Telegram «⏳ Pendientes: N partidos por procesar» al empezar; un fallo de Telegram no lo corta | Test `test_pendientes_avisa_a_telegram_al_empezar` | ✅ |
+| 4 | Seguimiento sin Claude: dashboard de logs automático y `RESUMEN` a Telegram; skill `resultados-ayer` actualizada | Commit `fd1682d`; `SKILL.md` de `resultados-ayer` | ✅ |
+| 5 | Gate | Tests 65 OK; `basket verificar` VERDE el 17/11 | ✅ |

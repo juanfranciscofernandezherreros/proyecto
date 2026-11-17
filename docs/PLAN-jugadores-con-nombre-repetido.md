@@ -32,7 +32,7 @@ batch va a la consola oculta del launcher (`inheritIO`).
   índice único `(match_id, team, player_key)` en lugar del de `(match_id, name, team)`.
   El writer usa ese `ON CONFLICT` y, si el CSV trae ids, borra antes las filas antiguas
   sin id de ese partido (si no, quedarían duplicadas). Tests del parser y del writer.
-- [ ] 3. Launcher (código hecho, falta desplegar; ver Resultado) (`csv-extra-batch`): la salida del batch va a
+- [x] 3. Launcher (`csv-extra-batch`): la salida del batch va a
   `REPORT_DIR\batch-logs\<request_id>.log` y, si falla, `batch_launch_request.error`
   guarda las últimas líneas útiles (`Caused by` / `ERROR`). Test del recorte.
 - [x] 4. Recompilar los JAR y reiniciar el launcher; `basket reextraer` de los 3 partidos
@@ -60,3 +60,9 @@ ficha, pero comparten página de jugador.
   en cada partido. Mongo y la API igual. En `l40Wzzzi` y `zFyE2s4k` faltaba un jugador
   desde noviembre.
 - Paso 5: tests del repo 65 OK; `basket verificar` VERDE.
+- Paso 3 desplegado el 17/11 a las 16:21, en el hueco entre dos partidos de `pendientes`.
+  Compilar el launcher suelto (`mvn -pl launcher`) usa una copia vieja del módulo
+  `pronostico` y no arranca (falta `ArticleGeneratorService`): hay que compilar con
+  `mvn -pl launcher -am package` desde `csv-extra-batch`. Por la parada, dos partidos
+  (`j33O51XI`, `I9eAT4PP`) no cargaron su POINT_BY_POINT; se cargaron a mano desde su CSV
+  y sus estadísticas quedan para la siguiente pasada de pendientes.

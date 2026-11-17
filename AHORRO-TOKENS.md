@@ -37,9 +37,9 @@ doble) porque `basket tokens` aún no existía. Desde la fila 5, todo sale de `b
 | 2 | 2026-11-17 | `CLAUDE.md` mínimo (la tabla de skills y reglas sobraba: se cargan solas) | 2.626 → 510 bytes | ~530 tok **por mensaje** | `fae464f` |
 | 3 | 2026-11-17 | `resultados-ayer`: línea `RESUMEN:` al bot (con la tarea al iniciar sesión, 0 tokens al día); skill fina con Haiku que lee solo `RESUMEN:` | Descripción 704 → 148 · fichero 4.721 → 1.549 bytes · modelo de la sesión → Haiku | ~140 tok por mensaje · ~800 tok por uso, más no leer el log | `d6b0e22` |
 | 4 | 2026-11-17 | Descripciones de 14 skills a ~140 caracteres; Haiku en `aviso-telegram` y `cuadrar-partidos-dia` | 6.230 → 2.177 bytes | ~1.000 tok **por mensaje** | `fbd9441` |
-| 5 | 2026-11-17 | `procesar-pendientes`: línea `RESUMEN:` al bot y skill fina que lee solo `RESUMEN:` | Fichero 5.596 bytes → 1.875 car · descripción 708 bytes → 167 car | ~930 tok por uso, ~130 por mensaje | pendiente de subir (prueba real en curso) |
+| 5 | 2026-11-17 | `procesar-pendientes`: línea `RESUMEN:` al bot y skill fina que lee solo `RESUMEN:` | Fichero 5.596 bytes → 1.875 car · descripción 708 bytes → 167 car | ~930 tok por uso, ~130 por mensaje | `84a641c` |
 
-**Acumulado en carga fija:** unos 1.700 tokens menos en cada mensaje de cada sesión.
+**Acumulado en carga fija:** unos 1.800 tokens menos en cada mensaje de cada sesión.
 
 ## Próximas mejoras
 

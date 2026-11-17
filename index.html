@@ -262,7 +262,8 @@ footer { color: var(--muted); font-size: .86rem; padding: 32px 0 48px; border-to
 <!-- ================= DIARIO ================= -->
 <section id="diario">
   <h2>La rutina diaria</h2>
-  <p class="sub">Dos skills independientes, con los mismos pasos: levantan todo y terminan comprobando en Mongo lo que dejó el projector.</p>
+  <p class="sub">Corre sola, sin Claude: al iniciar sesión la tarea programada <b>«Basketball - Resultados de ayer al iniciar»</b> lanza
+    <code>basket resultados-ayer</code>, que al terminar <b>encadena</b> <code>basket pendientes</code>. Cada paso abre el dashboard de logs y avisa a Telegram.</p>
   <div class="grid">
     <div class="card">
       <span class="pill info">1 · resultados</span>
@@ -274,6 +275,7 @@ footer { color: var(--muted); font-size: .86rem; padding: 32px 0 48px; border-to
         <li>Extrae de Flashscore solo las ligas con pendientes (~40 s por liga).</li>
         <li>Junta los de ayer en <code>RESULTS_YESTERDAY_&lt;fecha&gt;.csv</code> y lo carga por el launcher.</li>
         <li>Espera 90 s al projector y comprueba el marcador de cada partido en Mongo.</li>
+        <li><code>RESUMEN</code> a Telegram y sigue con los pendientes (salvo <code>--solo-csv</code> o <code>RESULTADOS_AYER_PENDIENTES=0</code>).</li>
       </ol>
     </div>
     <div class="card">
@@ -283,14 +285,15 @@ footer { color: var(--muted); font-size: .86rem; padding: 32px 0 48px; border-to
       <ol class="steps">
         <li>Levanta lo mismo, más la auditoría.</li>
         <li><code>datos-ayer</code>: los datos de los partidos de ayer.</li>
-        <li>Auditoría: lista de partidos jugados a los que les falta algo.</li>
+        <li>Auditoría: lista de partidos jugados a los que les falta algo; avisa a Telegram «⏳ Pendientes: N partidos por procesar».</li>
         <li>Partido a partido: extrae <b>solo</b> lo que falta, lo carga y refresca la auditoría.</li>
         <li>Espera 90 s y comprueba en Mongo: <code>OK</code> / <code>FALTAN &lt;secciones&gt;</code> / <code>NO ESTA EN MONGO</code>.</li>
       </ol>
     </div>
   </div>
   <div class="tip">Antes de los pendientes, <code>basket comprobar</code> debe dar <code>a_revisar = 0</code> (ningún partido jugado sin resultado).
-    El ciclo programado es <code>basket ciclo-diario</code> (pendientes + archivado de CSV repetidos + auditoría de datos).
+    <code>basket ciclo-diario</code> (pendientes + archivado de CSV repetidos + auditoría de datos) y «Procesamiento automatico al iniciar»
+    siguen como tareas <b>deshabilitadas</b> para no repetir el trabajo.
     Para cuadrar un día concreto entre Flashscore, fixtures y Mongo: <code>basket cuadrar [AAAA-MM-DD]</code>.</div>
 
   <h3>Previa de la jornada</h3>
@@ -327,7 +330,8 @@ footer { color: var(--muted); font-size: .86rem; padding: 32px 0 48px; border-to
     <div class="card">
       <h3>Grafana · 8084</h3>
       <p>Cada comando <code>basket</code> duplica su salida en <code>C:\data\basketball\logs\basket\&lt;comando&gt;_&lt;fecha&gt;.log</code>;
-        promtail la manda a Loki y se ve en vivo en el dashboard <code>basket-logs</code>.</p>
+        promtail la manda a Loki y se ve en vivo en el dashboard <code>basket-logs</code>, que <b>se abre solo</b> en el navegador
+        al lanzar cualquier comando (también en tareas programadas; <code>BASKET_NO_ABRIR_GRAFANA=1</code> lo evita).</p>
       <p>Otros dashboards: auditoría de fixtures, procesado, CSV procesados y consumo de recursos. Métricas en Prometheus (8086).</p>
       <p><a href="http://localhost:8084/d/basket-logs">Abrir logs en vivo</a></p>
     </div>
@@ -336,6 +340,8 @@ footer { color: var(--muted); font-size: .86rem; padding: 32px 0 48px; border-to
       <p>Un vigilante lee <code>batch_launch_request</code> cada 10 s y manda <b>una línea por CSV</b> terminado:
         solo estado, nombre y hora. Nunca el fichero ni su contenido.</p>
       <div class="tg">✅ COMPLETADO · POINT_BY_POINT_20261117125350_8ArlEYR6.csv · 17/11 12:54:49</div>
+      <p>En la rutina diaria llegan además el <code>RESUMEN</code> de resultados de ayer, el aviso de inicio de pendientes y su <code>RESUMEN</code> final:</p>
+      <div class="tg">⏳ Pendientes: 54 partidos por procesar (~54 min).</div>
       <p>Al publicar una previa llega también la predicción:</p>
       <div class="tg">🏀 Euroliga — Jornada 12: previa y pronósticos
 17/11 17:00  Dubai - Anadolu Efes → Dubai 63%
@@ -372,7 +378,7 @@ footer { color: var(--muted); font-size: .86rem; padding: 32px 0 48px; border-to
     <tr><th>Para…</th><th>Comando</th></tr>
     <tr><td>Arrancar web, API, projector y launcher</td><td><code>arrancar</code></td></tr>
     <tr><td>Ver qué está levantado y qué falta</td><td><code>estado</code></td></tr>
-    <tr><td>Resultados de ayer hasta el projector</td><td><code>resultados-ayer [AAAA-MM-DD] [--solo-csv] [--forzar]</code></td></tr>
+    <tr><td>Resultados de ayer hasta el projector (y luego los pendientes)</td><td><code>resultados-ayer [AAAA-MM-DD] [--solo-csv] [--forzar]</code></td></tr>
     <tr><td>Resultados de una liga o de todas</td><td><code>resultados [LIGA]</code></td></tr>
     <tr><td>Cargar CSV de resultados ya en disco</td><td><code>procesar-csv [LIGA]</code></td></tr>
     <tr><td>Comprobar que results y fixtures están al día</td><td><code>comprobar</code></td></tr>
@@ -384,7 +390,7 @@ footer { color: var(--muted); font-size: .86rem; padding: 32px 0 48px; border-to
     <tr><td>Auditar la calidad de los datos</td><td><code>auditar</code></td></tr>
     <tr><td>Previa de la próxima jornada</td><td><code>pronostico datos | publicar &lt;fichero&gt;</code></td></tr>
     <tr><td>Aviso por Telegram</td><td><code>telegram [prueba|una-vez|chat]</code></td></tr>
-    <tr><td>Ciclo diario (tarea programada)</td><td><code>ciclo-diario</code></td></tr>
+    <tr><td>Ciclo diario (tarea programada, deshabilitada)</td><td><code>ciclo-diario</code></td></tr>
     <tr><td>Gate del SDD</td><td><code>verificar</code></td></tr>
   </table></div>
 </section>

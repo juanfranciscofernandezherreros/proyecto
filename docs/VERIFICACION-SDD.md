@@ -271,3 +271,12 @@ Evidencia por paso. Ningún paso cambia el flujo del SDD §4 ni los puertos.
 | 4 | Tests (`DatosAyerTests`) | `python -m unittest tests.test_scripts_py`: 30 tests, 0 fallos (6 nuevos) | ✅ |
 | 5 | Prueba real `basket datos-ayer 2026-11-16` | En curso al cerrar esta nota: partido `0GolR8ad` con los 4 datasets OK (equipo, jugadores, resumen, jugada a jugada); quedan 7 partidos. ~1,5 min por dataset | ⏳ |
 | 6 | Gate `basket verificar` | VERDE (7 comprobaciones). Antes salía ROJO por web, API y Mongo parados; se arrancaron con `basket arrancar` | ✅ |
+
+## 16. Cuadre diario Flashscore / fixtures / Mongo (plan `PLAN-skill-cuadrar-dia.md`)
+
+| # | Cambio | Evidencia | Estado |
+|---|---|---|---|
+| 1 | `scripts\py\lanzadores\cuadrar_dia.py` y comando `basket cuadrar [AAAA-MM-DD]` | `basket cuadrar 2026-11-16`: Flashscore 8, fixtures 8, Mongo 8; 8 cuadran (NBA 5, Winner League 3), `TODO CUADRA`, código 0. Coincide con la comprobación a mano en flashscore.com de las 11 ligas | ✅ |
+| 2 | Tests `CuadrarDiaTests` (fecha de Madrid, todo cuadra, cada tipo de problema, fecha) | `python -m unittest tests.test_scripts_py`: 36 tests, 0 fallos (4 nuevos) | ✅ |
+| 3 | Skill `.claude\skills\cuadrar-partidos-dia\SKILL.md` y fila en `CLAUDE.md` | Gate `verificar.py` VERDE (7 comprobaciones) | ✅ |
+| 4 | Ejecución diaria programada | Pendiente de confirmar con el usuario | ⏳ |

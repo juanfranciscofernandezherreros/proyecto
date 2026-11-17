@@ -213,3 +213,53 @@ class RunTeeTests(unittest.TestCase):
                 sys.stdout = original
             self.assertEqual(rc, 0)
             self.assertEqual(log.read_text(encoding="utf-8"), "Şehir\n")
+
+
+class CuadrarDiaTests(unittest.TestCase):
+    """Logica pura de basket cuadrar (Flashscore / fixtures / Mongo)."""
+
+    @classmethod
+    def setUpClass(cls):
+        sys.path.insert(0, str(RAIZ / "scripts" / "py" / "lanzadores"))
+        import cuadrar_dia
+        cls.m = cuadrar_dia
+
+    def test_filas_del_dia_usa_la_hora_de_madrid(self):
+        from datetime import date
+        filas = [
+            {"matchId": "a", "eventDatetime": "2026-11-16T00:30:00+01:00", "homeTeam": "X",
+             "awayTeam": "Y", "homeScore": "90", "awayScore": "80"},
+            {"matchId": "b", "eventDatetime": "2026-11-15T23:30:00+00:00", "homeTeam": "X",
+             "awayTeam": "Y", "homeScore": "1", "awayScore": "2"},
+            {"matchId": "c", "eventDatetime": "2026-11-15T22:00:00+01:00", "homeTeam": "X",
+             "awayTeam": "Y", "homeScore": "1", "awayScore": "2"},
+            {"matchId": "d", "eventDatetime": "", "homeTeam": "X", "awayTeam": "Y"},
+        ]
+        r = self.m.filas_del_dia(filas, date(2026, 11, 16))
+        self.assertEqual(sorted(r), ["a", "b"])
+        self.assertEqual(r["a"]["marcador"], (90, 80))
+
+    def test_todo_cuadra(self):
+        fs = {"a": {"liga": "l", "local": "X", "visitante": "Y", "marcador": (90, 80)}}
+        fx = {"a": {"liga": "l", "local": "X", "visitante": "Y"}}
+        mg = {"a": {"marcador": (90, 80), "secciones": list(self.m.SECCIONES)}}
+        self.assertEqual(self.m.cuadrar(fs, fx, mg)[0]["problemas"], [])
+
+    def test_detecta_cada_problema(self):
+        fs = {"a": {"liga": "l", "local": "X", "visitante": "Y", "marcador": (90, 80)},
+              "b": {"liga": "l", "local": "X", "visitante": "Y", "marcador": (1, 2)}}
+        fx = {"a": {"liga": "l", "local": "X", "visitante": "Y"},
+              "c": {"liga": "l", "local": "X", "visitante": "Y"}}
+        mg = {"a": {"marcador": (91, 80), "secciones": ["fixture", "result"]}}
+        r = {f["match_id"]: f["problemas"] for f in self.m.cuadrar(fs, fx, mg)}
+        self.assertIn("marcador distinto en Mongo", r["a"])
+        self.assertTrue(any(p.startswith("faltan secciones: summary") for p in r["a"]))
+        self.assertEqual(r["b"], ["no esta en fixtures", "no esta en Mongo"])
+        self.assertEqual(r["c"], ["no esta en Flashscore", "no esta en Mongo"])
+
+    def test_fecha(self):
+        from datetime import date
+        self.assertEqual(self.m.validar_fecha("2026-11-16"), date(2026, 11, 16))
+        with self.assertRaises(ValueError):
+            self.m.validar_fecha("16-11-2026")
+        self.assertIsInstance(self.m.validar_fecha(None), date)

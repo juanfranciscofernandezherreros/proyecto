@@ -279,4 +279,4 @@ Evidencia por paso. Ningún paso cambia el flujo del SDD §4 ni los puertos.
 | 1 | `scripts\py\lanzadores\cuadrar_dia.py` y comando `basket cuadrar [AAAA-MM-DD]` | `basket cuadrar 2026-11-16`: Flashscore 8, fixtures 8, Mongo 8; 8 cuadran (NBA 5, Winner League 3), `TODO CUADRA`, código 0. Coincide con la comprobación a mano en flashscore.com de las 11 ligas | ✅ |
 | 2 | Tests `CuadrarDiaTests` (fecha de Madrid, todo cuadra, cada tipo de problema, fecha) | `python -m unittest tests.test_scripts_py`: 36 tests, 0 fallos (4 nuevos) | ✅ |
 | 3 | Skill `.claude\skills\cuadrar-partidos-dia\SKILL.md` y fila en `CLAUDE.md` | Gate `verificar.py` VERDE (7 comprobaciones) | ✅ |
-| 4 | Ejecución diaria programada | Pendiente de confirmar con el usuario | ⏳ |
+| 4 | Ejecución diaria: último paso de `ciclo_diario.py`, tras 90 s de espera al projector (`CICLO_ESPERA_CUADRE`); un fallo del cuadre se anota como AVISO y no cambia el código del ciclo | Paso probado aislado sobre un log temporal: rc 0, `TODO CUADRA`; 36 tests y gate VERDE. Ciclo completo no ejecutado | ✅ |

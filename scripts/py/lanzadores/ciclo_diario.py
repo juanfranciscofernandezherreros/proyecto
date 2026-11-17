@@ -3,6 +3,7 @@ r"""Lanzador: ciclo diario (CICLO_DIARIO.bat). RESULTS + pendientes + archivado.
 import os
 import subprocess
 import sys
+import time
 from datetime import datetime
 from pathlib import Path
 from _base import ensure, SCRIPTS_PY, PY, CFG
@@ -55,6 +56,14 @@ def main():
     if _run_log("lanzadores/auditar.py", log):
         with open(log, "a", encoding="utf-8") as fh:
             fh.write("[AVISO] La auditoria de datos no se pudo ejecutar.\n")
+    # Cuadre de ayer Flashscore / fixtures / Mongo. Antes se espera a que el projector
+    # (cada ~60 s) pase a Mongo lo recien importado. No cambia el codigo del ciclo.
+    time.sleep(int(CFG.get("CICLO_ESPERA_CUADRE") or 90))
+    with open(log, "a", encoding="utf-8") as fh:
+        fh.write("--- Cuadre de ayer Flashscore / fixtures / Mongo (skill cuadrar-partidos-dia):\n")
+    if _run_log("lanzadores/cuadrar_dia.py", log):
+        with open(log, "a", encoding="utf-8") as fh:
+            fh.write("[AVISO] El cuadre de ayer tiene partidos con problemas (ver FALLO arriba).\n")
     with open(log, "a", encoding="utf-8") as fh:
         fh.write(f"[{datetime.now():%d/%m/%Y %H:%M:%S}] Fin del ciclo diario. Codigo {rc}\n")
     print(f"Terminado con codigo {rc}. Registro: {log}")

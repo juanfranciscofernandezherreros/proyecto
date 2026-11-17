@@ -109,26 +109,84 @@ def cuadre_previo(dia, salida):
               "se extraen todas las ligas.")
         return None
     pendientes, total = ligas_pendientes(fx, fs, mg)
+    _R["total"] = total
     print(f"Cuadre previo (fixtures / Mongo): {total} partidos el "
           f"{dia.isoformat()}; ligas con pendientes: {', '.join(sorted(pendientes)) or 'ninguna'}")
     return pendientes
 
 
+# Resumen de la ejecucion, que rellenan las distintas salidas y se imprime al final
+# en una sola linea RESUMEN (y se manda al bot de Telegram).
+_R = {}
+
+
+def linea_resumen(r):
+    """Una linea con como acabo: ya estaban, n de m en Mongo, ligas con fallo o error."""
+    dia = r.get("dia")
+    cab = "Resultados de ayer" + (f" {dia:%d/%m}" if dia else "")
+    if r.get("error"):
+        return f"❌ {cab} · ERROR: {r['error']}"
+    if r.get("ya"):
+        return f"✅ {cab} · ya estaban los {r.get('total', 0)} en Mongo"
+    partes, mal = [], bool(r.get("ligas_fallo"))
+    if "en_mongo" in r:
+        partes.append(f"{r['en_mongo']} de {r['cargados']} en Mongo")
+        mal = mal or r["en_mongo"] < r["cargados"] or bool(r.get("cargas_fallo"))
+        if r.get("cargas_fallo"):
+            partes.append(f"{r['cargas_fallo']} carga(s) fallida(s)")
+    elif r.get("extraidos"):
+        partes.append(f"{r['extraidos']} partidos en el CSV (sin cargar)")
+    else:
+        partes.append("ningún partido")
+    if r.get("ligas_fallo"):
+        partes.append(f"{r['ligas_fallo']} liga(s) con fallo")
+    return f"{'❌' if mal else '✅'} {cab} · " + " · ".join(partes)
+
+
+def _avisar(linea):
+    """Imprime la linea RESUMEN y la manda al bot (si esta configurado; si falla, avisa)."""
+    print(f"RESUMEN: {linea}")
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "monitor"))
+        import telegram_csv
+        if telegram_csv.configurado():
+            telegram_csv.enviar_texto(linea)
+    except Exception as e:
+        print(f"[AVISO] Telegram: no se pudo enviar el resumen: {e}")
+
+
 def main(argv):
+    _R.clear()
+    try:
+        rc = _ejecutar(argv)
+    except Exception as e:  # cualquier fallo inesperado tambien se resume y avisa
+        _R["error"] = str(e)[:200]
+        rc = 1
+    if rc and not _R.get("error") and not ({"en_mongo", "ya", "extraidos"} & set(_R)):
+        _R["error"] = _R.get("motivo") or "ver el log"
+    _avisar(linea_resumen(_R))
+    return rc
+
+
+def _ejecutar(argv):
     procesar = "--solo-csv" not in argv
     forzar = "--forzar" in argv
     argv = [a for a in argv if a not in ("--solo-csv", "--procesar", "--forzar")]
     if len(argv) > 1:
         print("Uso: basket resultados-ayer [AAAA-MM-DD] [--solo-csv] [--forzar]")
+        _R["motivo"] = "uso incorrecto"
         return 1
     try:
         dia = C.validar_fecha(argv[0] if argv else None)
     except ValueError as e:
         print(f"ERROR: {e}")
+        _R["motivo"] = str(e)
         return 1
+    _R["dia"] = dia
 
     if ensure("antibloqueo", "postgres", "launcher", "runtime", "navegador"):
         print("ERROR: no se pudieron arrancar los servicios.")
+        _R["motivo"] = "no se pudieron arrancar los servicios"
         return 1
     salida = Path(CFG.get("REPORTS_DIR")) / "resultados-ayer" / nombre_fichero(dia)
     ligas = catalogo.cargar_ligas()
@@ -138,6 +196,7 @@ def main(argv):
             if not pendientes:
                 print(f"Ya estan todos los partidos del {dia.isoformat()} en Mongo con su "
                       "marcador; no se extrae nada (--forzar para extraer igualmente).")
+                _R["ya"] = True
                 return 0
             ligas = [l for l in ligas if f"{l['country']}/{l['competition']}" in pendientes]
 
@@ -183,6 +242,8 @@ def main(argv):
         print(f"  {code:<9} {n:>3}  ({origen})")
     print(f"Total: {len(filas)} partidos extraidos"
           + (f" (+{len(previas)} que ya estaban)" if previas else "") + f" -> {salida}")
+    _R["ligas_fallo"] = sum(1 for _, _, origen in resumen if str(origen).startswith("FALLO"))
+    _R["extraidos"] = len(filas)
     if procesar:
         return procesar_en_postgres(salida, cabecera, filas, dia)
     return 0
@@ -241,6 +302,7 @@ def procesar_en_postgres(salida, cabecera, filas, dia):
         print(f"  {estado:<5} {f['matchId']}  {f['country']}/{f['competition']}  "
               f"{f.get('homeTeam')} - {f.get('awayTeam')}  {C._m(esperado)}")
     print(f"En Mongo (projector): {len(filas) - mal} de {len(filas)} con su marcador.")
+    _R.update(cargados=len(filas), en_mongo=len(filas) - mal, cargas_fallo=fallos)
     return 1 if (fallos or mal) else 0
 
 

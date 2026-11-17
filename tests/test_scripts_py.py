@@ -523,3 +523,35 @@ class TelegramCsvTests(unittest.TestCase):
             "18/11 18:00  Besiktas - Real Madrid → Real Madrid 78%",
             "http://localhost:8083/predictions/j12"])
         self.assertNotIn("texto largo", msg)
+
+
+class ResultadosAyerResumenTests(unittest.TestCase):
+    """basket resultados-ayer: una linea RESUMEN al terminar (tambien va al bot)."""
+
+    @classmethod
+    def setUpClass(cls):
+        from datetime import date
+        sys.path.insert(0, str(RAIZ / "scripts" / "py" / "lanzadores"))
+        import resultados_ayer
+        cls.R, cls.dia = resultados_ayer, date(2026, 11, 16)
+
+    def test_ya_estaban(self):
+        self.assertEqual(self.R.linea_resumen({"dia": self.dia, "ya": True, "total": 8}),
+                         "✅ Resultados de ayer 16/11 · ya estaban los 8 en Mongo")
+
+    def test_todos_en_mongo(self):
+        r = {"dia": self.dia, "extraidos": 8, "ligas_fallo": 0, "cargados": 8, "en_mongo": 8, "cargas_fallo": 0}
+        self.assertEqual(self.R.linea_resumen(r), "✅ Resultados de ayer 16/11 · 8 de 8 en Mongo")
+
+    def test_faltan_en_mongo_y_liga_con_fallo(self):
+        r = {"dia": self.dia, "extraidos": 8, "ligas_fallo": 1, "cargados": 8, "en_mongo": 7, "cargas_fallo": 0}
+        self.assertEqual(self.R.linea_resumen(r),
+                         "❌ Resultados de ayer 16/11 · 7 de 8 en Mongo · 1 liga(s) con fallo")
+
+    def test_error(self):
+        self.assertEqual(self.R.linea_resumen({"dia": self.dia, "error": "no se pudieron arrancar los servicios"}),
+                         "❌ Resultados de ayer 16/11 · ERROR: no se pudieron arrancar los servicios")
+
+    def test_sin_partidos(self):
+        self.assertEqual(self.R.linea_resumen({"dia": self.dia, "extraidos": 0, "ligas_fallo": 0}),
+                         "✅ Resultados de ayer 16/11 · ningún partido")

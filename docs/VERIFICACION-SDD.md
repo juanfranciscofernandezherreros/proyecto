@@ -354,3 +354,12 @@ Evidencia por paso. Ningún paso cambia el flujo del SDD §4 ni los puertos.
 | 3 | `verificar.py` 7: Telegram configurado → un vigilante y ningún CSV terminado sin avisar más de 2 min; sin configurar se omite | `OK Telegram: un vigilante en marcha`, `OK Telegram: todos los CSV terminados avisados`; gate VERDE (17-nov) | ✅ |
 | 4 | `SDD.md` §7 (resultados-ayer, pendientes hasta el projector, orden de arranque, skills autocontenidas), §9 (aviso por Telegram) y §13 (gate y tests) | Revisado a mano | ✅ |
 | 5 | Skill `estado-del-sistema` borrada; sus menciones cambiadas por `basket estado` (commit `bdeda32`) | `grep estado-del-sistema` sin resultados salvo el comentario histórico de `estado.py` | ✅ |
+
+## 22. `resultados-ayer` sin gastar tokens (plan `PLAN-resultados-ayer-sin-tokens.md`)
+
+| # | Cambio | Evidencia | Estado |
+|---|---|---|---|
+| 1 | Al terminar, salga por donde salga, `resultados_ayer.py` imprime una línea `RESUMEN:` (ya estaban / n de m en Mongo / ligas o cargas con fallo / ERROR) y la manda al bot | `basket resultados-ayer` (17-nov, día 16): `RESUMEN: ✅ Resultados de ayer 16/11 · ya estaban los 8 en Mongo`, recibido en Telegram | ✅ |
+| 2 | Tests `ResultadosAyerResumenTests` (ya estaban, todos, faltan + liga con fallo, error, sin partidos) | 56 tests OK | ✅ |
+| 3 | Skill `resultados-ayer` fina: `model: haiku`, descripción 148 caracteres (antes 704), fichero 1.549 (antes 4.721), lee solo `RESUMEN:` | Revisada a mano | ✅ |
+| 4 | La tarea programada "Basketball - Resultados de ayer al iniciar" ya existía (último resultado 0); ahora su resultado llega al bot | `schtasks /query` | ✅ |

@@ -63,3 +63,13 @@ columnas repetida), partido en mensajes de hasta 4096 caracteres y como mucho
 - [x] Tests: datos en `<pre>` escapados, reparto con máximo, sin fichero.
 - [x] Prueba real: `PLAYER_STATS_20261117124906_8SJueQyq.csv` llega como texto en 1 mensaje; vigilante reiniciado.
 - [x] Commit + push.
+
+## Cambio 2026-11-17 (2): solo la información del fichero
+
+El usuario no quiere ni el fichero ni su contenido. Un mensaje por CSV con solo:
+estado (`✅ COMPLETADO` / `❌ FALLIDO`), nombre del CSV y hora de Madrid en que se procesó.
+
+- [x] `aviso()` y `hora_local()`; fuera `pie()`, `mensajes()`, `leer_lineas()` y `TELEGRAM_MAX_MENSAJES`.
+- [x] Tests `TelegramCsvTests` reescritos (50 tests OK).
+- [x] Vigilante reiniciado (12:54:57); aviso real de `POINT_BY_POINT_20261117125350_8ArlEYR6.csv`.
+- [x] Commit + push.

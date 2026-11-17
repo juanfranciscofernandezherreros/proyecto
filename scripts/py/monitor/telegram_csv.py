@@ -4,9 +4,8 @@ r"""Vigilante: envia al bot de Telegram cada CSV que termina de procesar el laun
 Todos los caminos de carga (resultados-ayer, pendientes, run_all_csv_batches,
 reextraer...) acaban en el launcher, que deja una fila por CSV en
 public.batch_launch_request. Este vigilante lee esa tabla cada TELEGRAM_INTERVALO
-segundos y manda los datos de cada CSV terminado (COMPLETED o FAILED) como texto
-(no el fichero), con su estado, tipo de batch y, si fallo, el error. Si no caben en
-un mensaje se parten en varios (TELEGRAM_MAX_MENSAJES, 5 por defecto).
+segundos y, por cada CSV terminado, manda un mensaje con solo tres cosas: el estado
+(COMPLETADO / FALLIDO), el nombre del CSV y la hora (Madrid) en que se proceso.
 
 Uso:  python scripts\py\monitor\telegram_csv.py [--prueba | --una-vez]
   --prueba   envia un mensaje de prueba y termina.
@@ -32,7 +31,6 @@ sys.path.insert(0, str(SCRIPTS_PY))
 import config as _config
 
 CFG = _config.cargar()
-EMOJI = {"COMPLETED": "\u2705", "FAILED": "\u274c"}
 
 # Misma consulta que sql\consultas\2026-11-17_1240_csv-terminados-para-telegram.sql,
 # con la marca de agua del vigilante en lugar de "hace una hora".
@@ -89,21 +87,24 @@ def terminados_desde(desde):
     return json.loads(texto) if texto else []
 
 
-def pie(fila):
-    """Texto que acompana al CSV en Telegram (maximo 1024 caracteres)."""
-    ruta = Path(fila.get("file_path") or "")
-    estado = fila.get("status") or "?"
-    hora = (fila.get("finished_at") or "")[:19].replace("T", " ")
-    lineas = [f"{EMOJI.get(estado, '')} {estado} \u00b7 {fila.get('batch_type') or '?'}".strip(),
-              ruta.name or "(sin fichero)",
-              f"\U0001F4C1 {ruta.parent.name}" if ruta.parent.name else "",
-              f"\U0001F552 {hora} UTC" if hora else ""]
-    if estado != "COMPLETED":
-        if fila.get("exit_code") is not None:
-            lineas.append(f"exit_code {fila['exit_code']}")
-        if fila.get("error"):
-            lineas.append("Error: " + fila["error"])
-    return "\n".join(l for l in lineas if l)[:1024]
+ESTADO = {"COMPLETED": "✅ COMPLETADO", "FAILED": "❌ FALLIDO"}
+
+
+def hora_local(finished_at):
+    """finished_at (ISO UTC) a hora de Madrid, "dd/mm HH:MM:SS". Vacio si no se entiende."""
+    try:
+        from zoneinfo import ZoneInfo
+        dt = datetime.fromisoformat((finished_at or "").replace("Z", "+00:00"))
+        return dt.astimezone(ZoneInfo("Europe/Madrid")).strftime("%d/%m %H:%M:%S")
+    except Exception:
+        return ""
+
+
+def aviso(fila):
+    """El aviso de un CSV: solo el estado, el nombre del CSV y la hora en que se proceso."""
+    estado = ESTADO.get(fila.get("status"), fila.get("status") or "?")
+    nombre = Path(fila.get("file_path") or "").name or "(sin fichero)"
+    return " · ".join(x for x in (estado, nombre, hora_local(fila.get("finished_at"))) if x)
 
 
 def _curl(metodo, campos, fichero=None):
@@ -126,55 +127,9 @@ def _curl(metodo, campos, fichero=None):
     return r
 
 
-LIMITE_MENSAJE = 4096  # caracteres por mensaje de Telegram
-
-
-def mensajes(fila, lineas, max_mensajes=5):
-    """Textos HTML a enviar para un CSV: el pie y los datos (no el fichero), en un
-    bloque <pre> por mensaje. La cabecera de columnas se repite en cada bloque. Si no
-    caben en `max_mensajes`, el ultimo avisa de cuantas filas quedan sin enviar."""
-    from html import escape
-    cab_texto = escape(pie(fila)[:900])
-    if not lineas:
-        return [cab_texto + "\n(fichero no encontrado o vacio)"]
-    columnas, datos = escape(lineas[0]), [escape(l) for l in lineas[1:]]
-    cab_texto += f"\n{len(datos)} filas"
-    salida, i = [], 0
-    while i < len(datos) or not salida:
-        prefijo = cab_texto + "\n" if not salida else ""
-        cuerpo, usado = [columnas], len(prefijo) + len("<pre></pre>") + len(columnas) + 60
-        while i < len(datos) and usado + len(datos[i]) + 1 <= LIMITE_MENSAJE:
-            cuerpo.append(datos[i])
-            usado += len(datos[i]) + 1
-            i += 1
-        if len(cuerpo) == 1 and i < len(datos):  # una fila sola mas larga que el mensaje
-            cuerpo.append(datos[i][:LIMITE_MENSAJE - usado - 2] + "…")
-            i += 1
-        texto = prefijo + "<pre>" + "\n".join(cuerpo) + "</pre>"
-        if len(salida) == max_mensajes - 1 and i < len(datos):
-            texto += f"\n… {len(datos) - i} filas más sin enviar"
-            salida.append(texto)
-            break
-        salida.append(texto)
-    return salida
-
-
-def leer_lineas(ruta):
-    """Lineas no vacias del CSV (sin BOM). Vacio si no existe."""
-    try:
-        with open(ruta, encoding="utf-8-sig", errors="replace") as fh:
-            return [l.rstrip("\r\n") for l in fh if l.strip()]
-    except OSError:
-        return []
-
-
 def enviar(fila):
-    """Envia los datos del CSV como texto (no el fichero) en uno o varios mensajes."""
-    chat = CFG["TELEGRAM_CHAT_ID"].strip()
-    ruta = Path(fila.get("file_path") or "")
-    maximo = int(CFG.get("TELEGRAM_MAX_MENSAJES") or 5)
-    for texto in mensajes(fila, leer_lineas(ruta) if ruta.is_file() else [], maximo):
-        _curl("sendMessage", {"chat_id": chat, "text": texto, "parse_mode": "HTML"})
+    """Un mensaje por CSV: estado, nombre y hora (ni el fichero ni sus datos)."""
+    _curl("sendMessage", {"chat_id": CFG["TELEGRAM_CHAT_ID"].strip(), "text": aviso(fila)})
 
 
 def pasada():

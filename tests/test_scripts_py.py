@@ -476,7 +476,7 @@ class ResultadosAyerCuadrePrevioTests(unittest.TestCase):
 
 
 class TelegramCsvTests(unittest.TestCase):
-    """Vigilante que envia al bot de Telegram cada CSV procesado (monitor/telegram_csv.py)."""
+    """Vigilante que avisa por Telegram de cada CSV procesado (monitor/telegram_csv.py)."""
 
     @classmethod
     def setUpClass(cls):
@@ -484,24 +484,16 @@ class TelegramCsvTests(unittest.TestCase):
         import telegram_csv
         cls.T = telegram_csv
 
-    def test_pie_completado_lleva_estado_batch_fichero_y_carpeta(self):
-        pie = self.T.pie({"status": "COMPLETED", "batch_type": "point-by-point",
-                          "file_path": r"C:\data\basketball-ready\current\8zdrsx7r\POINT_BY_POINT_1_8zdrsx7r.csv",
-                          "finished_at": "2026-11-17T10:56:05.123456Z", "exit_code": 0, "error": None})
-        self.assertIn("COMPLETED", pie)
-        self.assertIn("point-by-point", pie)
-        self.assertIn("POINT_BY_POINT_1_8zdrsx7r.csv", pie)
-        self.assertIn("8zdrsx7r", pie)
-        self.assertIn("2026-11-17 10:56:05", pie)
-        self.assertNotIn("Error", pie)
+    def test_aviso_solo_estado_nombre_y_hora_de_madrid(self):
+        aviso = self.T.aviso({"status": "COMPLETED", "batch_type": "player-stats", "exit_code": 0,
+                              "file_path": r"C:\data\x\8SJueQyq\PLAYER_STATS_1_8SJueQyq.csv",
+                              "finished_at": "2026-11-17T11:49:30.123456Z", "error": None})
+        self.assertEqual(aviso, "\u2705 COMPLETADO \u00b7 PLAYER_STATS_1_8SJueQyq.csv \u00b7 17/11 12:49:30")
 
-    def test_pie_fallido_lleva_el_error_y_no_pasa_de_1024(self):
-        pie = self.T.pie({"status": "FAILED", "batch_type": "results", "file_path": r"C:\x\R.csv",
-                          "finished_at": "2026-11-17T10:00:00Z", "exit_code": 1, "error": "x" * 5000})
-        self.assertIn("FAILED", pie)
-        self.assertIn("exit_code 1", pie)
-        self.assertIn("Error: x", pie)
-        self.assertLessEqual(len(pie), 1024)
+    def test_aviso_fallido_sin_error_ni_mas_datos(self):
+        aviso = self.T.aviso({"status": "FAILED", "file_path": r"C:\x\R.csv",
+                              "finished_at": "2026-07-01T10:00:00Z", "error": "boom", "exit_code": 1})
+        self.assertEqual(aviso, "\u274c FALLIDO \u00b7 R.csv \u00b7 01/07 12:00:00")
 
     def test_configurado_solo_con_token_y_chat(self):
         self.assertFalse(self.T.configurado({"TELEGRAM_BOT_TOKEN": "t", "TELEGRAM_CHAT_ID": ""}))
@@ -517,27 +509,3 @@ class TelegramCsvTests(unittest.TestCase):
         for linea in texto.splitlines():
             if linea.startswith(("TELEGRAM_BOT_TOKEN=", "TELEGRAM_CHAT_ID=")):
                 self.assertEqual(linea.split("=", 1)[1].strip(), "", linea.split("=")[0])
-
-    def test_mensajes_llevan_los_datos_no_el_fichero(self):
-        fila = {"status": "COMPLETED", "batch_type": "results", "file_path": r"C:\x\R.csv",
-                "finished_at": "2026-11-17T10:00:00Z"}
-        msgs = self.T.mensajes(fila, ["matchId,home", "a1,Real <Madrid>", "a2,Barca"])
-        self.assertEqual(len(msgs), 1)
-        self.assertIn("2 filas", msgs[0])
-        self.assertIn("<pre>matchId,home\na1,Real &lt;Madrid&gt;\na2,Barca</pre>", msgs[0])
-
-    def test_mensajes_se_parten_y_respetan_el_maximo(self):
-        fila = {"status": "COMPLETED", "batch_type": "point-by-point", "file_path": r"C:\x\P.csv",
-                "finished_at": "2026-11-17T10:00:00Z"}
-        lineas = ["c1,c2"] + [f"{i}," + "x" * 90 for i in range(400)]
-        msgs = self.T.mensajes(fila, lineas, max_mensajes=3)
-        self.assertEqual(len(msgs), 3)
-        self.assertTrue(all(len(m) <= 4096 for m in msgs))
-        self.assertTrue(all("<pre>c1,c2\n" in m for m in msgs))
-        self.assertIn("filas más sin enviar", msgs[-1])
-        self.assertIn("400 filas", msgs[0])
-
-    def test_mensajes_sin_fichero(self):
-        msgs = self.T.mensajes({"status": "FAILED", "file_path": ""}, [])
-        self.assertEqual(len(msgs), 1)
-        self.assertIn("no encontrado", msgs[0])

@@ -364,8 +364,11 @@ class BasketLogsTests(unittest.TestCase):
         abrir.assert_called_once()
         self.assertIn("/d/basket-logs/", abrir.call_args[0][0])
 
-    def test_no_abre_en_tareas_programadas_ni_con_variable(self):
-        self._observabilidad("ciclo-diario").assert_not_called()
+    def test_abre_tambien_en_tareas_programadas(self):
+        for comando in ("resultados-ayer", "ciclo-diario", "inicio-automatico"):
+            self._observabilidad(comando).assert_called_once()
+
+    def test_no_abre_con_variable(self):
         self._observabilidad("pendientes", {"BASKET_NO_ABRIR_GRAFANA": "1"}).assert_not_called()
 
 if __name__ == "__main__":

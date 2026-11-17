@@ -323,6 +323,7 @@ Evidencia por paso. Ningún paso cambia el flujo del SDD §4 ni los puertos.
 | 4 | Loki 192→768 MB y promtail 96→256 MB (`Start-BasketballLocal.ps1`, `asegurar.py`): sin memoria, Loki no aceptaba envíos | Tras el cambio, Loki 110 MB y promtail 53 MB, CPU ~1 %; 53 de 56 líneas en Loki al momento | ✅ |
 | 5 | Tests `BasketLogsTests` (regex de promtail, comandos sin Grafana, dashboard válido) | 42 tests OK; gate `verificar.py` VERDE | ✅ |
 | 6 | `basket.py` abre por defecto en el navegador el dashboard `basket-logs` (enlace `Logs en vivo:`), salvo en `ciclo-diario`&`inicio-automatico` o con `BASKET_NO_ABRIR_GRAFANA=1` | Tests `test_abre_dashboard_de_logs_por_defecto` y `test_no_abre_en_tareas_programadas_ni_con_variable` (61 OK); `basket verificar` VERDE el 17&11 | ✅ |
+| 7 | El dashboard `basket-logs` se abre siempre, también en `ciclo-diario` e `inicio-automatico`; solo `BASKET_NO_ABRIR_GRAFANA=1` lo evita | Test `test_abre_tambien_en_tareas_programadas` (62 OK); `basket verificar` VERDE el 17/11 | ✅ |
 
 ## 19. `basket pendientes` hasta el projector (plan `PLAN-pendientes-hasta-projector.md`)
 

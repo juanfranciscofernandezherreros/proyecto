@@ -25,8 +25,6 @@ CFG = _config.cargar()
 # Comandos que no levantan Grafana al empezar (rapidos, de vigilancia o que ya la abren).
 SIN_OBSERVABILIDAD = {"estado", "antibloqueo", "vigilar", "monitor", "grafana", "tokens"}
 DASHBOARD_LOGS = "basket-logs"
-# Tareas programadas: corren sin nadie delante, no abren el navegador.
-SIN_ABRIR_NAVEGADOR = {"ciclo-diario", "inicio-automatico"}
 
 # comando coherente -> (modulo lanzador, descripcion)
 COMANDOS = {
@@ -83,8 +81,8 @@ def _asegurar_observabilidad(comando, log):
               f"&from=now-3h&to=now&timezone=browser&var-comando=$__all&var-ejecucion=$__all"
               f"&var-buscar=&refresh=5s")
     print(f"Logs en vivo: {enlace}", flush=True)
-    # Pedido por el usuario: abrir el dashboard por defecto, salvo en tareas programadas.
-    if comando not in SIN_ABRIR_NAVEGADOR and os.environ.get("BASKET_NO_ABRIR_GRAFANA") != "1":
+    # Pedido por el usuario: abrir siempre el dashboard, también en tareas programadas.
+    if os.environ.get("BASKET_NO_ABRIR_GRAFANA") != "1":
         try:
             webbrowser.open(enlace)
         except Exception as e:  # sin navegador no se corta el comando

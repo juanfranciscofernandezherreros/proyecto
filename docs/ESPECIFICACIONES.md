@@ -282,7 +282,22 @@ no está en Mongo.
 cmd //c "1_EJECUTAR\basket.cmd ultimos"
 ```
 
-### 7.3 Ciclo diario (lo que corre la tarea programada)
+### 7.2b Flujo diario sin Claude (tarea «Resultados de ayer al iniciar»)
+
+La tarea programada activa es **«Basketball - Resultados de ayer al iniciar»**: al
+iniciar sesión lanza `basket resultados-ayer`, que al terminar encadena
+`basket pendientes` (salvo `--solo-csv` o `RESULTADOS_AYER_PENDIENTES=0`). Así el día
+entero corre sin intervención:
+
+1. Se abre el dashboard de logs de Grafana (`basket-logs`).
+2. Resultados de ayer → Postgres → Mongo; su `RESUMEN` llega a Telegram.
+3. Pendientes: aviso a Telegram «⏳ Pendientes: N partidos por procesar», proceso hasta
+   el projector y `RESUMEN` final a Telegram.
+
+«Ciclo diario» y «Procesamiento automatico al iniciar» siguen deshabilitadas para no
+repetir el trabajo.
+
+### 7.3 Ciclo diario (tarea programada, deshabilitada)
 
 ```bash
 cmd //c "1_EJECUTAR\basket.cmd ciclo-diario"

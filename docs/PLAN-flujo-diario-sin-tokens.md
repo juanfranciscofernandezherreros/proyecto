@@ -14,7 +14,7 @@ Situación de partida:
 - [x] 1. `resultados_ayer.py`: al terminar (salvo `--solo-csv` o
   `RESULTADOS_AYER_PENDIENTES=0`) lanza `matchids_pendientes.main([])` en el mismo
   proceso, aunque los resultados hayan fallado. El código de salida es el peor de los dos.
-- [ ] 2. Tarea programada: no se toca. «Resultados de ayer al iniciar» ya está activa
+- [x] 2. Tarea programada: no se toca. «Resultados de ayer al iniciar» ya está activa
   y con el punto 1 cubre el día entero. «Ciclo diario» sigue deshabilitada para no
   duplicar. Se documenta en `docs/ESPECIFICACIONES.md`.
 - [ ] 3. `procesar_matchids.py`: tras la auditoría, si hay N > 0 partidos, envía a

@@ -12,7 +12,7 @@ y ~2 min por partido, no hay forma de saber cuántos quedan sin mirar el log.
   procesar. Si Telegram falla, avisa en el log y sigue. Test del texto y del envío.
 - [x] 2. Tests, `basket verificar` en VERDE, evidencia en `docs/VERIFICACION-SDD.md`,
   `index.html` y commit + push.
-- [ ] 3. Añadir el mensaje a la tabla de Telegram del artículo del blog (rama, PR, checks,
+- [x] 3. Añadir el mensaje a la tabla de Telegram del artículo del blog (rama, PR, checks,
   merge, comprobar la publicación).
 
 ## Resultado (2026-11-17)
@@ -21,3 +21,4 @@ y ~2 min por partido, no hay forma de saber cuántos quedan sin mirar el log.
   `basket verificar` VERDE. `index.html` muestra el mensaje en «Observabilidad y avisos».
 - El `pendientes` que ya estaba en marcha cargó el código antes del cambio: los avisos por
   partido empiezan en la siguiente ejecución.
+- Artículo del blog actualizado (PR #43 fusionada, comprobado en la web).

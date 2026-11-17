@@ -23,7 +23,7 @@ Dos desarrollos funcionales y dos de mantenimiento, todos verificados:
 | M2 | Limpieza de servicios/dashboards muertos (Kafka) | §3.1, §9 | ✅ Verificado |
 | M3 | API: tests que no compilaban → verdes (CI) | §6, §13 | ✅ Verificado |
 | M4 | python-pyppeter: suite en verde (CI) | §3.1, §5, §13 | ✅ Verificado |
-| 19 | `basket pendientes` hasta el projector (comprueba Mongo) | §7 | ✅ Verificado (falta una ejecución completa con el código nuevo) |
+| 19 | `basket pendientes` hasta el projector (comprueba Mongo) | §7 | ✅ Verificado (42 de 42 en Mongo) |
 | 20 | Aviso por Telegram de cada CSV y de la predicción de la jornada | §9 | ✅ Verificado |
 | 21 | Postgres antes que Grafana; gate con vistas de Grafana y Telegram | §7, §13 | ✅ Verificado |
 
@@ -330,7 +330,7 @@ Evidencia por paso. Ningún paso cambia el flujo del SDD §4 ni los puertos.
 | 1 | `matchids_pendientes.py` asegura también `runtime` (Mongo, projector, API y web), como `resultados-ayer`; Grafana, Loki y promtail ya los levanta `basket.py` | Compila; gate `verificar.py` VERDE (17-nov) | ✅ |
 | 2 | Al terminar, espera `CICLO_ESPERA_CUADRE` y comprueba en Mongo cada partido `COMPLETED` del `PROCESAR_MATCHIDS_*.csv` de la ejecución: `OK` / `FALTAN <secciones>` / `NO ESTA EN MONGO`; código 1 solo si alguno no está | Prueba con 6 partidos reales de liga-endesa y 1 inventado: 4 OK, 2 FALTAN, 1 NO ESTA EN MONGO → `ausentes: 1`; sin CSV de la ejecución, "No hay partidos procesados" | ✅ |
 | 3 | Skill `procesar-pendientes` con la misma estructura que `resultados-ayer` (comando, pasos en orden, qué decir al terminar, tabla de fallos) y sin mandar a otras skills; ayuda de `basket pendientes` actualizada | Revisada a mano | ✅ |
-| 4 | Ejecución completa de `basket pendientes` con el código nuevo | Pendiente: la ejecución en curso (97 partidos) arrancó con el código anterior | ⏳ |
+| 4 | Comprobación en Mongo de una ejecución real de `basket pendientes` | Ejecución del 17-nov parada a petición tras el partido 42 de 97 (auditoría: quedan 55). `comprobar_en_mongo` sobre los 42: **42 de 42 en Mongo, 27 con todas las secciones**, 15 `FALTAN players`, los 15 `NO_PUBLICADO` en `dataset_unavailable` (3 intentos; `sql/consultas/2026-11-17_1435_players-sin-publicar-pendientes.sql`). 0 avisos ni errores en el log. Sigue sin verse el paso 9 lanzado por el propio comando de principio a fin | ✅ |
 
 ## 20. Aviso por Telegram de cada CSV procesado (plan `PLAN-telegram-csv-procesados.md`)
 

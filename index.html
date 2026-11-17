@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Basketball · Flujo del proyecto</title>
+<meta name="description" content="Cómo viaja un partido de baloncesto desde Flashscore hasta la web: extracción, carga, proyección, API, web, observabilidad y verificación.">
+<style>
+:root {
+  --bg: #f7f6f3; --surface: #ffffff; --surface-2: #f0eee9; --text: #1d1c1a; --muted: #5f5b54;
+  --border: #dedad2; --accent: #c2410c; --accent-soft: #fdeee6; --ok: #15803d; --ok-soft: #e7f5ec;
+  --info: #1d4ed8; --info-soft: #e8eefc; --warn: #a16207; --warn-soft: #fbf3dc; --code-bg: #efece6;
+  --shadow: 0 1px 2px rgba(0,0,0,.05), 0 4px 16px rgba(0,0,0,.04);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #141412; --surface: #1d1c1a; --surface-2: #26241f; --text: #ecebe7; --muted: #a8a49b;
+    --border: #36332d; --accent: #fb923c; --accent-soft: #3a2417; --ok: #4ade80; --ok-soft: #16301f;
+    --info: #93b4fd; --info-soft: #1b2540; --warn: #facc15; --warn-soft: #352d10; --code-bg: #26241f;
+    --shadow: none;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #141412; --surface: #1d1c1a; --surface-2: #26241f; --text: #ecebe7; --muted: #a8a49b;
+  --border: #36332d; --accent: #fb923c; --accent-soft: #3a2417; --ok: #4ade80; --ok-soft: #16301f;
+  --info: #93b4fd; --info-soft: #1b2540; --warn: #facc15; --warn-soft: #352d10; --code-bg: #26241f;
+  --shadow: none;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--text);
+  font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+a { color: var(--accent); }
+code, pre { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; font-size: .88em; }
+code { background: var(--code-bg); padding: .1em .35em; border-radius: 4px; overflow-wrap: anywhere; }
+pre { background: var(--code-bg); padding: 12px 14px; border-radius: 8px; overflow-x: auto; margin: 10px 0; }
+pre code { background: none; padding: 0; }
+.wrap { max-width: 1040px; margin: 0 auto; padding: 0 16px; }
+header.hero { padding: 48px 0 28px; border-bottom: 1px solid var(--border); }
+.eyebrow { color: var(--accent); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; font-size: .78rem; }
+h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); line-height: 1.15; margin: 8px 0 12px; }
+h2 { font-size: 1.45rem; margin: 0 0 6px; }
+h3 { font-size: 1.05rem; margin: 18px 0 6px; }
+.lead { color: var(--muted); font-size: 1.08rem; max-width: 760px; margin: 0; }
+nav.toc { position: sticky; top: 0; z-index: 5; background: color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter: blur(6px); border-bottom: 1px solid var(--border); }
+nav.toc .wrap { display: flex; gap: 6px; overflow-x: auto; padding-top: 8px; padding-bottom: 8px; scrollbar-width: thin; }
+nav.toc a { white-space: nowrap; text-decoration: none; color: var(--muted); font-size: .88rem;
+  padding: 4px 10px; border-radius: 999px; border: 1px solid transparent; }
+nav.toc a:hover { color: var(--text); border-color: var(--border); background: var(--surface); }
+section { padding: 36px 0 8px; scroll-margin-top: 52px; }
+.sub { color: var(--muted); margin: 0 0 16px; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; box-shadow: var(--shadow); }
+.grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+/* ---- diagrama ---- */
+.flow { display: grid; gap: 10px; grid-template-columns: repeat(4, 1fr); counter-reset: paso; }
+.node { position: relative; background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+  padding: 14px 14px 12px; box-shadow: var(--shadow); text-decoration: none; color: var(--text); display: block; }
+.node:hover { border-color: var(--accent); }
+.node .n { counter-increment: paso; }
+.node .n::before { content: counter(paso); display: inline-grid; place-items: center; width: 22px; height: 22px;
+  border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-weight: 700; font-size: .78rem; margin-right: 6px; }
+.node b { font-size: .98rem; }
+.node small { display: block; color: var(--muted); font-size: .82rem; line-height: 1.4; margin-top: 4px; }
+.node .port { position: absolute; top: 10px; right: 10px; font-size: .72rem; color: var(--muted);
+  background: var(--surface-2); padding: 1px 7px; border-radius: 999px; }
+.node.store { border-style: dashed; }
+.flow-legend { display: flex; flex-wrap: wrap; gap: 14px; color: var(--muted); font-size: .84rem; margin-top: 12px; }
+.flow-legend span::before { content: ""; display: inline-block; width: 12px; height: 12px; border: 1px solid var(--border);
+  border-radius: 3px; margin-right: 6px; vertical-align: -1px; background: var(--surface); }
+.flow-legend .ds::before { border-style: dashed; }
+.side { margin-top: 14px; display: grid; gap: 10px; grid-template-columns: repeat(3, 1fr); }
+.side .node { background: var(--surface-2); }
+@media (max-width: 860px) { .flow { grid-template-columns: repeat(2, 1fr); } .side { grid-template-columns: 1fr; } }
+@media (max-width: 460px) { .flow { grid-template-columns: 1fr; } }
+/* ---- etapas ---- */
+.stage { display: grid; grid-template-columns: 44px 1fr; gap: 14px; margin: 18px 0; }
+.stage .badge { width: 40px; height: 40px; border-radius: 10px; background: var(--accent-soft); color: var(--accent);
+  display: grid; place-items: center; font-weight: 800; }
+.stage .card h3 { margin-top: 0; }
+.stage p { margin: 6px 0; }
+.kv { display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px; font-size: .92rem; margin-top: 8px; }
+.kv dt { color: var(--muted); }
+.kv dd { margin: 0; }
+@media (max-width: 520px) { .stage { grid-template-columns: 1fr; } .kv { grid-template-columns: 1fr; } .kv dt { margin-top: 6px; } }
+/* ---- tablas ---- */
+.table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+th { background: var(--surface-2); font-weight: 600; font-size: .84rem; color: var(--muted); }
+tr:last-child td { border-bottom: 0; }
+.pill { display: inline-block; font-size: .74rem; font-weight: 600; padding: 1px 8px; border-radius: 999px; }
+.pill.ok { background: var(--ok-soft); color: var(--ok); }
+.pill.info { background: var(--info-soft); color: var(--info); }
+.pill.warn { background: var(--warn-soft); color: var(--warn); }
+.note { border-left: 3px solid var(--warn); background: var(--warn-soft); padding: 10px 14px; border-radius: 0 8px 8px 0; margin: 12px 0; font-size: .94rem; }
+.tip { border-left: 3px solid var(--info); background: var(--info-soft); padding: 10px 14px; border-radius: 0 8px 8px 0; margin: 12px 0; font-size: .94rem; }
+ol.steps { padding-left: 1.2em; margin: 8px 0; }
+ol.steps li { margin: 4px 0; }
+.tg { font-family: ui-monospace, Consolas, monospace; font-size: .86rem; background: var(--surface-2);
+  border: 1px solid var(--border); border-radius: 12px 12px 12px 4px; padding: 10px 12px; margin: 8px 0; white-space: pre-wrap; }
+footer { color: var(--muted); font-size: .86rem; padding: 32px 0 48px; border-top: 1px solid var(--border); margin-top: 40px; }
+.theme-btn { float: right; margin-top: 4px; background: var(--surface); color: var(--text); border: 1px solid var(--border);
+  border-radius: 999px; padding: 4px 12px; font: inherit; font-size: .84rem; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <button class="theme-btn" id="tema" type="button" aria-label="Cambiar tema claro u oscuro">◐ Tema</button>
+    <div class="eyebrow">Proyecto Basketball · actualizado 17/11/2026</div>
+    <h1>De Flashscore a la web: el flujo completo</h1>
+    <p class="lead">Cómo entra un partido de baloncesto en el sistema, por dónde pasa, cómo se comprueba
+      que llegó bien y cómo te enteras desde el móvil. Todo se maneja con un único comando:
+      <code>1_EJECUTAR\basket.cmd &lt;comando&gt;</code>.</p>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Índice">
+  <div class="wrap">
+    <a href="#flujo">Flujo</a>
+    <a href="#etapas">Etapas</a>
+    <a href="#diario">Rutina diaria</a>
+    <a href="#arranque">Arranque</a>
+    <a href="#avisos">Observabilidad y avisos</a>
+    <a href="#verificar">Verificación</a>
+    <a href="#comandos">Comandos</a>
+    <a href="#skills">Skills</a>
+    <a href="#puertos">Puertos y rutas</a>
+    <a href="#normas">Normas</a>
+  </div>
+</nav>
+
+<main class="wrap">
+
+<!-- ================= FLUJO ================= -->
+<section id="flujo">
+  <h2>El flujo de un vistazo</h2>
+  <p class="sub">Cada caja es una etapa; haz clic para ver el detalle. El dato siempre avanza en este orden.</p>
+
+  <div class="flow">
+    <a class="node" href="#e1"><span class="n"></span><b>Flashscore</b><small>Fuente: resultados, calendario, jugadas y estadísticas</small></a>
+    <a class="node" href="#e2"><span class="n"></span><b>Scraper</b><small><code>python-pyppeter</code> con Selenium + Edge genera CSV</small></a>
+    <a class="node store" href="#e3"><span class="n"></span><b>CSV en disco</b><small><code>competitions\</code> → consolidado en <code>basketball-ready\current</code></small></a>
+    <a class="node" href="#e4"><span class="n"></span><b>Launcher</b><span class="port">8088</span><small>Recibe cada CSV y lanza su batch Java</small></a>
+    <a class="node store" href="#e5"><span class="n"></span><b>PostgreSQL</b><span class="port">55432</span><small>Fuente de verdad: un schema por dataset</small></a>
+    <a class="node" href="#e6"><span class="n"></span><b>Projector</b><small>Une todo por partido cada ~60 s</small></a>
+    <a class="node store" href="#e7"><span class="n"></span><b>MongoDB</b><span class="port">27017</span><small>Read model: un documento por partido</small></a>
+    <a class="node" href="#e8"><span class="n"></span><b>API → Web</b><span class="port">8082 · 8083</span><small>Spring Boot sirve; React muestra</small></a>
+  </div>
+
+  <div class="side">
+    <a class="node" href="#auditoria"><b>Auditoría</b><span class="port">8090</span><small>Lee Postgres y dice qué partidos jugados están incompletos</small></a>
+    <a class="node" href="#avisos"><b>Grafana + Loki + Telegram</b><span class="port">8084</span><small>Logs en vivo, dashboards y aviso al móvil de cada CSV</small></a>
+    <a class="node" href="#verificar"><b>Gate <code>basket verificar</code></b><small>7 comprobaciones verde/rojo del sistema real</small></a>
+  </div>
+  <div class="flow-legend"><span>proceso o servicio</span><span class="ds">almacén de datos</span></div>
+</section>
+
+<!-- ================= ETAPAS ================= -->
+<section id="etapas">
+  <h2>Etapa a etapa</h2>
+  <p class="sub">Qué hace cada pieza, dónde vive y qué deja.</p>
+
+  <div class="stage" id="e1"><div class="badge">1</div><div class="card">
+    <h3>Flashscore: la fuente</h3>
+    <p>Todo sale de las páginas públicas de Flashscore de 11 ligas, definidas en <code>LIGAS_BASKET.json</code>:
+      Euroliga, Liga Endesa (ACB), NBA, Süper Lig, Basket League, Winner League, Lega A, LNB, BBL, LKL y la Superliga serbia.</p>
+    <dl class="kv">
+      <dt>Datasets</dt><dd><code>RESULTS</code> (marcador y parciales), <code>FIXTURES</code> (calendario), <code>SCORE_SUMMARY</code>,
+        <code>POINT_BY_POINT</code> (jugada a jugada), <code>TEAM_STATS</code>, <code>PLAYER_STATS</code></dd>
+      <dt>Identidad</dt><dd>Cada partido es un <code>match_id</code> de Flashscore (p. ej. <code>8zdrsx7r</code>) más país y competición.</dd>
+    </dl>
+  </div></div>
+
+  <div class="stage" id="e2"><div class="badge">2</div><div class="card">
+    <h3>Scraper: de la página al CSV</h3>
+    <p><code>python-pyppeter\flashscore.py</code> abre Flashscore con <b>Selenium + Microsoft Edge</b>
+      (el <code>msedgedriver</code> se ajusta solo a la versión de Edge) y escribe un CSV por dataset con un contrato fijo de columnas.</p>
+    <dl class="kv">
+      <dt>Resultados de liga</dt><dd><code>flashscore.py competition results &lt;url&gt;</code> → <code>RESULTS_&lt;fecha&gt;_&lt;pais&gt;_&lt;competicion&gt;.csv</code></dd>
+      <dt>Detalle de partido</dt><dd><code>extract_flashscore_match_bundle.py</code> → jugada a jugada por cuartos y estadísticas</dd>
+      <dt>Lo lanza</dt><dd>Siempre un comando <code>basket</code> (nunca piezas sueltas).</dd>
+    </dl>
+  </div></div>
+
+  <div class="stage" id="e3"><div class="badge">3</div><div class="card">
+    <h3>CSV en disco</h3>
+    <p>Los CSV crudos quedan por liga y partido; antes de cargarse se <b>consolidan</b> en la carpeta que lee el launcher.</p>
+    <dl class="kv">
+      <dt>Crudos</dt><dd><code>C:\data\basketball\competitions\&lt;pais&gt;\&lt;competicion&gt;\[&lt;match_id&gt;\]</code></dd>
+      <dt>Listos para cargar</dt><dd><code>C:\data\basketball-ready\current\</code></dd>
+      <dt>Resultados de ayer</dt><dd><code>C:\data\basketball\reports\resultados-ayer\RESULTS_YESTERDAY_&lt;fecha&gt;.csv</code> (fuera de <code>competitions\</code>)</dd>
+    </dl>
+    <div class="note">No copiar CSV crudos a mano en <code>basketball-ready\current</code>: deben consolidarse antes.</div>
+  </div></div>
+
+  <div class="stage" id="e4"><div class="badge">4</div><div class="card">
+    <h3>Launcher: un batch por CSV</h3>
+    <p><code>csv-extra-batch\launcher</code> (Java 21, puerto <b>8088</b>) recibe cada CSV por
+      <code>POST /batch-launches</code>, detecta su tipo y lanza el JAR del batch que corresponde. Cada envío deja una fila en
+      <code>public.batch_launch_request</code> con su estado (<code>QUEUED → RUNNING → COMPLETED / FAILED</code>).</p>
+    <dl class="kv">
+      <dt>Batches</dt><dd><code>results</code>, <code>fixtures</code>, <code>match-summary</code>, <code>team-stats</code>,
+        <code>stats-player</code>, <code>point-by-point</code></dd>
+      <dt>Por qué importa</dt><dd>Es el <b>único punto</b> por el que pasa todo CSV; de esa tabla leen Grafana y el aviso de Telegram.</dd>
+    </dl>
+  </div></div>
+
+  <div class="stage" id="e5"><div class="badge">5</div><div class="card">
+    <h3>PostgreSQL: la fuente de verdad</h3>
+    <p>Contenedor <code>local-validation-postgres-1</code>, puerto <b>55432</b> desde Windows. Un schema por dataset:</p>
+    <div class="table-wrap"><table>
+      <tr><th>Buscas…</th><th>Schema.tabla</th></tr>
+      <tr><td>Calendario</td><td><code>fixtures.fixtures</code></td></tr>
+      <tr><td>Resultado y parciales</td><td><code>results.results</code></td></tr>
+      <tr><td>Resumen de marcador</td><td><code>match_summary.match_summary</code></td></tr>
+      <tr><td>Estadísticas de equipo</td><td><code>team_stats.team_stats</code></td></tr>
+      <tr><td>Estadísticas de jugadores</td><td><code>stats_player.stats_player</code></td></tr>
+      <tr><td>Jugada a jugada</td><td><code>point_by_point.point_by_point_event</code></td></tr>
+      <tr><td>Cargas del launcher</td><td><code>public.batch_launch_request</code></td></tr>
+    </table></div>
+    <div class="note">Nunca <code>docker compose down -v</code>: borra el volumen y todos los datos. Toda consulta SQL que se ejecute se guarda en <code>sql\consultas\</code>.</div>
+
+    <h3 id="auditoria">Auditoría de pendientes</h3>
+    <p><code>fixtures-processing-audit</code> (puerto <b>8090</b>) cruza el calendario con lo cargado y decide qué partidos
+      <b>ya jugados</b> están pendientes y qué dataset le falta a cada uno. Los datasets que Flashscore no publica quedan en
+      <code>fixtures_processing_audit.dataset_unavailable</code> (<code>NO_PUBLICADO</code> / <code>VACIO</code>) para no reintentarlos en bucle.</p>
+  </div></div>
+
+  <div class="stage" id="e6"><div class="badge">6</div><div class="card">
+    <h3>Projector: de tablas a partidos</h3>
+    <p><code>basketball-match-projector</code> (Spring Boot) lee Postgres cada ~60 s y construye <b>un documento por partido</b>
+      juntando calendario, resultado, resumen, jugadas y estadísticas. Solo reescribe lo que cambió (hash de origen).</p>
+    <dl class="kv">
+      <dt>Secciones</dt><dd><code>fixture</code>, <code>result</code>, <code>summary</code>, <code>players</code>, <code>teamStats</code>, <code>pointByPoint</code> (en <code>availableSections</code>)</dd>
+      <dt>Retraso</dt><dd>Lo cargado tarda ~1 minuto en verse en la web.</dd>
+    </dl>
+  </div></div>
+
+  <div class="stage" id="e7"><div class="badge">7</div><div class="card">
+    <h3>MongoDB: el read model</h3>
+    <p>Base <code>basketball</code>, colección <code>matches</code> (puerto <b>27017</b>). Es lo que lee la API: rápido y ya unido.
+      Las previas publicadas viven en <code>prediction_articles</code>.</p>
+  </div></div>
+
+  <div class="stage" id="e8"><div class="badge">8</div><div class="card">
+    <h3>API y web</h3>
+    <dl class="kv">
+      <dt>API · 8082</dt><dd><code>basketball-match-api</code> (Spring Boot 4) sobre Mongo:
+        <code>/api/v1/matches</code>, <code>/filters</code>, <code>/{matchId}</code>, <code>/{matchId}/stats</code>,
+        <code>/{matchId}/players</code>, <code>/{matchId}/point-by-point</code>, <code>/processing</code>,
+        <code>/api/v1/predictions</code></dd>
+      <dt>Web · 8083</dt><dd><code>basketball-match-web</code> (React + Vite, servida por nginx): partidos por liga y estado,
+        ficha con jugadas y estadísticas, páginas de jugador y sección <b>Pronósticos</b>.</dd>
+    </dl>
+    <p><a href="http://localhost:8083">Abrir la web</a> · <a href="http://localhost:8082/actuator/health">Salud de la API</a></p>
+  </div></div>
+</section>
+
+<!-- ================= DIARIO ================= -->
+<section id="diario">
+  <h2>La rutina diaria</h2>
+  <p class="sub">Dos skills independientes, con los mismos pasos: levantan todo y terminan comprobando en Mongo lo que dejó el projector.</p>
+  <div class="grid">
+    <div class="card">
+      <span class="pill info">1 · resultados</span>
+      <h3>Resultados de ayer</h3>
+      <pre><code>basket resultados-ayer</code></pre>
+      <ol class="steps">
+        <li>Levanta Grafana, Loki, promtail, Postgres, launcher, runtime y navegador.</li>
+        <li><b>Cuadre previo</b> fixtures / Mongo: si ya están todos con marcador, termina sin extraer.</li>
+        <li>Extrae de Flashscore solo las ligas con pendientes (~40 s por liga).</li>
+        <li>Junta los de ayer en <code>RESULTS_YESTERDAY_&lt;fecha&gt;.csv</code> y lo carga por el launcher.</li>
+        <li>Espera 90 s al projector y comprueba el marcador de cada partido en Mongo.</li>
+      </ol>
+    </div>
+    <div class="card">
+      <span class="pill info">2 · pendientes</span>
+      <h3>Jugadas y estadísticas</h3>
+      <pre><code>basket pendientes [csv] [limite]</code></pre>
+      <ol class="steps">
+        <li>Levanta lo mismo, más la auditoría.</li>
+        <li><code>datos-ayer</code>: los datos de los partidos de ayer.</li>
+        <li>Auditoría: lista de partidos jugados a los que les falta algo.</li>
+        <li>Partido a partido: extrae <b>solo</b> lo que falta, lo carga y refresca la auditoría.</li>
+        <li>Espera 90 s y comprueba en Mongo: <code>OK</code> / <code>FALTAN &lt;secciones&gt;</code> / <code>NO ESTA EN MONGO</code>.</li>
+      </ol>
+    </div>
+  </div>
+  <div class="tip">Antes de los pendientes, <code>basket comprobar</code> debe dar <code>a_revisar = 0</code> (ningún partido jugado sin resultado).
+    El ciclo programado es <code>basket ciclo-diario</code> (pendientes + archivado de CSV repetidos + auditoría de datos).
+    Para cuadrar un día concreto entre Flashscore, fixtures y Mongo: <code>basket cuadrar [AAAA-MM-DD]</code>.</div>
+
+  <h3>Previa de la jornada</h3>
+  <p><code>basket pronostico datos [pais competicion]</code> calcula ganador y probabilidad de cada partido de la próxima jornada
+    (65 % diferencial de la temporada, 35 % últimos cinco, +2,5 puntos de localía); se redacta la previa y
+    <code>basket pronostico publicar &lt;borrador&gt;</code> la guarda en Mongo, la muestra en la web y envía la predicción al bot.</p>
+</section>
+
+<!-- ================= ARRANQUE ================= -->
+<section id="arranque">
+  <h2>Arranque: quién levanta qué</h2>
+  <p class="sub"><code>scripts\py\arranque\asegurar.py</code> arranca cada servicio con sus dependencias primero. Cada comando <code>basket</code> pide solo lo que necesita.</p>
+  <div class="table-wrap"><table>
+    <tr><th>Servicio</th><th>Depende de</th><th>Qué es</th></tr>
+    <tr><td><code>docker</code></td><td>—</td><td>Docker Desktop</td></tr>
+    <tr><td><code>postgres</code></td><td>docker</td><td>Contenedor de Postgres</td></tr>
+    <tr><td><code>grafana</code></td><td>docker, postgres</td><td>Grafana + Prometheus + Loki; aplica las vistas <code>v_csv_procesados</code> / <code>v_csv_generados</code> e importa los dashboards</td></tr>
+    <tr><td><code>promtail</code></td><td>grafana</td><td>Envía los logs de <code>basket</code> a Loki</td></tr>
+    <tr><td><code>telegram</code></td><td>postgres</td><td>Vigilante del aviso al bot (si hay token y chat)</td></tr>
+    <tr><td><code>launcher</code></td><td>postgres, telegram</td><td>CSV batch launcher (8088)</td></tr>
+    <tr><td><code>runtime</code></td><td>postgres</td><td>Mongo, projector, API y web</td></tr>
+    <tr><td><code>auditoria</code></td><td>postgres</td><td>Auditoría de pendientes (8090)</td></tr>
+    <tr><td><code>navegador</code></td><td>—</td><td>EdgeDriver a juego con Edge</td></tr>
+    <tr><td><code>antibloqueo</code></td><td>—</td><td>Mantiene el PC despierto durante procesos largos</td></tr>
+  </table></div>
+  <div class="note">Nunca arrancar piezas sueltas con <code>mvn spring-boot:run</code> ni <code>npm run dev</code>: usan puertos equivocados (8080 y 5173).
+    Para levantar la web, la API y el projector: <code>basket arrancar</code>.</div>
+</section>
+
+<!-- ================= AVISOS ================= -->
+<section id="avisos">
+  <h2>Observabilidad y avisos</h2>
+  <div class="grid">
+    <div class="card">
+      <h3>Grafana · 8084</h3>
+      <p>Cada comando <code>basket</code> duplica su salida en <code>C:\data\basketball\logs\basket\&lt;comando&gt;_&lt;fecha&gt;.log</code>;
+        promtail la manda a Loki y se ve en vivo en el dashboard <code>basket-logs</code>.</p>
+      <p>Otros dashboards: auditoría de fixtures, procesado, CSV procesados y consumo de recursos. Métricas en Prometheus (8086).</p>
+      <p><a href="http://localhost:8084/d/basket-logs">Abrir logs en vivo</a></p>
+    </div>
+    <div class="card">
+      <h3>Telegram · @MiGrafanaDashboardOutOfHome_bot</h3>
+      <p>Un vigilante lee <code>batch_launch_request</code> cada 10 s y manda <b>una línea por CSV</b> terminado:
+        solo estado, nombre y hora. Nunca el fichero ni su contenido.</p>
+      <div class="tg">✅ COMPLETADO · POINT_BY_POINT_20261117125350_8ArlEYR6.csv · 17/11 12:54:49</div>
+      <p>Al publicar una previa llega también la predicción:</p>
+      <div class="tg">🏀 Euroliga — Jornada 12: previa y pronósticos
+17/11 17:00  Dubai - Anadolu Efes → Dubai 63%
+…</div>
+      <p><code>basket telegram [prueba|una-vez|chat]</code>. Token y chat solo en <code>config\basketball.local.env</code> (fuera de git).</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= VERIFICAR ================= -->
+<section id="verificar">
+  <h2>Verificación: cómo sé que funciona</h2>
+  <p class="sub"><code>basket verificar</code> (<code>scripts\py\verificar.py</code>) comprueba el sistema real y devuelve VERDE (0) o ROJO (1).</p>
+  <div class="table-wrap"><table>
+    <tr><th>#</th><th>Comprobación</th><th>Etapa</th></tr>
+    <tr><td>1</td><td>La web (8083) y la API (8082) responden 200</td><td>8</td></tr>
+    <tr><td>2</td><td><code>results</code> y <code>fixtures</code> sin slugs no canónicos (<code>acb</code>, <code>super-league</code>)</td><td>5</td></tr>
+    <tr><td>3</td><td>Los filtros de la API no ofrecen esos slugs</td><td>8</td></tr>
+    <tr><td>4</td><td>Un partido de Liga Endesa une calendario y resultado</td><td>6 → 8</td></tr>
+    <tr><td>5</td><td>Mongo sin partidos con sección <code>fixture</code> vacía</td><td>7</td></tr>
+    <tr><td>6</td><td>Vistas de Grafana presentes en Postgres</td><td>5</td></tr>
+    <tr><td>7</td><td>Telegram: un único vigilante y ningún CSV sin avisar más de 2 min</td><td>4</td></tr>
+  </table></div>
+  <p>Además: tests de <code>scripts\py</code> con <code>python -m unittest discover -s tests</code>, CI en cada subrepo y hook <code>pre-push</code>.
+    El diseño está en <a href="docs/SDD.md">docs/SDD.md</a>, la operación en <a href="docs/ESPECIFICACIONES.md">docs/ESPECIFICACIONES.md</a>
+    y la evidencia de cada cambio en <a href="docs/VERIFICACION-SDD.md">docs/VERIFICACION-SDD.md</a>.</p>
+</section>
+
+<!-- ================= COMANDOS ================= -->
+<section id="comandos">
+  <h2>Comandos <code>basket</code></h2>
+  <p class="sub"><code>1_EJECUTAR\basket.cmd &lt;comando&gt;</code> (doble clic = menú; <code>basket ayuda</code> los lista).</p>
+  <div class="table-wrap"><table>
+    <tr><th>Para…</th><th>Comando</th></tr>
+    <tr><td>Arrancar web, API, projector y launcher</td><td><code>arrancar</code></td></tr>
+    <tr><td>Ver qué está levantado y qué falta</td><td><code>estado</code></td></tr>
+    <tr><td>Resultados de ayer hasta el projector</td><td><code>resultados-ayer [AAAA-MM-DD] [--solo-csv] [--forzar]</code></td></tr>
+    <tr><td>Resultados de una liga o de todas</td><td><code>resultados [LIGA]</code></td></tr>
+    <tr><td>Cargar CSV de resultados ya en disco</td><td><code>procesar-csv [LIGA]</code></td></tr>
+    <tr><td>Comprobar que results y fixtures están al día</td><td><code>comprobar</code></td></tr>
+    <tr><td>Lanzar la auditoría de pendientes</td><td><code>auditoria</code></td></tr>
+    <tr><td>Procesar pendientes hasta el projector</td><td><code>pendientes [csv] [limite]</code></td></tr>
+    <tr><td>Datos de los partidos de ayer</td><td><code>datos-ayer [AAAA-MM-DD]</code></td></tr>
+    <tr><td>Reextraer partidos concretos</td><td><code>reextraer [--dataset D] &lt;match_id…&gt;</code></td></tr>
+    <tr><td>Cuadrar un día: Flashscore / fixtures / Mongo</td><td><code>cuadrar [AAAA-MM-DD]</code></td></tr>
+    <tr><td>Auditar la calidad de los datos</td><td><code>auditar</code></td></tr>
+    <tr><td>Previa de la próxima jornada</td><td><code>pronostico datos | publicar &lt;fichero&gt;</code></td></tr>
+    <tr><td>Aviso por Telegram</td><td><code>telegram [prueba|una-vez|chat]</code></td></tr>
+    <tr><td>Ciclo diario (tarea programada)</td><td><code>ciclo-diario</code></td></tr>
+    <tr><td>Gate del SDD</td><td><code>verificar</code></td></tr>
+  </table></div>
+</section>
+
+<!-- ================= SKILLS ================= -->
+<section id="skills">
+  <h2>Skills de Claude Code</h2>
+  <p class="sub">Cada skill es autocontenida: da sus comandos y consultas y no llama a otra.</p>
+  <div class="table-wrap"><table>
+    <tr><th>Skill</th><th>Para qué</th></tr>
+    <tr><td><code>resultados-ayer</code></td><td>Resultados de ayer de todas las ligas, hasta el projector</td></tr>
+    <tr><td><code>procesar-pendientes</code></td><td>Jugadas y estadísticas que faltan, hasta el projector</td></tr>
+    <tr><td><code>aviso-telegram</code></td><td>Arrancar, comprobar, probar y arreglar el aviso al bot</td></tr>
+    <tr><td><code>cuadrar-partidos-dia</code></td><td>Cuadre diario Flashscore / fixtures / Mongo</td></tr>
+    <tr><td><code>arrancar-web</code></td><td>Levantar web, API y projector</td></tr>
+    <tr><td><code>extraer-resultados</code> · <code>resultados-todas-las-ligas</code></td><td>Resultados de una liga o de todas</td></tr>
+    <tr><td><code>procesar-csv-resultados</code></td><td>Cargar CSV de resultados ya extraídos</td></tr>
+    <tr><td><code>extraer-datos-partido</code></td><td>Jugada a jugada y estadísticas de una liga</td></tr>
+    <tr><td><code>ultimos-resultados</code> · <code>auditar-datos</code> · <code>diagnosticar-partido</code></td><td>Consultar, auditar y diagnosticar</td></tr>
+    <tr><td><code>pronostico-jornada</code></td><td>Previa y pronóstico de la próxima jornada</td></tr>
+    <tr><td><code>normas-basketball</code> · <code>commit-multirepo</code></td><td>Normas de desarrollo y commit con submódulos</td></tr>
+  </table></div>
+</section>
+
+<!-- ================= PUERTOS ================= -->
+<section id="puertos">
+  <h2>Puertos y rutas</h2>
+  <div class="grid">
+    <div class="table-wrap"><table>
+      <tr><th>Servicio</th><th>Puerto</th></tr>
+      <tr><td>Web</td><td><a href="http://localhost:8083">8083</a></td></tr>
+      <tr><td>API</td><td><a href="http://localhost:8082/actuator/health">8082</a></td></tr>
+      <tr><td>Launcher</td><td><a href="http://localhost:8088">8088</a></td></tr>
+      <tr><td>Auditoría</td><td><a href="http://localhost:8090/fixtures-processing-audit/latest">8090</a></td></tr>
+      <tr><td>Grafana</td><td><a href="http://localhost:8084">8084</a></td></tr>
+      <tr><td>Loki · Prometheus</td><td>8085 · 8086</td></tr>
+      <tr><td>PostgreSQL</td><td>55432</td></tr>
+      <tr><td>MongoDB</td><td>27017</td></tr>
+    </table></div>
+    <div class="table-wrap"><table>
+      <tr><th>Qué</th><th>Dónde</th></tr>
+      <tr><td>Configuración</td><td><code>config\basketball.env</code> (+ <code>basketball.local.env</code>, fuera de git)</td></tr>
+      <tr><td>Datos</td><td><code>C:\data\basketball\</code></td></tr>
+      <tr><td>CSV listos</td><td><code>C:\data\basketball-ready\current\</code></td></tr>
+      <tr><td>Informes</td><td><code>C:\data\basketball\reports\</code></td></tr>
+      <tr><td>Logs de basket</td><td><code>C:\data\basketball\logs\basket\</code></td></tr>
+      <tr><td>Consultas SQL</td><td><code>sql\consultas\</code></td></tr>
+      <tr><td>Stack docker</td><td><code>local-validation\docker-compose.yml</code></td></tr>
+    </table></div>
+  </div>
+</section>
+
+<!-- ================= NORMAS ================= -->
+<section id="normas">
+  <h2>Normas de trabajo</h2>
+  <div class="card">
+    <ol class="steps">
+      <li><b>Plan con backlog</b> (<code>docs\PLAN-*.md</code>) antes de tocar nada, marcando cada paso al hacerlo.</li>
+      <li>Cumplir el <b>SDD</b> y dejar evidencia en <code>docs\VERIFICACION-SDD.md</code>.</li>
+      <li>Gate <code>basket verificar</code> en verde y <b>commit + push por paso</b>.</li>
+      <li>Todo en <b>español</b>; toda consulta SQL ejecutada, guardada en <code>sql\consultas\</code>.</li>
+      <li>Credenciales solo en <code>config\basketball.local.env</code>; nunca en un commit.</li>
+    </ol>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">Proyecto Basketball · CSV → launcher → PostgreSQL → projector → MongoDB → API → web ·
+    detalle en <a href="docs/SDD.md">SDD</a> y <a href="docs/ESPECIFICACIONES.md">ESPECIFICACIONES</a>.</div>
+</footer>
+
+<script>
+(function () {
+  var raiz = document.documentElement, clave = "basketball-tema";
+  try { var t = localStorage.getItem(clave); if (t) raiz.setAttribute("data-theme", t); } catch (e) {}
+  document.getElementById("tema").addEventListener("click", function () {
+    var oscuro = raiz.getAttribute("data-theme") === "dark" ||
+      (!raiz.getAttribute("data-theme") && matchMedia("(prefers-color-scheme: dark)").matches);
+    var nuevo = oscuro ? "light" : "dark";
+    raiz.setAttribute("data-theme", nuevo);
+    try { localStorage.setItem(clave, nuevo); } catch (e) {}
+  });
+})();
+</script>
+</body>
+</html>

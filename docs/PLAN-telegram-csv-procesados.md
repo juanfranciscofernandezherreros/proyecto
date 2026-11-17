@@ -47,6 +47,6 @@ lee esa tabla y envía lo que termina, venga de donde venga.
 - [x] `asegurar.py`: servicio `telegram`; `launcher` depende de él.
 - [x] `basket.py`: comando `telegram`.
 - [x] Tests del pie y de la lectura de filas.
-- [ ] Prueba real (pendiente: el usuario aun no ha escrito al bot, sin chat_id no se puede enviar): `basket telegram prueba` llega al móvil y un CSV procesado llega como documento.
+- [x] Prueba real: `basket telegram prueba` llega al móvil y un CSV procesado llega como documento.
 - [x] Gate `verificar.py` en verde y evidencia en `docs\VERIFICACION-SDD.md`.
 - [x] Commit + push (sin el token).

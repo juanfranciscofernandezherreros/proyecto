@@ -330,4 +330,4 @@ Evidencia por paso. Ningún paso cambia el flujo del SDD §4 ni los puertos.
 | 2 | Servicio `telegram` en `asegurar.py` (el launcher depende de él) y comando `basket telegram [prueba\|una-vez\|chat]`; sin token o chat_id queda desactivado | `basket telegram chat` responde; compila | ✅ |
 | 3 | Token solo en `config\basketball.local.env` (ignorado por git); claves vacías en `basketball.env` | `git check-ignore` lo confirma; test `test_token_no_esta_en_la_configuracion_versionada` | ✅ |
 | 4 | Tests `TelegramCsvTests` (pie, límite 1024, configuración, marca de agua) | 5 tests OK; suite completa OK; gate `verificar.py` VERDE | ✅ |
-| 5 | Prueba real en el móvil | Pendiente: falta que el usuario escriba al bot para obtener el `chat_id` | ⏳ |
+| 5 | Prueba real en el móvil | `chat_id` obtenido con `basket telegram chat`; `basket telegram prueba` enviado; un CSV real (`PLAYER_STATS_20261117124906_8SJueQyq.csv`) enviado como documento; vigilante en marcha (`logs	elegram_csv.log`) | ✅ |

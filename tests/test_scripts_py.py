@@ -517,3 +517,27 @@ class TelegramCsvTests(unittest.TestCase):
         for linea in texto.splitlines():
             if linea.startswith(("TELEGRAM_BOT_TOKEN=", "TELEGRAM_CHAT_ID=")):
                 self.assertEqual(linea.split("=", 1)[1].strip(), "", linea.split("=")[0])
+
+    def test_mensajes_llevan_los_datos_no_el_fichero(self):
+        fila = {"status": "COMPLETED", "batch_type": "results", "file_path": r"C:\x\R.csv",
+                "finished_at": "2026-11-17T10:00:00Z"}
+        msgs = self.T.mensajes(fila, ["matchId,home", "a1,Real <Madrid>", "a2,Barca"])
+        self.assertEqual(len(msgs), 1)
+        self.assertIn("2 filas", msgs[0])
+        self.assertIn("<pre>matchId,home\na1,Real &lt;Madrid&gt;\na2,Barca</pre>", msgs[0])
+
+    def test_mensajes_se_parten_y_respetan_el_maximo(self):
+        fila = {"status": "COMPLETED", "batch_type": "point-by-point", "file_path": r"C:\x\P.csv",
+                "finished_at": "2026-11-17T10:00:00Z"}
+        lineas = ["c1,c2"] + [f"{i}," + "x" * 90 for i in range(400)]
+        msgs = self.T.mensajes(fila, lineas, max_mensajes=3)
+        self.assertEqual(len(msgs), 3)
+        self.assertTrue(all(len(m) <= 4096 for m in msgs))
+        self.assertTrue(all("<pre>c1,c2\n" in m for m in msgs))
+        self.assertIn("filas más sin enviar", msgs[-1])
+        self.assertIn("400 filas", msgs[0])
+
+    def test_mensajes_sin_fichero(self):
+        msgs = self.T.mensajes({"status": "FAILED", "file_path": ""}, [])
+        self.assertEqual(len(msgs), 1)
+        self.assertIn("no encontrado", msgs[0])

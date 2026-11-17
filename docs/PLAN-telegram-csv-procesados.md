@@ -50,3 +50,16 @@ lee esa tabla y envía lo que termina, venga de donde venga.
 - [x] Prueba real: `basket telegram prueba` llega al móvil y un CSV procesado llega como documento.
 - [x] Gate `verificar.py` en verde y evidencia en `docs\VERIFICACION-SDD.md`.
 - [x] Commit + push (sin el token).
+
+## Cambio 2026-11-17: datos como texto, no el fichero
+
+El usuario no quiere el fichero adjunto, solo los datos. `enviar` manda el pie y las
+filas del CSV como texto (`sendMessage`, HTML, bloque `<pre>` con la cabecera de
+columnas repetida), partido en mensajes de hasta 4096 caracteres y como mucho
+`TELEGRAM_MAX_MENSAJES` (5); el último avisa de las filas que quedan sin enviar.
+
+- [x] `mensajes()` y `leer_lineas()` en `telegram_csv.py`; sin `sendDocument`.
+- [x] `TELEGRAM_MAX_MENSAJES=5` en `configasketball.env`.
+- [x] Tests: datos en `<pre>` escapados, reparto con máximo, sin fichero.
+- [x] Prueba real: `PLAYER_STATS_20261117124906_8SJueQyq.csv` llega como texto en 1 mensaje; vigilante reiniciado.
+- [x] Commit + push.

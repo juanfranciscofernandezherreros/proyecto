@@ -69,6 +69,22 @@ def _escribir_rows(path, rows):
         w.writerows(rows)
 
 
+def mensaje_inicio(n):
+    """Aviso de arranque para Telegram (~1 min por partido)."""
+    return f"⏳ Pendientes: {n} partidos por procesar (~{n} min)."
+
+
+def avisar_inicio(n):
+    """Manda el aviso de arranque al bot; si falla, avisa y sigue."""
+    try:
+        sys.path.insert(0, str(SCRIPTS_PY / "monitor"))
+        import telegram_csv
+        if telegram_csv.configurado():
+            telegram_csv.enviar_texto(mensaje_inicio(n))
+    except Exception as e:
+        print(f"[AVISO] Telegram: no se pudo enviar el aviso de inicio: {e}")
+
+
 def main():
     args = [a for a in sys.argv[1:]]
     # "" (o '') para pasar solo el limite llega a veces con las comillas literales.
@@ -136,6 +152,7 @@ def main():
         return 0
 
     print(f"Procesamiento secuencial: {len(queue)} partidos pendientes segun la auditoria fresca.")
+    avisar_inicio(len(queue))
     state = []
     current_pending = {_match_key(r) for r in fresh}
     for row in queue:

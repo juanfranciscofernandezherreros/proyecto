@@ -480,6 +480,21 @@ class ResultadosAyerTests(unittest.TestCase):
         self.assertFalse(R.encadenar_pendientes(["--solo-csv"], {}))
         self.assertFalse(R.encadenar_pendientes([], {"RESULTADOS_AYER_PENDIENTES": "0"}))
 
+    def test_pendientes_avisa_a_telegram_al_empezar(self):
+        from unittest import mock
+        sys.path.insert(0, str(RAIZ / "scripts" / "py" / "pendientes"))
+        import procesar_matchids as PM
+        self.assertEqual(PM.mensaje_inicio(54), "⏳ Pendientes: 54 partidos por procesar (~54 min).")
+        sys.path.insert(0, str(RAIZ / "scripts" / "py" / "monitor"))
+        import telegram_csv
+        with mock.patch.object(telegram_csv, "configurado", return_value=True), \
+             mock.patch.object(telegram_csv, "enviar_texto") as enviar:
+            PM.avisar_inicio(3)
+        enviar.assert_called_once_with(PM.mensaje_inicio(3))
+        with mock.patch.object(telegram_csv, "configurado", return_value=True), \
+             mock.patch.object(telegram_csv, "enviar_texto", side_effect=OSError("sin red")):
+            PM.avisar_inicio(3)  # no debe lanzar
+
     def test_main_lanza_pendientes_y_devuelve_el_peor_codigo(self):
         from unittest import mock
         sys.path.insert(0, str(RAIZ / "scripts" / "py" / "lanzadores"))

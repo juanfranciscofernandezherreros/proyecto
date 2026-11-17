@@ -17,7 +17,7 @@ Situación de partida:
 - [x] 2. Tarea programada: no se toca. «Resultados de ayer al iniciar» ya está activa
   y con el punto 1 cubre el día entero. «Ciclo diario» sigue deshabilitada para no
   duplicar. Se documenta en `docs/ESPECIFICACIONES.md`.
-- [ ] 3. `procesar_matchids.py`: tras la auditoría, si hay N > 0 partidos, envía a
+- [x] 3. `procesar_matchids.py`: tras la auditoría, si hay N > 0 partidos, envía a
   Telegram «⏳ Pendientes: N partidos por procesar (~N min)». Si falla Telegram,
   avisa y sigue.
 - [ ] 4. Seguimiento sin Claude: el dashboard de logs ya se abre solo (commit fd1682d)

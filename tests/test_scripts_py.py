@@ -151,6 +151,143 @@ class ConfigTests(unittest.TestCase):
         self.assertTrue(cfg["COMPETITIONS_DIR"].startswith(cfg["DATA_DIR"]))
 
 
+def _equipo(nombre, dif_temp, dif_ult5, pj=11):
+    return {"equipo": nombre, "pj": pj, "g": 0, "p": 0, "pf": 0, "pc": 0, "dif_temp": dif_temp,
+            "dif_ult5": dif_ult5, "g_ult5": 0, "casa": "0-0", "fuera": "0-0"}
+
+
+def _partido(inicio, local, visitante):
+    return {"match_id": f"{local}-{visitante}", "inicio": inicio, "home_team": local, "away_team": visitante}
+
+
+class PronosticoPreviaTests(unittest.TestCase):
+    """Logica pura de scripts\\py\\pronostico\\previa.py (sin Postgres ni Mongo)."""
+
+    @classmethod
+    def setUpClass(cls):
+        sys.path.insert(0, str(RAIZ / "scripts" / "py" / "pronostico"))
+        import previa
+        cls.previa = previa
+
+    def _datos(self):
+        return {
+            "fixtures": [
+                _partido("2026-11-17T18:00:00Z", "Zalgiris Kaunas", "Bayern"),
+                _partido("2026-11-17T19:45:00Z", "Partizan Mozzart Bet", "Valencia"),
+                _partido("2026-11-19T19:00:00Z", "Zalgiris Kaunas", "Panathinaikos"),
+            ],
+            "equipos": [
+                _equipo("Zalgiris Kaunas", 3.3, 12.6), _equipo("Bayern", -8.4, -12.2),
+                _equipo("Partizan Mozzart Bet", 1.7, 4.8), _equipo("Valencia", 7.5, 8.2),
+                _equipo("Panathinaikos", 7.9, -0.6),
+            ],
+            "resultados": 110,
+        }
+
+    def test_la_jornada_se_corta_cuando_un_equipo_se_repite(self):
+        jornada = self.previa.cortar_jornada(self._datos()["fixtures"])
+        self.assertEqual([p["home_team"] for p in jornada], ["Zalgiris Kaunas", "Partizan Mozzart Bet"])
+
+    def test_margen_y_probabilidad_del_local(self):
+        margen = self.previa.margen_local(_equipo("L", 3.3, 12.6), _equipo("V", -8.4, -12.2))
+        self.assertAlmostEqual(margen, 18.785, places=3)
+        self.assertAlmostEqual(self.previa.probabilidad_local(margen), 89.0, places=1)
+        self.assertAlmostEqual(self.previa.probabilidad_local(0), 50.0, places=6)
+
+    def test_confianza_por_tramos(self):
+        self.assertEqual(self.previa.confianza(75.0), "alta")
+        self.assertEqual(self.previa.confianza(74.9), "media")
+        self.assertEqual(self.previa.confianza(60.0), "media")
+        self.assertEqual(self.previa.confianza(59.9), "baja")
+
+    def test_borrador_elige_al_visitante_cuando_es_favorito(self):
+        borrador = self.previa.construir_borrador(self._datos(), "europe", "euroleague")
+        self.assertEqual(borrador["_id"], "euroliga-jornada-12-2026-11-17")
+        self.assertEqual(borrador["round"], "Jornada 12")
+        self.assertEqual(borrador["competition"], "EuroLeague")
+        partizan = borrador["games"][1]
+        self.assertEqual(partizan["winner"], "Valencia")
+        self.assertEqual(partizan["winnerProbability"], 56.8)
+        self.assertTrue(partizan["prediction"].startswith("2 · Valencia · 1: 43,2% · 2: 56,8%"))
+
+    def test_borrador_falla_sin_calendario_o_con_un_equipo_sin_resultados(self):
+        with self.assertRaises(ValueError):
+            self.previa.construir_borrador({"fixtures": [], "equipos": []}, "europe", "euroleague")
+        datos = self._datos()
+        datos["equipos"] = [e for e in datos["equipos"] if e["equipo"] != "Bayern"]
+        with self.assertRaisesRegex(ValueError, "Bayern"):
+            self.previa.construir_borrador(datos, "europe", "euroleague")
+
+    def test_validar_exige_textos_y_limpiar_quita_la_ayuda(self):
+        borrador = self.previa.construir_borrador(self._datos(), "europe", "euroleague")
+        self.assertEqual(len(self.previa.validar(borrador)), 3)  # introduccion + 2 analisis
+        borrador["introduction"] = "Texto"
+        for partido in borrador["games"]:
+            partido["analysis"] = "Texto"
+        self.assertEqual(self.previa.validar(borrador), [])
+        limpio = self.previa.limpiar(borrador)
+        self.assertNotIn("_ayuda", limpio)
+        self.assertNotIn("_ayuda", limpio["games"][0])
+        self.assertIn("_ayuda", borrador)  # el borrador original no se toca
+
+
+    # ----- analisis ampliado -----
+    def _jugados(self):
+        def jugado(ident, inicio, local, visitante, pl, pv, ql=None, qv=None):
+            return {"match_id": ident, "inicio": inicio, "home_team": local, "away_team": visitante,
+                    "home_score": pl, "away_score": pv, "home_periods": ql or [], "away_periods": qv or []}
+        return [
+            jugado("m1", "2026-10-01T18:00:00Z", "A", "B", 80, 70, [20, 20, 20, 20, None], [10, 20, 20, 20, None]),
+            jugado("m2", "2026-10-08T18:00:00Z", "B", "A", 90, 85, [25, 25, 20, 20, None], [20, 20, 25, 20, None]),
+            jugado("m3", "2026-10-15T18:00:00Z", "A", "C", 70, 72),
+        ]
+
+    def test_perfil_separa_casa_y_fuera_y_calcula_racha_ajustados_y_cuartos(self):
+        perfil = self.previa.perfil_equipos(self._jugados())["A"]
+        self.assertEqual((perfil["total"]["pj"], perfil["total"]["g"], perfil["total"]["p"]), (3, 1, 2))
+        self.assertEqual((perfil["casa"]["pj"], perfil["casa"]["dif"]), (2, 4.0))
+        self.assertEqual((perfil["fuera"]["pj"], perfil["fuera"]["dif"]), (1, -5.0))
+        self.assertEqual(perfil["racha"], "P2")
+        self.assertEqual(perfil["ajustados"], {"pj": 2, "g": 0})
+        self.assertEqual(perfil["ultimos5"][0], "P 70-72 vs C")
+        self.assertEqual(perfil["cuartos"]["partidos"], 2)  # m3 no trae parciales
+        self.assertEqual(perfil["cuartos"]["q1"], 2.5)
+        self.assertEqual(perfil["ultimo_partido"], "2026-10-15T18:00:00Z")
+
+    def test_descanso_directos_y_margen_de_pista(self):
+        self.assertEqual(self.previa.dias_descanso("2026-10-15T18:00:00Z", "2026-10-17T18:00:00Z"), 2.0)
+        self.assertEqual(self.previa.enfrentamientos(self._jugados(), "A", "B"),
+                         ["2026-10-08: B 90-85 A", "2026-10-01: A 80-70 B"])
+        self.assertEqual(self.previa.margen_pista(4.0, -6.0), 5.0)
+        self.assertIsNone(self.previa.margen_pista(None, -6.0))
+
+    def test_contraste_usa_solo_partidos_anteriores(self):
+        contraste = self.previa.contrastar(self._jugados(), minimo=1)
+        # m1 y m3 no entran (algun equipo sin partidos previos); en m2 el modelo elige a A y gana B.
+        self.assertEqual((contraste["partidos"], contraste["aciertos"]), (1, 0))
+        self.assertEqual(contraste["porcentaje_siempre_local"], 100.0)
+        self.assertEqual(contraste["error_medio_margen"], 22.5)
+        self.assertEqual(self.previa.contrastar(self._jugados())["partidos"], 0)
+
+    def test_ampliar_añade_la_ayuda_y_el_parrafo_de_contraste(self):
+        datos = {"fixtures": [_partido("2026-10-20T18:00:00Z", "A", "B")],
+                 "equipos": [_equipo("A", 1.0, 1.0, pj=3), _equipo("B", -2.5, -2.5, pj=2)], "resultados": 3}
+        borrador = self.previa.construir_borrador(datos, "europe", "euroleague")
+        antes = borrador["methodology"]
+        self.previa.ampliar(borrador, self._jugados())
+        ayuda = borrador["games"][0]["_ayuda"]
+        self.assertEqual(ayuda["descansoLocalDias"], 5.0)
+        self.assertEqual(ayuda["descansoVisitanteDias"], 12.0)
+        self.assertEqual(len(ayuda["enfrentamientosEstaTemporada"]), 2)
+        self.assertIsNone(ayuda["margenPistaLocal"])  # menos de 3 partidos en casa o fuera
+        self.assertEqual(borrador["methodology"], antes)  # sin muestra no se añade el parrafo
+        self.assertIn("38 (63,3 %)", self.previa.texto_contraste(
+            {"partidos": 60, "aciertos": 38, "porcentaje": 63.3, "porcentaje_siempre_local": 53.3,
+             "error_medio_margen": 10.0,
+             "por_confianza": {"alta": {"partidos": 19, "aciertos": 14}, "media": {"partidos": 28, "aciertos": 18},
+                               "baja": {"partidos": 13, "aciertos": 6}}}))
+
+
 class DatosAyerTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -178,6 +315,35 @@ class DatosAyerTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 self.datos_ayer.consulta(mala)
 
+
+class BasketLogsTests(unittest.TestCase):
+    """basket: log por ejecucion para promtail (job basket) y dashboard basket-logs."""
+
+    def test_nombre_del_log_casa_con_la_regex_de_promtail(self):
+        import re
+        from datetime import datetime
+        import basket
+        log = basket.fichero_log("resultados-ayer", datetime(2026, 11, 17, 9, 48, 4))
+        self.assertEqual(log.name, "resultados-ayer_20261117_094804.log")
+        self.assertEqual(log.parent.parts[-2:], ("logs", "basket"))
+        promtail = (RAIZ / "local-validation" / "observability" / "promtail.yml").read_text(encoding="utf-8")
+        regex = re.search(r"expression: '(.+)'", promtail).group(1)
+        m = re.search(regex, "/var/log/basketball/basket/" + log.name)
+        self.assertEqual((m.group("comando"), m.group("ejecucion")),
+                         ("resultados-ayer", "resultados-ayer_20261117_094804"))
+
+    def test_estado_no_levanta_grafana(self):
+        import basket
+        self.assertIn("estado", basket.SIN_OBSERVABILIDAD)
+        self.assertNotIn("resultados-ayer", basket.SIN_OBSERVABILIDAD)
+
+    def test_dashboard_basket_logs_valido(self):
+        ruta = RAIZ / "local-validation" / "observability" / "basket-logs-dashboard.json"
+        d = json.loads(ruta.read_text(encoding="utf-8"))
+        self.assertEqual(d["dashboard"]["uid"], "basket-logs")
+        self.assertTrue(d["overwrite"])
+        for panel in d["dashboard"]["panels"]:
+            self.assertEqual(panel["datasource"]["uid"], "loki-local")
 
 if __name__ == "__main__":
     unittest.main()

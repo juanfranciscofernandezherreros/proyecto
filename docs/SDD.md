@@ -204,6 +204,9 @@ Detalle en [ESPECIFICACIONES.md §11](ESPECIFICACIONES.md).
   Prometheus en 8086.
 - **Logs** (Loki): promtail lee los contenedores y envía a Loki (8085); etiquetas por
   `container`/`service`.
+  Además lee los logs de los comandos de `basket` (`DATA_DIR\logs\basket\*.log`, job
+  `basket`, etiquetas `comando`/`ejecucion`); dashboard `basket-logs`. `basket` levanta
+  Grafana, Loki y promtail al empezar cada comando.
 - **Dashboards** (Grafana 8084): set oficial = dashboards de `csv-extra-batch`
   (Postgres/Infinity), dashboard global de flujo, y uno por microservicio vivo
   (api, projector, web, mongo, postgres). Importación en `Start-BasketballLocal.ps1`.

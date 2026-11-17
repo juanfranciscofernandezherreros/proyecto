@@ -8,11 +8,22 @@ Uso:  python scripts\py\basket.py <comando> [args]
       basket.cmd <comando> [args]          (shim de Windows)
 Ejemplos:  basket estado | basket resultados EUROLIGA | basket ciclo-diario
 """
+import os
 import subprocess
 import sys
+from datetime import datetime
 from pathlib import Path
 
-LANZADORES = Path(__file__).resolve().parent / "lanzadores"
+SCRIPTS_PY = Path(__file__).resolve().parent
+LANZADORES = SCRIPTS_PY / "lanzadores"
+sys.path.insert(0, str(SCRIPTS_PY / "arranque"))
+import config as _config
+
+CFG = _config.cargar()
+
+# Comandos que no levantan Grafana al empezar (rapidos, de vigilancia o que ya la abren).
+SIN_OBSERVABILIDAD = {"estado", "antibloqueo", "vigilar", "monitor", "grafana"}
+DASHBOARD_LOGS = "basket-logs"
 
 # comando coherente -> (modulo lanzador, descripcion)
 COMANDOS = {
@@ -33,10 +44,11 @@ COMANDOS = {
     "comprobar":         ("comprobar_results_fixtures","Comprobar que RESULTS y FIXTURES estan listos"),
     "auditoria":         ("auditoria_fixtures",        "Lanzar la auditoria de fixtures"),
     "auditar":           ("auditar",                   "Auditar la integridad de los datos en Postgres (solo lectura)"),
-    "ids-ayer":         ("ids_partidos_ayer",         "Imprimir los match_id de ayer"),
+    "pronostico":        ("pronostico",                "Previa de la proxima jornada: datos [pais] [competicion] | publicar <fichero>"),
+    "ids-ayer":        ("ids_partidos_ayer",         "Imprimir los match_id de ayer"),
     "datos-ayer":        ("datos_ayer",                "Extraer los datos de los partidos de ayer en fixtures [AAAA-MM-DD]"),
     "cuadrar":           ("cuadrar_dia",               "Cuadrar los partidos de un dia: Flashscore, fixtures y Mongo [AAAA-MM-DD]"),
-    "monitor":           ("monitor_pendientes",        "Abrir el monitor de pendientes en vivo"),
+    "monitor":           ("monitor_pendientes",       "Abrir el monitor de pendientes en vivo"),
     "grafana":           ("grafana_pendientes",        "Abrir el dashboard de pendientes en Grafana"),
     "vigilar":           ("vigilar_servicios",         "Vigilante de servicios [minutos|una-vez]"),
     "ciclo-diario":      ("ciclo_diario",              "Ciclo diario (tarea programada)"),
@@ -44,9 +56,48 @@ COMANDOS = {
 }
 
 
+def fichero_log(comando, ahora=None):
+    r"""Ruta del log de una ejecucion: DATA_DIR\logs\basket\<comando>_<AAAAMMDD_HHMMSS>.log."""
+    ahora = ahora or datetime.now()
+    base = Path(CFG.get("DATA_DIR") or r"C:\data\basketball") / "logs" / "basket"
+    return base / f"{comando}_{ahora:%Y%m%d_%H%M%S}.log"
+
+
+def _asegurar_observabilidad(comando, log):
+    """Levanta Loki, Grafana y promtail para ver el log en vivo. Si falla, avisa y sigue."""
+    if comando in SIN_OBSERVABILIDAD or os.environ.get("BASKET_SIN_GRAFANA") == "1":
+        return
+    rc = subprocess.run([sys.executable, str(SCRIPTS_PY / "arranque" / "asegurar.py"),
+                         "grafana", "promtail"]).returncode
+    if rc != 0:
+        print("AVISO: Grafana o promtail no arrancaron; el comando sigue sin logs en vivo.", flush=True)
+        return
+    url = (CFG.get("GRAFANA_URL") or "http://localhost:8084").rstrip("/")
+    print(f"Logs en vivo: {url}/d/{DASHBOARD_LOGS}?var-comando={comando}"
+          f"&var-ejecucion={log.stem}&refresh=5s", flush=True)
+
+
 def _ejecutar(comando, args):
+    """Lanza el comando con su salida por consola y, a la vez, en su fichero de log."""
     modulo = COMANDOS[comando][0]
-    return subprocess.run([sys.executable, str(LANZADORES / f"{modulo}.py"), *args]).returncode
+    log = fichero_log(comando)
+    log.parent.mkdir(parents=True, exist_ok=True)
+    _asegurar_observabilidad(comando, log)
+    print(f"Log: {log}", flush=True)
+    env = dict(os.environ, PYTHONUNBUFFERED="1", PYTHONIOENCODING="utf-8")
+    hijo = subprocess.Popen([sys.executable, "-u", str(LANZADORES / f"{modulo}.py"), *args],
+                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=env)
+    salida = sys.stdout.buffer
+    with open(log, "wb") as fh:
+        while True:
+            trozo = hijo.stdout.read1(4096)
+            if not trozo:
+                break
+            salida.write(trozo)
+            salida.flush()
+            fh.write(trozo)
+            fh.flush()
+    return hijo.wait()
 
 
 def _menu():

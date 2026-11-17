@@ -3,11 +3,12 @@ r"""Lanzador: resultados de ayer de todas las ligas en un solo fichero.
 
 Uso: resultados_ayer.py [AAAA-MM-DD] [--solo-csv]   (por defecto, ayer en Europe/Madrid)
 
-Sin opciones lo hace todo: genera el CSV, lo carga en Postgres, espera al projector y
-comprueba en Mongo (lo que escribe el projector) que cada partido esta con su marcador. Con --solo-csv solo
-genera el CSV. No extrae de Flashscore: usa los RESULTS ya extraidos.
+Sin opciones lo hace todo: extrae de Flashscore los resultados de cada liga (en una
+carpeta temporal, sin tocar competitions\), se queda con los partidos de ese dia y
+los junta en un unico CSV; lo carga en Postgres, espera al projector y comprueba en
+Mongo que cada partido esta con su marcador. Con --solo-csv solo genera el CSV.
 
-Del ultimo RESULTS_*.csv de cada liga toma los partidos de ese dia y los escribe en
+El CSV unico es
    REPORTS_DIR\resultados-ayer\RESULTS_YESTERDAY_<AAAAMMDD>.csv
    (columnas del RESULTS con country y competition delante).
 
@@ -18,7 +19,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-from _base import CFG
+from _base import CFG, ensure
 import cuadrar_dia as C
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -39,6 +40,23 @@ def filas_de_liga(filas, dia, country, competition):
     return out
 
 
+def extraer_liga(liga, carpeta):
+    """Extrae de Flashscore los resultados de una liga en `carpeta` (fuera de
+    competitions\\, para no tocar los RESULTS de la liga). Devuelve el CSV generado."""
+    import subprocess
+    import time
+    carpeta.mkdir(parents=True, exist_ok=True)
+    inicio = time.time()
+    rc = subprocess.run([CFG.get("PYTHON"), CFG.get("SCRAPER"), "competition", "results",
+                         liga["resultsUrl"], "--output", str(carpeta / "RESULTS.csv")]).returncode
+    if rc != 0:
+        raise RuntimeError(f"el scraper termino con codigo {rc}")
+    cands = [p for p in carpeta.glob("RESULTS_*.csv") if p.stat().st_mtime >= inicio]
+    if not cands:
+        raise RuntimeError("el scraper no genero el CSV")
+    return max(cands, key=lambda p: p.stat().st_mtime)
+
+
 def nombre_fichero(dia):
     return f"RESULTS_YESTERDAY_{dia:%Y%m%d}.csv"
 
@@ -55,11 +73,18 @@ def main(argv):
         print(f"ERROR: {e}")
         return 1
 
+    if ensure("antibloqueo", "postgres", "launcher", "runtime", "navegador"):
+        print("ERROR: no se pudieron arrancar los servicios.")
+        return 1
+    extraccion = Path(CFG.get("REPORTS_DIR")) / "resultados-ayer" / f"{dia:%Y%m%d}" / "extraccion"
     filas, cabecera, resumen = [], ["country", "competition"], []
     for liga in catalogo.cargar_ligas():
-        fichero = C.ultimo_results(liga)
-        if fichero is None:
-            resumen.append((liga["code"], 0, "sin RESULTS_*.csv"))
+        print(f"Extrayendo de Flashscore [{liga['code']}]...")
+        try:
+            fichero = extraer_liga(liga, extraccion / liga["code"])
+        except RuntimeError as e:
+            print(f"[FALLO] [{liga['code']}] {e}")
+            resumen.append((liga["code"], 0, f"FALLO: {e}"))
             continue
         with open(fichero, encoding="utf-8-sig", newline="") as fh:
             lector = csv.DictReader(fh)
@@ -110,7 +135,7 @@ def procesar_en_postgres(salida, cabecera, filas, dia):
             w.writeheader()
             w.writerows(de_liga)
         try:
-            r = L.submit_and_wait(cfg, parte, timeout_min=30)
+            r = L.submit_and_wait(cfg, parte, timeout_min=3)
             estado = r.get("status")
         except Exception as e:
             estado = f"FALLO ({e})"

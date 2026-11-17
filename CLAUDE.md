@@ -19,6 +19,7 @@ El detalle vive fuera de este fichero:
 | Extraer resultados de todas las ligas | skill `resultados-todas-las-ligas` |
 | Cargar en Postgres los CSV de resultados ya extraídos | skill `procesar-csv-resultados` |
 | Consultar los últimos resultados agregados a Postgres | skill `ultimos-resultados` |
+| Pronóstico y artículo de previa de la próxima jornada | skill `pronostico-jornada` |
 | Extraer jugada a jugada y estadísticas | skill `extraer-datos-partido` |
 | Procesar los partidos pendientes (antes ejecuta `basket datos-ayer`) | skill `procesar-pendientes` |
 | Guardar los resultados de ayer en `RESULTS_YESTERDAY_<fecha>.csv` | skill `resultados-ayer` |

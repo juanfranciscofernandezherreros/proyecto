@@ -92,7 +92,7 @@ Contenedor de Postgres: `local-validation-postgres-1`.
 
 Interruptores útiles del `.env`:
 - `INICIO_RESULTS=1` → en el arranque automático, extrae RESULTS de todas las ligas.
-- `CICLO_RESULTS=1` → en el ciclo diario, extrae RESULTS antes de procesar pendientes.
+- `CICLO_RESULTS=1` → en el ciclo diario, extrae RESULTS antes de todo. Por defecto `0`: los RESULTS son la skill manual `resultados-todas-las-ligas` y el ciclo empieza por `datos-ayer`.
 - `FILTRO_PAIS` / `FILTRO_COMPETICION` → limitan el orquestador.
 
 ---
@@ -283,7 +283,7 @@ cmd //c "1_EJECUTAR\basket.cmd ultimos"
 cmd //c "1_EJECUTAR\basket.cmd ciclo-diario"
 ```
 
-1. (si `CICLO_RESULTS=1`) extrae RESULTS de todas las ligas.
+1. (solo si `CICLO_RESULTS=1`, apagado por defecto) extrae RESULTS de todas las ligas.
 2. `MATCHIDS_PENDIENTES` → primero `basket datos-ayer` (datos de los partidos de ayer en
    `fixtures`; `DATOS_AYER=0` lo desactiva) y después procesa pendientes.
 3. `ARCHIVAR_CSV_REPETIDOS` → deja un CSV vigente por partido/dataset, el resto al histórico.

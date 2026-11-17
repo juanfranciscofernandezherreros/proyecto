@@ -261,6 +261,16 @@ Evidencia por paso. Ningún paso cambia el flujo del SDD §4 ni los puertos.
 | 5 | Web: nombre del jugador enlazado desde `MatchDetailPage.tsx` | `typecheck` y `npm test` (31 tests) en verde | ✅ |
 | 6 | Hallazgo: `teamScore`/`opponentScore` casi siempre `null` | Los jugadores llevan la abreviatura del equipo (`DAL`, `BRE`...) y el resultado el nombre completo. De 200 actuaciones, 2 con marcador (BBL). Pendiente de decidir (ver plan, §3b) | ⚠️ Abierto |
 
+## 13. Skill `pronostico-jornada` (plan `PLAN-skill-pronostico-jornada.md`)
+
+| # | Cambio | Evidencia | Estado |
+|---|---|---|---|
+| 1 | Consulta `sql\consultas\2026-11-15_2330_previa-jornada-datos.sql` (calendario próximo y forma de cada equipo, en JSON) | Ejecutada por `basket pronostico datos`: 30 partidos próximos, 20 equipos, 110 resultados de Euroliga | ✅ |
+| 2 | `scripts\py\pronostico\previa.py` y lanzador `basket pronostico datos \| publicar` | `basket pronostico datos` da para la jornada 12 las mismas diez probabilidades calculadas a mano (Zalgiris 89,0 %, Valencia 56,8 %...) | ✅ |
+| 3 | Tests de la lógica pura (`PronosticoPreviaTests`) | `python -m unittest discover -s tests`: 24 tests, 0 fallos (6 nuevos) | ✅ |
+| 4 | `publicar` valida y no duplica | Borrador sin textos: lista lo que falta y no publica. Borrador relleno: "Artículo actualizado: euroliga-jornada-12-2026-11-15"; la colección sigue con 4 documentos y el publicado no lleva claves `_ayuda` | ✅ |
+| 5 | Skill `.claude\skills\pronostico-jornada\SKILL.md` y fila en `CLAUDE.md` | Artículo visible en `http://localhost:8083/predictions/euroliga-jornada-12-2026-11-15` | ✅ |
+
 ## 14. `basket datos-ayer` y paso previo de los pendientes (plan `PLAN-resultados-por-fixtures.md`)
 
 | # | Cambio | Evidencia | Estado |
@@ -290,3 +300,14 @@ Evidencia por paso. Ningún paso cambia el flujo del SDD §4 ni los puertos.
 | 2 | Test `ResultadosAyerTests` | 37 tests, 0 fallos; gate `verificar.py` VERDE | ✅ |
 | 3 | Skill `.claude\skills\resultados-ayer\SKILL.md` y fila en `CLAUDE.md` | Skill listada en la sesión | ✅ |
 | 4 | Sin opciones lo hace todo: CSV → Postgres (launcher, por liga) → projector → comprobación en Mongo; tarea "Basketball - Resultados de ayer al iniciar" (al iniciar sesión) y desactivadas las otras dos de inicio | `basket resultados-ayer` (16-nov): winner-league 3 y nba 5 → COMPLETED; tras 90 s, 8 de 8 en Mongo con su marcador; 37 tests OK | ✅ |
+| 5 | Extrae de Flashscore cada liga (python-pyppeter), asegura también el runtime (Mongo, projector) y da por fallida una liga a los 3 min de carga | `basket resultados-ayer` (17-nov, 16-nov): 11 ligas extraídas, winner-league 3 y nba 5 → COMPLETED, 8 de 8 en Mongo, código 0 | ✅ |
+
+## 18. Logs de `basket` en Grafana (plan `PLAN-logs-basket-en-grafana.md`)
+
+| # | Cambio | Evidencia | Estado |
+|---|---|---|---|
+| 1 | `basket.py` duplica la salida de cada comando en `DATA_DIR\logs\basket\<comando>_<AAAAMMDD_HHMMSS>.log` y, salvo en `estado`/`vigilar`/`monitor`/`antibloqueo`/`grafana`, asegura Grafana y promtail e imprime el enlace `Logs en vivo:` | `basket resultados-ayer`: `Log:` y `Logs en vivo:` impresos; fichero `resultados-ayer_20261117_101025.log` | ✅ |
+| 2 | promtail: job `basket` con etiquetas `comando` y `ejecucion`, `DATA_DIR\logs` montado en `/var/log/basketball`; servicio `promtail` en `asegurar.py` (lo recrea si falta el montaje) | Loki devuelve `comando=ids-ayer, resultados-ayer`; local-validation `e9fd53f` | ✅ |
+| 3 | Dashboard `basket-logs` (Loki): filtros comando/ejecución/texto, líneas, fallos, líneas por minuto, fallos y avisos, salida en vivo | Visto en vivo en http://localhost:8084/d/basket-logs durante la ejecución, 0 fallos | ✅ |
+| 4 | Loki 192→768 MB y promtail 96→256 MB (`Start-BasketballLocal.ps1`, `asegurar.py`): sin memoria, Loki no aceptaba envíos | Tras el cambio, Loki 110 MB y promtail 53 MB, CPU ~1 %; 53 de 56 líneas en Loki al momento | ✅ |
+| 5 | Tests `BasketLogsTests` (regex de promtail, comandos sin Grafana, dashboard válido) | 42 tests OK; gate `verificar.py` VERDE | ✅ |

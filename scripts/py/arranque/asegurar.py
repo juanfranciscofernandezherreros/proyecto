@@ -6,7 +6,7 @@ Para cada servicio pedido: comprueba si esta listo; si no, lo arranca y espera. 
 dependencias se resuelven solas (launcher -> postgres -> docker).
 
 Uso:  python scripts\py\arranque\asegurar.py <servicio> [servicio...] [--reiniciar-launcher] [--actualizar-dashboard]
-Servicios: antibloqueo watcher docker postgres runtime auditoria launcher grafana navegador consumo
+Servicios: antibloqueo watcher docker postgres runtime auditoria launcher grafana promtail navegador consumo
 SKIP_CSV_WATCHER=1 ignora "watcher".  ASEGURAR_LOG=<fichero> anade cada linea a un log.
 """
 import json
@@ -55,6 +55,7 @@ GRAFANA_DASHBOARDS = {
     "processing-live": os.path.join(BATCH_ROOT, "observability", "processing-live-dashboard.json"),
     "csv-procesados": os.path.join(BATCH_ROOT, "observability", "csv-procesados-dashboard.json"),
     "consumo-recursos": os.path.join(BATCH_ROOT, "observability", "consumo-recursos-dashboard.json"),
+    "basket-logs": str(WORKSPACE / "local-validation" / "observability" / "basket-logs-dashboard.json"),
 }
 GRAFANA_VIEWS = [
     os.path.join(str(WORKSPACE), "sql", "consultas", "2026-11-03_1055_vista-csv-procesados.sql"),
@@ -63,6 +64,7 @@ GRAFANA_VIEWS = [
 
 DEPENDENCIES = {
     "grafana": ["docker"],
+    "promtail": ["grafana"],
     "watcher": ["postgres"],
     "postgres": ["docker"],
     "runtime": ["postgres"],
@@ -416,6 +418,47 @@ def _ensure_grafana():
     estado("grafana", f"listo en {GRAFANA_URL}/d/{PENDING_DASHBOARD_UID}")
 
 
+# ---------- promtail ----------
+PROMTAIL_CONTAINER = "basketball-promtail"
+PROMTAIL_LOGS = "/var/log/basketball"
+
+
+def _promtail_args():
+    r"""docker run de promtail (igual que Start-BasketballLocal.ps1) con DATA_DIR\logs montado."""
+    config = WORKSPACE / "local-validation" / "observability" / "promtail.yml"
+    logs = Path(CFG.get("DATA_DIR") or r"C:\data\basketball") / "logs"
+    logs.mkdir(parents=True, exist_ok=True)
+    return ["run", "-d", "--name", PROMTAIL_CONTAINER, "--restart", "no",
+            "--memory", "256m", "--memory-swap", "256m", "--network", "local-validation_default",
+            "-v", f"{config}:/etc/promtail/config.yml:ro",
+            "-v", "/var/run/docker.sock:/var/run/docker.sock:ro",
+            "-v", f"{logs}:{PROMTAIL_LOGS}:ro",
+            "-v", "basketball-promtail-positions:/run/promtail",
+            "grafana/promtail:latest"]
+
+
+def _ensure_promtail():
+    """promtail lee los contenedores y los logs de basket; lo recrea si le falta el montaje."""
+    rc, montajes = _docker(["inspect", "--format",
+                            "{{range .Mounts}}{{.Destination}} {{end}}", PROMTAIL_CONTAINER])
+    if rc == 0 and PROMTAIL_LOGS not in montajes.split():
+        estado("promtail", "sin la carpeta de logs de basket; recreando")
+        _docker(["rm", "-f", PROMTAIL_CONTAINER])
+        rc = 1
+    if rc != 0:
+        rc, _ = _docker(_promtail_args(), visible=True)
+        if rc != 0:
+            raise FalloArranque(f"docker run {PROMTAIL_CONTAINER} fallo.")
+        estado("promtail", "creado")
+    rc, st = _docker(["inspect", "--format", "{{.State.Status}}", PROMTAIL_CONTAINER])
+    if st != "running":
+        estado("promtail", f"contenedor {st}; arrancando")
+        rc, _ = _docker(["start", PROMTAIL_CONTAINER], visible=True)
+        if rc != 0:
+            raise FalloArranque(f"docker start {PROMTAIL_CONTAINER} fallo.")
+    estado("promtail", "listo")
+
+
 # ---------- consumo ----------
 def _ensure_consumo():
     if _procesos_cmdline("recolectar_consumo.py"):
@@ -464,11 +507,13 @@ def _ensure_service(service, reiniciar_launcher):
         _ensure_grafana()
     elif service == "navegador":
         _ensure_navegador()
+    elif service == "promtail":
+        _ensure_promtail()
     elif service == "consumo":
         _ensure_consumo()
     else:
         raise FalloArranque(f"Servicio desconocido: {service}. Validos: antibloqueo, watcher, "
-                            "docker, postgres, runtime, auditoria, launcher, grafana, navegador, consumo")
+                            "docker, postgres, runtime, auditoria, launcher, grafana, promtail, navegador, consumo")
     _done.add(service)
 
 

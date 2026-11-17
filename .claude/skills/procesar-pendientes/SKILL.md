@@ -58,13 +58,14 @@ El ciclo diario completo (lo que corre la tarea programada) es:
 cmd //c "C:\Develop\basketball\1_EJECUTAR\basket.cmd ciclo-diario"
 ```
 
-Antes de los pendientes, `matchids_pendientes` (y por tanto `pendientes`,
-`ciclo-diario`, `inicio-automatico` y `extraer-todo`) ejecuta `basket datos-ayer`: los
-datos de todos los partidos de ayer que hay en `fixtures` (se desactiva con
-`DATOS_AYER=0` o `SKIP_DATOS_AYER=1`). Después hace tres cosas: extrae los resultados de todas las ligas solo si
-`CICLO_RESULTS=1` en `config\basketball.env` (activado desde el 2026-11-15), lanza
-`MATCHIDS_PENDIENTES` y archiva los CSV repetidos. Log en
-`C:\data\basketball\reports\orchestrator\ciclo-diario-<fecha>.log`.
+El ciclo empieza por `basket datos-ayer`: los datos de todos los partidos de ayer que hay
+en `fixtures` (lo ejecuta `matchids_pendientes`, y por tanto también `pendientes`,
+`inicio-automatico` y `extraer-todo`; se desactiva con `DATOS_AYER=0` o
+`SKIP_DATOS_AYER=1`). Sigue con el resto de pendientes y archiva los CSV repetidos.
+Los resultados de todas las ligas **no** forman parte del ciclo: son la skill
+`resultados-todas-las-ligas`, que se lanza a mano (`CICLO_RESULTS=1` en
+`configasketball.env` los reactiva). Log en
+`C:\dataasketballeports\orchestrator\ciclo-diario-<fecha>.log`.
 
 ## 4. Verificar
 

@@ -1,12 +1,13 @@
 ---
 name: resultados-ayer
-description: Procesa los resultados de ayer de todas las ligas hasta el projector, sin preguntar nada — genera RESULTS_YESTERDAY_<fecha>.csv con los RESULTS ya extraídos, lo carga en PostgreSQL, espera al projector y comprueba en MongoDB (lo que escribe el projector) que cada partido está con su marcador; no abre la web. Usar cuando el usuario pida los resultados de ayer, el RESULTS_YESTERDAY, procesar el CSV de ayer o llevar los resultados de ayer hasta el projector. Para extraer resultados nuevos de Flashscore, resultados-todas-las-ligas.
+description: Trae los resultados de ayer de todas las ligas hasta el projector, sin preguntar nada — extrae de Flashscore los resultados de cada liga con el scraper python-pyppeter (Selenium + Edge), genera RESULTS_YESTERDAY_<fecha>.csv con los partidos de ayer, lo carga en PostgreSQL por el launcher, espera al projector y comprueba en MongoDB que cada partido está con su marcador; la salida se ve en vivo en el dashboard basket-logs de Grafana. Usar cuando el usuario pida los resultados de ayer, el RESULTS_YESTERDAY, procesar el CSV de ayer o llevar los resultados de ayer hasta el projector. Para todos los resultados de la temporada de todas las ligas, resultados-todas-las-ligas.
 ---
 
 # Resultados de ayer hasta el projector
 
-Sin preguntar nada al usuario, lanzar en segundo plano (tarda unos minutos) y redirigir
-la salida a un fichero del directorio temporal de la sesión:
+Sin preguntar nada al usuario, lanzar en segundo plano (tarda unos 10 minutos) y
+redirigir la salida a un fichero del directorio temporal de la sesión. Antes, comprobar
+que no hay otro `resultados-ayer` en marcha: dos a la vez se pisan.
 
 ```bash
 cmd //c "C:\Develop\basketball\1_EJECUTAR\basket.cmd resultados-ayer"
@@ -14,15 +15,25 @@ cmd //c "C:\Develop\basketball\1_EJECUTAR\basket.cmd resultados-ayer"
 
 Hace, en este orden:
 
-1. Genera `C:\data\basketball\reports\resultados-ayer\RESULTS_YESTERDAY_<AAAAMMDD>.csv`
-   con los partidos de ayer (hora de Madrid) del último `RESULTS_*.csv` de cada liga.
-   No extrae de Flashscore.
-2. Lo carga en Postgres por el launcher, una liga cada vez (las partes quedan en
-   `resultados-ayer\<AAAAMMDD>\`, fuera de `competitions\`).
-3. Espera 90 s (`CICLO_ESPERA_CUADRE`) a que el projector lo lleve a Mongo.
-4. Comprueba en Mongo (lo que escribe el projector) que cada partido está con su marcador. No abre la web.
+1. `basket` levanta Grafana, Loki y promtail, y duplica la salida en
+   `C:\data\basketball\logs\basket\resultados-ayer_<AAAAMMDD_HHMMSS>.log`. Imprime el
+   enlace `Logs en vivo:` al dashboard `basket-logs` (http://localhost:8084/d/basket-logs).
+2. Asegura antibloqueo, Postgres, launcher, runtime (Mongo, projector, API y web) y
+   navegador.
+3. Extrae de Flashscore los resultados de cada liga del catálogo con el scraper
+   `python-pyppeter\flashscore.py competition results` (Selenium + Edge; unos 40 s por
+   liga). Va a `reports\resultados-ayer\<AAAAMMDD>\extraccion\<LIGA>\`, sin tocar
+   `competitions\`. Una liga que falla queda `FALLO` y se sigue.
+4. Se queda con los partidos de ayer (hora de Madrid) y los junta en
+   `C:\data\basketball\reports\resultados-ayer\RESULTS_YESTERDAY_<AAAAMMDD>.csv`.
+5. Lo carga en Postgres por el launcher, una parte por liga
+   (`resultados-ayer\<AAAAMMDD>\RESULTS_<ts>_<pais>_<competicion>.csv`). Una liga que
+   tarda más de 3 minutos se da por fallida.
+6. Espera 90 s (`CICLO_ESPERA_CUADRE`) a que el projector lo lleve a Mongo.
+7. Comprueba en Mongo que cada partido está con su marcador. No abre la web.
 
-Otra fecha: `basket resultados-ayer 2026-11-16`. Solo el CSV: `--solo-csv`.
+Otra fecha: `basket resultados-ayer 2026-11-16`. Solo extraer y generar el CSV:
+`--solo-csv`.
 
 ## Qué decir al terminar
 
@@ -32,13 +43,16 @@ Código 0 si todo está en Mongo; 1 si algo falló.
 
 | Sale | Qué hacer |
 |---|---|
-| Una liga con 0 partidos que sí jugó | Su RESULTS es de antes del final del día: `basket resultados ALL` y repetir |
-| `PROCESAR ... -> FAILED` | Ver la carga en `public.batch_launch_request` (skill `diagnosticar-partido`) |
+| `[FALLO] [LIGA]` en la extracción | Ver el log; repetir, o `basket resultados <LIGA>` (skill `extraer-resultados`) |
+| Una liga con 0 partidos que sí jugó | Flashscore aún no lo tenía: repetir más tarde |
+| `PROCESAR ... -> FAILED` o tiempo agotado | Ver la carga en `public.batch_launch_request` (skill `diagnosticar-partido`) |
 | `NO ESTA EN MONGO` / `MARCADOR DISTINTO EN MONGO` | Esperar un minuto más y repetir; si sigue, skill `diagnosticar-partido` |
+| `AVISO: Grafana o promtail no arrancaron` | El comando sigue; los logs solo quedan en el fichero |
 
 Las jugadas y estadísticas de esos partidos no van aquí: las cargan los pendientes.
 
 ## Relacionado
 
-- Lógica: `scripts\py\lanzadores\resultados_ayer.py`. Plan: `docs\PLAN-resultados-ayer.md`.
+- Lógica: `scripts\py\lanzadores\resultados_ayer.py`. Planes:
+  `docs\PLAN-resultados-ayer.md`, `docs\PLAN-logs-basket-en-grafana.md`.
 - Cuadre con fixtures y secciones: skill `cuadrar-partidos-dia`.

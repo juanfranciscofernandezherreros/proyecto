@@ -177,6 +177,18 @@ de Grafana).
   pendientes + archivar + auditoría de datos). Extracción por liga:
   `1_EJECUTAR/basket.cmd orquestar <LIGA> results|datos|todo`. Partidos concretos:
   `basket.cmd reextraer`. Calidad de datos: `basket.cmd auditar`.
+- **Resultados de ayer**: `basket.cmd resultados-ayer` hace el cuadre previo (fixtures /
+  Mongo), extrae solo las ligas con pendientes, carga `RESULTS_YESTERDAY_<fecha>.csv`,
+  espera al projector y comprueba el marcador en Mongo.
+- **Pendientes**: `basket.cmd pendientes` levanta lo mismo que `resultados-ayer`
+  (Grafana, Postgres, auditoría, launcher, runtime y navegador), hace `datos-ayer`,
+  extrae e importa partido a partido lo que falta y **termina en el projector**:
+  espera `CICLO_ESPERA_CUADRE` y comprueba en Mongo cada partido completado
+  (`OK` / `FALTAN <secciones>` / `NO ESTA EN MONGO`).
+- **Orden de arranque**: Grafana depende de Postgres (`asegurar.py`), porque al
+  arrancar aplica en Postgres las vistas `v_csv_procesados` y `v_csv_generados`.
+- **Skills**: cada skill de `.claude\skills\` es autocontenida (da sus comandos y
+  consultas, no manda a otra) y no se encadenan entre sí.
 - **Requisitos**: Docker, JDK 21, Maven, Python (venv), Edge + EdgeDriver (versión
   del driver = versión de Edge).
 
@@ -211,6 +223,20 @@ Detalle en [ESPECIFICACIONES.md §11](ESPECIFICACIONES.md).
   (Postgres/Infinity), dashboard global de flujo, y uno por microservicio vivo
   (api, projector, web, mongo, postgres). Importación en `Start-BasketballLocal.ps1`.
 - Datasources de Grafana: Prometheus, Loki, PostgreSQL (directo) e Infinity (auditoría).
+- **Aviso por Telegram** (bot `@MiGrafanaDashboardOutOfHome_bot`, skill `aviso-telegram`):
+  - Vigilante `scripts\py\monitor\telegram_csv.py` (servicio `telegram` de
+    `asegurar.py`; el launcher depende de él, `basket telegram [prueba|una-vez|chat]`).
+    Lee `public.batch_launch_request` cada 10 s y manda **una línea por CSV terminado**:
+    estado (`✅ COMPLETADO` / `❌ FALLIDO`), nombre del CSV y hora de Madrid. Nunca el
+    fichero ni su contenido. Marca de agua en `DATA_DIR\state\telegram_csv.json`: no
+    reenvía el histórico y reintenta sin perder avisos. Log en
+    `DATA_DIR\logs\telegram_csv.log`.
+  - `basket pronostico publicar` manda al bot la predicción de la jornada: título, una
+    línea por partido (hora, equipos, ganador, probabilidad) y el enlace. Un fallo de
+    Telegram no impide publicar.
+  - `TELEGRAM_BOT_TOKEN` y `TELEGRAM_CHAT_ID` solo en `config\basketball.local.env`
+    (ignorado por git); vacíos en `basketball.env` = desactivado. Envío con `curl.exe`
+    (urllib se colgaba contra api.telegram.org en esta máquina).
 
 ---
 
@@ -251,8 +277,13 @@ La verificación no es solo manual; está soportada por tres capas:
 
 - **Script de verificación** `scripts/py/verificar.py` (lanzador `1_EJECUTAR/basket.cmd verificar`):
   convierte las comprobaciones de `VERIFICACION-SDD.md` en checks verde/rojo
-  (web/API 200, sin slugs no canónicos, filtros limpios, join fixture+result). Código
+  (web/API 200, sin slugs no canónicos, filtros limpios, join fixture+result, Mongo sin
+  fixture nula, vistas de Grafana en Postgres y, si Telegram está configurado, un
+  único vigilante en marcha sin CSV terminados por avisar más de 2 min). Código
   de salida 0/1, apto para hook o CI. Requiere el stack arrancado.
+- **Tests unitarios** `tests\test_scripts_py.py` (`python -m unittest discover -s tests`):
+  lógica pura de `scripts\py`, entre ellos el aviso y el mensaje de predicción de
+  Telegram y que el token no esté en la configuración versionada.
 - **Hook `pre-push`** en cada subrepo (`.githooks/pre-push`): compila/typechea antes de
   permitir el push. Se activa una vez por repo con `git config core.hooksPath .githooks`.
 - **CI en GitHub Actions** (`.github/workflows/ci.yml`) por subrepo: Maven `verify`

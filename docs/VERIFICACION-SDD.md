@@ -334,3 +334,13 @@ Evidencia por paso. Ningún paso cambia el flujo del SDD §4 ni los puertos.
 | 6 | Los datos del CSV van como texto (no el fichero): bloque `<pre>` con la cabecera repetida, mensajes de hasta 4096 caracteres, máximo `TELEGRAM_MAX_MENSAJES` (5) | 8 tests `TelegramCsvTests` OK; `PLAYER_STATS_20261117124906_8SJueQyq.csv` recibido como texto en 1 mensaje; vigilante reiniciado con el código nuevo | ✅ |
 | 7 | Aviso de una línea por CSV: solo estado, nombre del CSV y hora de Madrid (sin fichero ni datos) | 50 tests OK; vigilante reiniciado 12:54:57; recibido `✅ COMPLETADO · POINT_BY_POINT_20261117125350_8ArlEYR6.csv · 17/11 12:54:49` | ✅ |
 | 8 | `basket pronostico publicar` envía al bot solo la predicción (título, una línea por partido con hora de Madrid, ganador y probabilidad, y el enlace); un fallo de Telegram no impide publicar | Test `test_mensaje_pronostico_solo_prediccion_y_enlace` (51 tests OK); publicada la jornada 12 de Euroliga: `Artículo actualizado` y `Telegram: prediccion enviada al bot.` | ✅ |
+
+## 21. SDD y gate al día con lo del 2026-11-17 (plan `PLAN-sdd-verificacion-17nov.md`)
+
+| # | Cambio | Evidencia | Estado |
+|---|---|---|---|
+| 1 | `asegurar.py`: Grafana depende de Postgres, que arranca antes y deja aplicar las vistas `v_csv_procesados` y `v_csv_generados` (antes fallaban con "container is not running") | Con Postgres parado, `_ensure_service('grafana')` arrancó Postgres y dio `vista aplicada` en las dos (commit `af36a17`) | ✅ |
+| 2 | `verificar.py` 6: vistas de Grafana presentes en Postgres | `OK Grafana: vistas v_csv_procesados y v_csv_generados en Postgres` | ✅ |
+| 3 | `verificar.py` 7: Telegram configurado → un vigilante y ningún CSV terminado sin avisar más de 2 min; sin configurar se omite | `OK Telegram: un vigilante en marcha`, `OK Telegram: todos los CSV terminados avisados`; gate VERDE (17-nov) | ✅ |
+| 4 | `SDD.md` §7 (resultados-ayer, pendientes hasta el projector, orden de arranque, skills autocontenidas), §9 (aviso por Telegram) y §13 (gate y tests) | Revisado a mano | ✅ |
+| 5 | Skill `estado-del-sistema` borrada; sus menciones cambiadas por `basket estado` (commit `bdeda32`) | `grep estado-del-sistema` sin resultados salvo el comentario histórico de `estado.py` | ✅ |

@@ -85,6 +85,25 @@ def avisar_inicio(n):
         print(f"[AVISO] Telegram: no se pudo enviar el aviso de inicio: {e}")
 
 
+def mensaje_partido(hecho, total, row, status, message=""):
+    """Aviso de un partido terminado: estado, posicion en la tanda, partido y cuantos quedan."""
+    icono = "✅" if status == "COMPLETED" else "❌"
+    partido = f"{row.get('home_team')} - {row.get('away_team')} ({row.get('country')}/{row.get('competition')})"
+    motivo = f" · {message[:150]}" if status != "COMPLETED" and message else ""
+    return f"{icono} {hecho}/{total} · {partido}{motivo} · quedan {total - hecho}"
+
+
+def avisar_partido(hecho, total, row, status, message=""):
+    """Manda el aviso de un partido al bot; si falla, avisa y sigue."""
+    try:
+        sys.path.insert(0, str(SCRIPTS_PY / "monitor"))
+        import telegram_csv
+        if telegram_csv.configurado():
+            telegram_csv.enviar_texto(mensaje_partido(hecho, total, row, status, message))
+    except Exception as e:
+        print(f"[AVISO] Telegram: no se pudo enviar el aviso del partido: {e}")
+
+
 def main():
     args = [a for a in sys.argv[1:]]
     # "" (o '') para pasar solo el limite llega a veces con las comillas literales.
@@ -155,7 +174,7 @@ def main():
     avisar_inicio(len(queue))
     state = []
     current_pending = {_match_key(r) for r in fresh}
-    for row in queue:
+    for hecho, row in enumerate(queue, start=1):
         log_path = REPORT_ROOT / f"PROCESAR_MATCHIDS_{run_id}_{row['match_id']}.log"
         started = _ahora_iso()
         try:
@@ -191,6 +210,7 @@ def main():
                          f"competition={row['competition']} message={message}\n")
             print(f"AVISO: [{row['match_id']}] {message}")
         state.append(_fila_estado(run_id, row, status, started, message, log_path))
+        avisar_partido(hecho, len(queue), row, status, message)
         try:
             current_pending = {_match_key(r) for r in _ultimos_pendientes()}
         except Exception as e:

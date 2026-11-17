@@ -401,3 +401,10 @@ Evidencia por paso. Ningún paso cambia el flujo del SDD §4 ni los puertos.
 | 3 | El launcher guarda el motivo de un batch fallido | `BatchProcessExecutorMotivoTest` (4 OK); desplegado el 17/11 16:21, launcher UP | ✅ |
 | 4 | Los 3 partidos de OKC tienen a los dos «Williams J.» | Postgres 27/22/26 jugadores con id; Mongo y `/api/v1/matches/h81tlrkd/players` igual | ✅ |
 | 5 | Gate | Tests del repo 65 OK; `basket verificar` VERDE el 17/11 | ✅ |
+
+## Aviso a Telegram por partido (`docs/PLAN-aviso-telegram-por-partido.md`, 2026-11-17)
+
+| # | Requisito | Evidencia | Estado |
+|---|---|---|---|
+| 1 | Tras cada partido, `✅/❌ i/N · partido · quedan N-i`; un fallo de Telegram no corta | `test_pendientes_avisa_de_cada_partido_y_cuantos_quedan` | ✅ |
+| 2 | Gate | Tests 66 OK; `basket verificar` VERDE el 17/11 | ✅ |

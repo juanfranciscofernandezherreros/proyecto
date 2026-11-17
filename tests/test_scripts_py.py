@@ -495,6 +495,22 @@ class ResultadosAyerTests(unittest.TestCase):
              mock.patch.object(telegram_csv, "enviar_texto", side_effect=OSError("sin red")):
             PM.avisar_inicio(3)  # no debe lanzar
 
+    def test_pendientes_avisa_de_cada_partido_y_cuantos_quedan(self):
+        from unittest import mock
+        sys.path.insert(0, str(RAIZ / "scripts" / "py" / "pendientes"))
+        import procesar_matchids as PM
+        row = {"home_team": "Houston Rockets", "away_team": "Golden State Warriors",
+               "country": "usa", "competition": "nba"}
+        self.assertEqual(PM.mensaje_partido(3, 54, row, "COMPLETED"),
+                         "✅ 3/54 · Houston Rockets - Golden State Warriors (usa/nba) · quedan 51")
+        self.assertEqual(PM.mensaje_partido(54, 54, row, "ERROR", "sin conexion"),
+                         "❌ 54/54 · Houston Rockets - Golden State Warriors (usa/nba) · sin conexion · quedan 0")
+        sys.path.insert(0, str(RAIZ / "scripts" / "py" / "monitor"))
+        import telegram_csv
+        with mock.patch.object(telegram_csv, "configurado", return_value=True), \
+             mock.patch.object(telegram_csv, "enviar_texto", side_effect=OSError("sin red")):
+            PM.avisar_partido(1, 2, row, "COMPLETED")  # no debe lanzar
+
     def test_main_lanza_pendientes_y_devuelve_el_peor_codigo(self):
         from unittest import mock
         sys.path.insert(0, str(RAIZ / "scripts" / "py" / "lanzadores"))

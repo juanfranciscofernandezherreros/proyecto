@@ -73,3 +73,9 @@ estado (`✅ COMPLETADO` / `❌ FALLIDO`), nombre del CSV y hora de Madrid en qu
 - [x] Tests `TelegramCsvTests` reescritos (50 tests OK).
 - [x] Vigilante reiniciado (12:54:57); aviso real de `POINT_BY_POINT_20261117125350_8ArlEYR6.csv`.
 - [x] Commit + push.
+
+## Skill `aviso-telegram`
+
+- [x] `.claude\skills\aviso-telegram\SKILL.md`: arrancar, comprobar, probar y arreglar el aviso, sin mandar a otras skills.
+- [x] Fila en la tabla de `CLAUDE.md`.
+- [x] Commit + push.

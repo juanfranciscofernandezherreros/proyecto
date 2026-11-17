@@ -17,7 +17,7 @@ Hace, en este orden:
 
 1. `basket` levanta Grafana, Loki y promtail, y duplica la salida en
    `C:\data\basketball\logs\basket\resultados-ayer_<AAAAMMDD_HHMMSS>.log`. Imprime el
-   enlace `Logs en vivo:` al dashboard `basket-logs` (http://localhost:8084/d/basket-logs).
+   enlace `Logs en vivo:` al dashboard `basket-logs` (http://localhost:8084/d/basket-logs/basketball-logs-de-basket?orgId=1&from=now-3h&to=now&timezone=browser&var-comando=$__all&var-ejecucion=$__all&var-buscar=&refresh=5s).
 2. Asegura antibloqueo, Postgres, launcher, runtime (Mongo, projector, API y web) y
    navegador.
 3. **Cuadre previo** (lógica de `cuadrar_dia`): partidos de ese día en `fixtures` y en

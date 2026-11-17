@@ -73,8 +73,10 @@ def _asegurar_observabilidad(comando, log):
         print("AVISO: Grafana o promtail no arrancaron; el comando sigue sin logs en vivo.", flush=True)
         return
     url = (CFG.get("GRAFANA_URL") or "http://localhost:8084").rstrip("/")
-    print(f"Logs en vivo: {url}/d/{DASHBOARD_LOGS}?var-comando={comando}"
-          f"&var-ejecucion={log.stem}&refresh=5s", flush=True)
+    # Enlace fijo pedido por el usuario: todos los comandos y ejecuciones de las últimas 3 h.
+    print(f"Logs en vivo: {url}/d/{DASHBOARD_LOGS}/basketball-logs-de-basket?orgId=1"
+          f"&from=now-3h&to=now&timezone=browser&var-comando=$__all&var-ejecucion=$__all"
+          f"&var-buscar=&refresh=5s", flush=True)
 
 
 def _ejecutar(comando, args):

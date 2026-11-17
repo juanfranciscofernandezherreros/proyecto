@@ -22,24 +22,41 @@ batch va a la consola oculta del launcher (`inheritIO`).
 
 ## Backlog
 
-- [ ] 1. Scraper (`python-pyppeter`): columna nueva `player_url` al final de
+- [x] 1. Scraper (`python-pyppeter`): columna nueva `player_url` al final de
   `PLAYER_STATS_FIELDS`. `player_rows` empareja cada fila con el enlace de su `label`
   en orden de aparición (dos «Williams J.» → primer y segundo enlace). La cabecera
   visible se sigue buscando con las 23 columnas de Flashscore. Test con el caso OKC.
-- [ ] 2. Batch `stats-player` (`csv-extra-batch`): `ResultRow` acepta 24 columnas
+- [x] 2. Batch `stats-player` (`csv-extra-batch`): `ResultRow` acepta 24 columnas
   (CSV antiguos) o 25 (con `player_url`) y saca `player_id` del enlace. Migración V2:
   columnas `player_id` y `player_key` (generada: `player_id` o, si falta, `name`),
   índice único `(match_id, team, player_key)` en lugar del de `(match_id, name, team)`.
   El writer usa ese `ON CONFLICT` y, si el CSV trae ids, borra antes las filas antiguas
   sin id de ese partido (si no, quedarían duplicadas). Tests del parser y del writer.
-- [ ] 3. Launcher (`csv-extra-batch`): la salida del batch va a
+- [ ] 3. Launcher (código hecho, falta desplegar; ver Resultado) (`csv-extra-batch`): la salida del batch va a
   `REPORT_DIR\batch-logs\<request_id>.log` y, si falla, `batch_launch_request.error`
   guarda las últimas líneas útiles (`Caused by` / `ERROR`). Test del recorte.
-- [ ] 4. Recompilar los JAR y reiniciar el launcher; `basket reextraer` de los 3 partidos
+- [x] 4. Recompilar los JAR y reiniciar el launcher; `basket reextraer` de los 3 partidos
   de OKC; comprobar en Postgres (dos «Williams J.» con distinto `player_id`) y en Mongo.
-- [ ] 5. Tests, `basket verificar` en VERDE, evidencia en `docs/VERIFICACION-SDD.md`,
+- [x] 5. Tests, `basket verificar` en VERDE, evidencia en `docs/VERIFICACION-SDD.md`,
   commit + push en cada submódulo y en el repo principal.
 
 Fuera de alcance: las páginas de jugador de la web/API siguen identificando por nombre;
 dos jugadores con el mismo nombre abreviado en un partido se ven como dos filas en la
 ficha, pero comparten página de jugador.
+
+## Resultado (2026-11-17)
+
+- Paso 1: `python-pyppeter` 9fc61b8; 347 tests OK.
+- Paso 2: `csv-extra-batch` e1a74c4; además `CsvInput` validaba la cabecera aparte y solo
+  admitía 24 columnas (el primer reintento falló por eso). 5 tests OK. La migración V2 ya
+  está aplicada en la BD.
+- Paso 3: `csv-extra-batch` 5ffbcb7; 8 tests OK. **Código hecho, sin desplegar**: el JAR del
+  launcher no se puede reemplazar mientras el launcher corre, y estaba atendiendo a
+  `basket pendientes`. Falta `mvn package` en `launcher` y reiniciar el launcher al terminar.
+  La carpeta de logs no es `REPORT_DIR\batch-logs` sino `batch-logs` junto a la carpeta
+  vigilada (o `BATCH_LOG_DIR`).
+- Paso 4: recarga sin navegador desde el `MATCH_DETAILS` ya descargado (que trae los enlaces).
+  Postgres: 27, 22 y 26 jugadores, todos con `player_id`; dos «Williams J.» con id distinto
+  en cada partido. Mongo y la API igual. En `l40Wzzzi` y `zFyE2s4k` faltaba un jugador
+  desde noviembre.
+- Paso 5: tests del repo 65 OK; `basket verificar` VERDE.

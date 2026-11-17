@@ -391,3 +391,13 @@ Evidencia por paso. Ningún paso cambia el flujo del SDD §4 ni los puertos.
 | 3 | `pendientes` avisa a Telegram «⏳ Pendientes: N partidos por procesar» al empezar; un fallo de Telegram no lo corta | Test `test_pendientes_avisa_a_telegram_al_empezar` | ✅ |
 | 4 | Seguimiento sin Claude: dashboard de logs automático y `RESUMEN` a Telegram; skill `resultados-ayer` actualizada | Commit `fd1682d`; `SKILL.md` de `resultados-ayer` | ✅ |
 | 5 | Gate | Tests 65 OK; `basket verificar` VERDE el 17/11 | ✅ |
+
+## Jugadores con el mismo nombre abreviado (`docs/PLAN-jugadores-con-nombre-repetido.md`, 2026-11-17)
+
+| # | Requisito | Evidencia | Estado |
+|---|---|---|---|
+| 1 | `PLAYER_STATS` trae `player_url` emparejado por nombre y orden | `test_dos_jugadores_con_el_mismo_nombre_reciben_su_enlace`; `python-pyppeter` 347 tests OK | ✅ |
+| 2 | `stats_player` usa `(match_id, team, player_key)`; acepta CSV de 24 o 25 columnas | `ResultRowTest` (5 OK); migración V2 aplicada; consulta `2026-11-17_1605_williams-j-okc-cargados.sql` | ✅ |
+| 3 | El launcher guarda el motivo de un batch fallido | `BatchProcessExecutorMotivoTest` (4 OK); **sin desplegar** hasta que termine `pendientes` | ⏳ |
+| 4 | Los 3 partidos de OKC tienen a los dos «Williams J.» | Postgres 27/22/26 jugadores con id; Mongo y `/api/v1/matches/h81tlrkd/players` igual | ✅ |
+| 5 | Gate | Tests del repo 65 OK; `basket verificar` VERDE el 17/11 | ✅ |

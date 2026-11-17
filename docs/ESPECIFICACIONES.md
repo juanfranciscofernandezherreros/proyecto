@@ -392,6 +392,14 @@ Schemas de Postgres y su contenido:
 | Estadísticas de jugadores | `stats_player.stats_player` |
 | Jugada a jugada | `point_by_point.point_by_point_event` |
 
+> **Jugadores con el mismo nombre abreviado** (desde 2026-11-17): Flashscore escribe a
+> Jalen y Jaylin Williams (OKC) como «Williams J.». `PLAYER_STATS` lleva al final la
+> columna `player_url` (enlace del jugador en Flashscore) y `stats_player` guarda su id en
+> `player_id`; la unicidad es `(match_id, team, player_key)`, con
+> `player_key = COALESCE(player_id, name)`. Los CSV antiguos de 24 columnas se siguen
+> aceptando (sin id). Si un batch falla, `batch_launch_request.error` guarda la causa y la
+> salida completa queda en `batch-logs\<tipo>_<csv>.log` (`BATCH_LOG_DIR`).
+
 > Toda consulta SQL que se ejecute contra la BD se guarda en `sql\consultas\`
 > (ver la sección correspondiente en `CLAUDE.md`).
 

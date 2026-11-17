@@ -1,6 +1,6 @@
 # Verificación contra el SDD — Cierre de desarrollo
 
-> **Fecha:** 2026-11-08 · **Relacionado:** [SDD.md](SDD.md),
+> **Fecha:** 2026-11-08 · **Actualizado:** 2026-11-17 · **Relacionado:** [SDD.md](SDD.md),
 > [ESPECIFICACIONES.md](ESPECIFICACIONES.md),
 > [PLAN-normalizacion-competiciones.md](PLAN-normalizacion-competiciones.md).
 >
@@ -23,6 +23,11 @@ Dos desarrollos funcionales y dos de mantenimiento, todos verificados:
 | M2 | Limpieza de servicios/dashboards muertos (Kafka) | §3.1, §9 | ✅ Verificado |
 | M3 | API: tests que no compilaban → verdes (CI) | §6, §13 | ✅ Verificado |
 | M4 | python-pyppeter: suite en verde (CI) | §3.1, §5, §13 | ✅ Verificado |
+| 19 | `basket pendientes` hasta el projector (comprueba Mongo) | §7 | ✅ Verificado (falta una ejecución completa con el código nuevo) |
+| 20 | Aviso por Telegram de cada CSV y de la predicción de la jornada | §9 | ✅ Verificado |
+| 21 | Postgres antes que Grafana; gate con vistas de Grafana y Telegram | §7, §13 | ✅ Verificado |
+
+El detalle de cada desarrollo posterior al 2026-11-08 está en su sección (§7 en adelante).
 
 ---
 
@@ -109,6 +114,10 @@ el read model; había ~1308 docs con `availableSections:["fixture"]` pero sin ob
 - **§4 Flujo:** sin cambios de arquitectura; los cambios viven en scraper, batch y
   datos, como describe el SDD. ✅
 - **§9 Observabilidad:** fuentes de datos vivas y set de dashboards consolidado. ✅
+- **§7 Operación (2026-11-17):** `resultados-ayer` y `pendientes` terminan en el
+  projector y comprueban Mongo; Grafana arranca después de Postgres. ✅
+- **§9 Observabilidad (2026-11-17):** aviso por Telegram de cada CSV (solo estado,
+  nombre y hora) y de la predicción de la jornada; comprobado por el gate. ✅
 - **§11 Riesgos:** D1 y D2 cierran dos riesgos listados; quedan abiertos el bug del
   projector con `fixture` nula y el `restart` de los exporters (documentados). ⚠️
 
@@ -157,7 +166,8 @@ La verificación es ahora **ejecutable y automatizable**, no solo manual:
 
 | Capa | Qué | Dónde | Cómo se usa |
 |---|---|---|---|
-| Script | Checks verde/rojo del SDD | `scripts/Verificar.ps1` · `1_EJECUTAR/VERIFICAR.bat` | Stack arrancado → exit 0/1 |
+| Script | Checks verde/rojo del SDD (7 grupos: web/API, slugs, filtros, join, Mongo, vistas de Grafana, Telegram) | `scripts/py/verificar.py` · `1_EJECUTAR/basket.cmd verificar` | Stack arrancado → exit 0/1 |
+| Tests | Lógica pura de `scripts/py` | `tests/test_scripts_py.py` | `python -m unittest discover -s tests` |
 | Hook | Compila/typechea antes del push | `<repo>/.githooks/pre-push` | `git config core.hooksPath .githooks` (una vez por repo) |
 | CI | Build + tests en cada push/PR | `<repo>/.github/workflows/ci.yml` | Automático en GitHub |
 | Skill | Normas + flujo SDD→plan→verificación | `/normas-basketball` | Invocar antes de implementar/revisar |
@@ -165,8 +175,8 @@ La verificación es ahora **ejecutable y automatizable**, no solo manual:
 **Estado del CI:** `basketball-match-api` (M3) y `python-pyppeter` (M4) ya están **en
 verde**. El resto de repos no tenían suites rotas. El gate cumple su función.
 
-**Notas:** la skill `/normas-basketball` vive en `.claude/` (gitignored), así que es
-local, no versionada; el hook requiere activación manual por repo (diseño de git).
+**Notas:** las skills, reglas, agentes y comandos de `.claude/` se versionan (solo se
+ignora la configuración local de la máquina); el hook requiere activación manual por repo (diseño de git).
 
 ## 6. Conclusión
 

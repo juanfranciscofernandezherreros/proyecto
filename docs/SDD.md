@@ -1,6 +1,6 @@
 # SDD — Documento de Diseño Software · Basketball
 
-> **Estado:** vivo · **Fecha:** 2026-11-07 · **Ámbito:** pipeline completo de datos de
+> **Estado:** vivo · **Fecha:** 2026-11-07 · **Actualizado:** 2026-11-17 · **Ámbito:** pipeline completo de datos de
 > baloncesto (extracción → carga → read model → API → web) y su observabilidad.
 >
 > Documento de diseño. El **detalle operativo** (comandos exactos, puertos, cómo
@@ -260,6 +260,8 @@ Detalle en [ESPECIFICACIONES.md §11](ESPECIFICACIONES.md).
 | Projector no proyecta el objeto `fixture` cuando `fixtures.event_time` es nulo | ~1337 "scheduled" sin equipos/fecha y sin filtrar por liga | **Cerrado** — eran docs obsoletos; `PROJECTION_VERSION` en el sourceHash fuerza reproyección (0 rotos; scheduled NBA 0→1068) |
 | Exporters con `restart: "no"` | Se quedan `Exited` y los dashboards dejan de actualizarse | **Abierto** — poner `restart: unless-stopped` o `VIGILAR_SERVICIOS.bat` |
 | `results` de euroleague con `country/competition` vacíos (SCORE_SUMMARY antiguos) | Dependen de la `fixture` para clasificarse | Resuelto para extracciones nuevas (§8) |
+| Token del bot de Telegram escrito en una conversación (2026-11-17) | Cualquiera con el token puede usar el bot | **Abierto** — regenerarlo en BotFather (`/revoke`) y ponerlo en `config\basketball.local.env`; nunca se versiona (test lo vigila) |
+| Enlace de la predicción en Telegram apunta a `localhost:8083` | No se abre desde el móvil fuera de casa | **Abierto** — aceptado; el mensaje ya trae la predicción completa |
 | Repos anidados (`python-pyppeter`, `csv-extra-batch`, `local-validation`) gitignorados y de otro propietario | Cambios fáciles de perder / no versionados con el repo raíz | Documentado; commitear en cada repo |
 
 ---

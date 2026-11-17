@@ -267,9 +267,14 @@ eextraer.py`.
 1_EJECUTAR\basket.cmd pendientes [csv_seleccion] [limite]
 ```
 
-Consulta la auditoría global y procesa solo los `matchId` pendientes
-(extrae + importa lo que falte de cada partido). Asegura antes:
-`antibloqueo postgres auditoria launcher navegador`.
+Levanta Grafana, Loki y promtail y asegura
+`antibloqueo postgres auditoria launcher runtime navegador`. Hace `basket datos-ayer`,
+consulta la auditoría global y procesa solo los `matchId` pendientes (extrae + importa
+lo que falte de cada partido, refrescando la auditoría tras cada uno). Deja el
+resumen en `reports\orchestrator\PROCESAR_MATCHIDS_<run_id>.csv` y **termina en el
+projector**: espera `CICLO_ESPERA_CUADRE` (90 s) y comprueba en Mongo cada partido
+completado (`OK` / `FALTAN <secciones>` / `NO ESTA EN MONGO`). Código 1 solo si alguno
+no está en Mongo.
 
 ### 7.2 Procesar los últimos partidos (completo)
 
@@ -300,12 +305,45 @@ cmd //c "1_EJECUTAR\basket.cmd ciclo-diario"
 Por defecto cada 5 min revisa `antibloqueo postgres auditoria launcher grafana` y
 arranca lo que esté parado. `VIGILAR_SERVICIOS.bat una-vez` hace una sola pasada.
 
+### 7.5 Aviso por Telegram
+
+```text
+1_EJECUTAR\basket.cmd telegram [prueba|una-vez|chat]
+```
+
+Vigilante (`scripts\py\monitor\telegram_csv.py`) que lee `public.batch_launch_request`
+cada 10 s y manda al bot `@MiGrafanaDashboardOutOfHome_bot` una línea por CSV terminado:
+`✅ COMPLETADO · <csv> · <dd/mm HH:MM:SS>` (o `❌ FALLIDO`). Nunca el fichero ni su
+contenido. Lo levanta cualquier comando que use el launcher (el launcher depende del
+servicio `telegram`). `basket pronostico publicar` manda además la predicción de la
+jornada (una línea por partido y el enlace).
+
+- Configuración: `TELEGRAM_BOT_TOKEN` y `TELEGRAM_CHAT_ID` solo en
+  `config\basketball.local.env` (ignorado por git); `TELEGRAM_INTERVALO` (10 s) en
+  `basketball.env`. Sin token o chat, desactivado.
+- `chat`: muestra el `chat_id` de quien escribió al bot. `prueba`: mensaje de prueba.
+  `una-vez`: envía lo pendiente y termina.
+- Log `C:\data\basketball\logs\telegram_csv.log`; marca de agua
+  `C:\data\basketball\state\telegram_csv.json`.
+- Detalle y averías: skill `aviso-telegram`.
+
 ---
 
 ## 8. Verificar
 
-**Rápido (verde/rojo):** con el stack arrancado, `1_EJECUTAR\basket.cmd verificar` (o
-`scripts\Verificar.ps1`) ejecuta las comprobaciones del SDD y devuelve 0/1. Cada
+**Rápido (verde/rojo):** con el stack arrancado, `1_EJECUTAR\basket.cmd verificar`
+(`scripts\py\verificar.py`) ejecuta las comprobaciones del SDD y devuelve 0/1:
+
+1. Web (8083) y API (8082) responden 200.
+2. `results` y `fixtures` sin slugs no canónicos (`acb`, `super-league`).
+3. `/api/v1/matches/filters` no ofrece esos slugs.
+4. Un partido de `spain/liga-endesa` une fixture + result.
+5. Mongo: ningún partido con sección `fixture` y objeto `fixture` nulo.
+6. Vistas de Grafana `v_csv_procesados` y `v_csv_generados` presentes en Postgres.
+7. Telegram (si está configurado): un único vigilante en marcha y ningún CSV
+   terminado sin avisar más de 2 min.
+
+Tests de la lógica de `scripts\py`: `python -m unittest discover -s tests`. Cada
 subrepo trae además CI (`.github/workflows/ci.yml`) y un hook `pre-push`
 (`.githooks/pre-push`, se activa con `git config core.hooksPath .githooks`). Detalle en
 `docs\VERIFICACION-SDD.md` y `docs\SDD.md` (§13).
@@ -346,15 +384,22 @@ Schemas de Postgres y su contenido:
 
 ## 9. Mapa de scripts
 
-- `1_EJECUTAR\` — scripts de uso diario (los de arriba).
-- `scripts\arranque\` — `ASEGURAR.bat`/`ASEGURAR_SERVICIOS.ps1`, tareas programadas
-  (`TAREA_INICIO`, `TAREA_DIARIA`, `TAREA_VIGILANCIA`), antibloqueo, EdgeDriver.
-- `scripts\ligas\` — orquestación de ligas (`ORQUESTAR_LIGAS.ps1`,
-  `EJECUTAR_TODAS_LAS_LIGAS.ps1`, `PROCESAR_ULTIMOS_PARTIDOS_COMPLETO.ps1`).
-- `scripts\extraer\` — extracción por dataset.
-- `scripts\importar\` — importación por dataset a Postgres.
-- `scripts\pendientes\` — auditoría/procesado de pendientes y archivado.
-- `scripts\monitor\` — watchers de imports/consumo.
+Todo el pipeline es Python, con un CLI único:
+
+- `1_EJECUTAR\basket.cmd <comando>` — punto de entrada (doble clic = menú;
+  `basket ayuda` lista los comandos) → `scripts\py\basket.py`, que duplica la salida en
+  `DATA_DIR\logs\basket\` y levanta Grafana, Loki y promtail.
+- `scripts\py\lanzadores\` — un módulo por comando (`resultados_ayer`,
+  `matchids_pendientes`, `telegram`, `pronostico`, `cuadrar_dia`…).
+- `scripts\py\arranque\asegurar.py` — arranque de servicios con sus dependencias
+  (docker, postgres, runtime, auditoría, launcher, grafana, promtail, navegador,
+  telegram…), antibloqueo y EdgeDriver.
+- `scripts\py\ligas\` — catálogo y orquestación de ligas.
+- `scripts\py\extraer\` y `scripts\py\importar\` — extracción e importación por dataset.
+- `scripts\py\pendientes\` — procesado de pendientes y archivado.
+- `scripts\py\monitor\` — watchers (imports, consumo) y el vigilante de Telegram.
+- `scripts\py\pronostico\` — cálculo y publicación de la previa.
+- `scripts\py\verificar.py` — gate del SDD (§8).
 - `python\orchestrate_competition.py` — orquestador de una competición (extrae,
   audita, recupera incompletos, consolida y publica). Ver `README.md`.
 

@@ -596,12 +596,15 @@ class TokensTests(unittest.TestCase):
             (raiz / "CLAUDE.md").write_text("x" * 100, encoding="utf-8")
             (raiz / ".claude" / "rules").mkdir(parents=True)
             (raiz / ".claude" / "rules" / "r.md").write_text("y" * 40, encoding="utf-8")
+            (raiz / ".claude" / "rules" / "java.md").write_text(
+                '---\npaths:\n  - "**/*.java"\n---\nregla', encoding="utf-8")
             for nombre, extra in (("a", "model: haiku\n"), ("b", "disable-model-invocation: true\n")):
                 (raiz / ".claude" / "skills" / nombre).mkdir(parents=True)
                 (raiz / ".claude" / "skills" / nombre / "SKILL.md").write_text(
                     f"---\nname: {nombre}\ndescription: {'d' * 20}\n{extra}---\n\ncuerpo\n", encoding="utf-8")
             m = T.medir(raiz)
         self.assertEqual(m["fijo"], [("CLAUDE.md", 100), ("rules/r.md", 40)])
+        self.assertEqual([n for n, _ in m["condicional"]], ["rules/java.md"])
         self.assertEqual([(s[0], s[1], s[3]) for s in m["skills"]], [("a", 20, "haiku")])
         self.assertEqual(m["total_fijo"], 160)
         self.assertEqual(T.tokens(160), 40)

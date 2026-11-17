@@ -27,12 +27,15 @@ def _frontmatter(texto):
 def medir(raiz=RAIZ):
     """Devuelve {fijo: [(nombre, caracteres)], skills: [(nombre, desc, fichero, modelo)],
     total_fijo}. Solo cuenta las skills que Claude puede invocar."""
-    fijo = []
+    fijo, condicional = [], []
     claude = raiz / "CLAUDE.md"
     if claude.exists():
         fijo.append(("CLAUDE.md", len(claude.read_text(encoding="utf-8"))))
     for r in sorted((raiz / ".claude" / "rules").glob("*.md")):
-        fijo.append((f"rules/{r.name}", len(r.read_text(encoding="utf-8"))))
+        texto = r.read_text(encoding="utf-8")
+        # Con paths: solo se carga al tocar esos ficheros: no es carga fija.
+        destino = condicional if re.search(r"^paths:", _frontmatter(texto), re.M) else fijo
+        destino.append((f"rules/{r.name}", len(texto)))
     skills = []
     for f in sorted((raiz / ".claude" / "skills").glob("*/SKILL.md")):
         texto = f.read_text(encoding="utf-8")
@@ -44,7 +47,7 @@ def medir(raiz=RAIZ):
         skills.append((f.parent.name, len(desc.group(1)) if desc else 0, len(texto),
                        modelo.group(1) if modelo else "-"))
     total = sum(c for _, c in fijo) + sum(d for _, d, _, _ in skills)
-    return {"fijo": fijo, "skills": skills, "total_fijo": total}
+    return {"fijo": fijo, "condicional": condicional, "skills": skills, "total_fijo": total}
 
 
 def main():
@@ -59,6 +62,9 @@ def main():
     desc = sum(d for _, d, _, _ in m["skills"])
     print(f"  {'descripciones de ' + str(len(m['skills'])) + ' skills':<44} {desc:>6} car  ~{tokens(desc):>5} tok")
     print(f"  {'TOTAL FIJO':<44} {m['total_fijo']:>6} car  ~{tokens(m['total_fijo']):>5} tok")
+    print("\n== Reglas condicionales (solo al tocar sus ficheros, paths:) ==")
+    for nombre, c in m["condicional"]:
+        print(f"  {nombre:<44} {c:>6} car  ~{tokens(c):>5} tok")
     print("\n== Al usar cada skill ==")
     print(f"  {'skill':<28} {'desc':>5} {'fichero':>8} {'~tok':>6}  modelo")
     for nombre, d, f, modelo in sorted(m["skills"], key=lambda s: -s[2]):

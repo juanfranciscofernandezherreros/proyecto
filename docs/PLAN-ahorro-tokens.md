@@ -25,3 +25,14 @@ Que cada optimización deje constancia, con cifras medidas (no a ojo), en
 - [x] `AHORRO-TOKENS.md` con el estado actual, el registro de hoy y las próximas mejoras.
 - [x] Norma en `CLAUDE.md`.
 - [x] Commit + push.
+
+## Corrección: reglas con `paths:` no son carga fija
+
+`microservicios-spring` (`**/*.java`, `**/pom.xml`) y `score-summary` (scraper,
+match-summary, projector) ya tenían `paths:`: solo se cargan al tocar esos ficheros.
+`basket tokens` las contaba como fijas y sobreestimaba el total.
+
+- [x] `tokens.py`: reglas con `paths:` en un apartado "condicional", fuera del total fijo.
+- [x] Test de una regla condicional.
+- [x] `AHORRO-TOKENS.md`: estado actual corregido y próximas mejoras sin esas dos.
+- [x] Commit + push.

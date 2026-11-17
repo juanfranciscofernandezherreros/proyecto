@@ -26,7 +26,7 @@ El detalle vive fuera de este fichero:
 | Guardar los resultados de ayer en `RESULTS_YESTERDAY_<fecha>.csv` | skill `resultados-ayer` |
 | Cuadre diario Flashscore / fixtures / Mongo (`basket cuadrar`) | skill `cuadrar-partidos-dia` |
 | Un partido no sale o sale mal en la web | skill `diagnosticar-partido` |
-| Ver qué está levantado y qué falta | skill `estado-del-sistema` |
+| Ver qué está levantado y qué falta | `1_EJECUTAR\basket.cmd estado` |
 | Auditar la calidad de los datos en Postgres | skill `auditar-datos` |
 | Commit y push con submódulos | skill `commit-multirepo` |
 | Normas de desarrollo y flujo SDD → plan → verificación | skill `normas-basketball` |

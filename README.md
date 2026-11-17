@@ -11,7 +11,6 @@ equivalente, por si prefieres hacerlo con doble clic.
 | Skill | Qué decir | Qué hace | Sin Claude |
 |---|---|---|---|
 | `/arrancar-web` | "arranca la web" | Levanta web, API y projector (con Mongo). El launcher de CSV solo si pides "todo" | `1_EJECUTAR\basket.cmd arrancar` |
-| `/estado-del-sistema` | "¿cómo está todo?" | Servicios, últimas cargas, último resultado por liga y pendientes | `1_EJECUTAR\basket.cmd estado` |
 | `/resultados-todas-las-ligas` | "extrae los resultados de todas las ligas" | Baja de Flashscore los marcadores de las 11 ligas y los carga en Postgres | `1_EJECUTAR\basket.cmd resultados ALL` |
 | `/extraer-resultados` | "extrae los resultados de la Euroliga" | Lo mismo para una liga concreta | `1_EJECUTAR\basket.cmd resultados EUROLIGA` |
 | `/procesar-csv-resultados` | "procesa los CSV de resultados" | Carga en Postgres los CSV de resultados que ya están en disco, sin extraer | `1_EJECUTAR\basket.cmd procesar-csv` |

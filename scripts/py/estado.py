@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-r"""Estado del sistema, resumido y ordenado por lo que falla (equivale a la skill
+r"""Estado del sistema, resumido y ordenado por lo que falla (equivale a la antigua skill
 estado-del-sistema, pero sin gastar tokens).
 
 Ejecuta ESTADO.bat (solo lectura), lo parsea y escribe un resumen corto

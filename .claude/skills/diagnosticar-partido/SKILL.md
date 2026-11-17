@@ -110,7 +110,7 @@ curl -s http://localhost:8082/api/v1/matches/<MATCH_ID>/processing
 Para medir huecos en bloque en lugar de partido a partido: skill `auditar-datos`
 (Postgres) y `sql\consultas\2026-11-07_1915_auditoria-integridad-read-model.sql`
 (desfase con Mongo). Y para el
-estado general, `1_EJECUTAR\basket.cmd verificar` (skill `estado-del-sistema`).
+estado general, `1_EJECUTAR\basket.cmd estado` y `1_EJECUTAR\basket.cmd verificar`.
 
 ## Al terminar
 

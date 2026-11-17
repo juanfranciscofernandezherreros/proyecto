@@ -370,3 +370,12 @@ Evidencia por paso. Ningún paso cambia el flujo del SDD §4 ni los puertos.
 |---|---|---|---|
 | 1 | Descripción de 14 skills recortada a 124–148 caracteres (qué hace + cuándo usarla, sin mencionar otras skills); se cargan en cada mensaje | Total de descripciones cargadas: **6.230 → 2.177 caracteres** (−65 %, ~1.000 tokens menos por mensaje) | ✅ |
 | 2 | `model: haiku` en `aviso-telegram` y `cuadrar-partidos-dia` | Frontmatter revisado | ✅ |
+
+## 24. `pendientes` sin gastar tokens (plan `PLAN-pendientes-sin-tokens.md`)
+
+| # | Cambio | Evidencia | Estado |
+|---|---|---|---|
+| 1 | `matchids_pendientes.py` termina con una línea `RESUMEN:` (procesados, errores, en Mongo y completos, quedan) que llega al bot; faltar secciones no es ❌ | `basket pendientes "" 1` (17-nov): `RESUMEN: ✅ Pendientes · 1 procesados · 1 de 1 en Mongo (0 completos) · quedan 54`, recibido en Telegram; camino de error probado: `❌ Pendientes · ERROR: el procesado termino con codigo 1 · quedan 55` | ✅ |
+| 2 | `procesar_matchids.py`: un primer argumento vacío o solo comillas (`""`) cuenta como sin CSV de selección (antes fallaba con `No existe el CSV indicado: ""`) | La misma prueba procesó 1 partido | ✅ |
+| 3 | Tests `PendientesResumenTests` y `TokensTests`; skill `procesar-pendientes` fina (lee solo `RESUMEN:`) | 61 tests OK | ✅ |
+| 4 | `basket tokens` y `AHORRO-TOKENS.md` en la raíz (plan `PLAN-ahorro-tokens.md`) | Carga fija medida: 9.963 caracteres, ~2.490 tokens por mensaje | ✅ |

@@ -555,3 +555,53 @@ class ResultadosAyerResumenTests(unittest.TestCase):
     def test_sin_partidos(self):
         self.assertEqual(self.R.linea_resumen({"dia": self.dia, "extraidos": 0, "ligas_fallo": 0}),
                          "✅ Resultados de ayer 16/11 · ningún partido")
+
+
+class PendientesResumenTests(unittest.TestCase):
+    """basket pendientes: una linea RESUMEN al terminar (tambien va al bot)."""
+
+    @classmethod
+    def setUpClass(cls):
+        sys.path.insert(0, str(RAIZ / "scripts" / "py" / "lanzadores"))
+        import matchids_pendientes
+        cls.P = matchids_pendientes
+
+    def test_todo_bien_aunque_falten_secciones(self):
+        r = {"procesados": 42, "errores": 0, "en_mongo": 42, "completos": 27, "quedan": 55}
+        self.assertEqual(self.P.linea_resumen(r),
+                         "✅ Pendientes · 42 procesados · 42 de 42 en Mongo (27 completos) · quedan 55")
+
+    def test_errores_y_ausentes_son_fallo(self):
+        r = {"procesados": 40, "errores": 2, "en_mongo": 39, "completos": 25, "quedan": 57}
+        self.assertEqual(self.P.linea_resumen(r),
+                         "❌ Pendientes · 40 procesados · 2 con error · 39 de 40 en Mongo (25 completos) · quedan 57")
+
+    def test_nada_que_procesar(self):
+        self.assertEqual(self.P.linea_resumen({"procesados": 0, "errores": 0, "quedan": 0}),
+                         "✅ Pendientes · nada que procesar · quedan 0")
+
+    def test_error_sin_auditoria(self):
+        self.assertEqual(self.P.linea_resumen({"error": "no se pudieron arrancar los servicios", "quedan": None}),
+                         "❌ Pendientes · ERROR: no se pudieron arrancar los servicios")
+
+
+class TokensTests(unittest.TestCase):
+    """basket tokens: mide la carga fija (CLAUDE.md, reglas, descripciones) y la de cada skill."""
+
+    def test_mide_fijo_y_salta_las_skills_no_invocables(self):
+        sys.path.insert(0, str(RAIZ / "scripts" / "py" / "lanzadores"))
+        import tokens as T
+        with tempfile.TemporaryDirectory() as d:
+            raiz = Path(d)
+            (raiz / "CLAUDE.md").write_text("x" * 100, encoding="utf-8")
+            (raiz / ".claude" / "rules").mkdir(parents=True)
+            (raiz / ".claude" / "rules" / "r.md").write_text("y" * 40, encoding="utf-8")
+            for nombre, extra in (("a", "model: haiku\n"), ("b", "disable-model-invocation: true\n")):
+                (raiz / ".claude" / "skills" / nombre).mkdir(parents=True)
+                (raiz / ".claude" / "skills" / nombre / "SKILL.md").write_text(
+                    f"---\nname: {nombre}\ndescription: {'d' * 20}\n{extra}---\n\ncuerpo\n", encoding="utf-8")
+            m = T.medir(raiz)
+        self.assertEqual(m["fijo"], [("CLAUDE.md", 100), ("rules/r.md", 40)])
+        self.assertEqual([(s[0], s[1], s[3]) for s in m["skills"]], [("a", 20, "haiku")])
+        self.assertEqual(m["total_fijo"], 160)
+        self.assertEqual(T.tokens(160), 40)

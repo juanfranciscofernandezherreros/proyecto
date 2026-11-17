@@ -26,12 +26,12 @@ skill `procesar-pendientes`, cuando se use, gaste lo mínimo.
 
 ## Backlog
 
-- [ ] `matchids_pendientes.py`: resumen, línea `RESUMEN:` y envío a Telegram.
-- [ ] Tests de la línea de resumen.
-- [ ] Prueba real: `basket pendientes "" 1` imprime `RESUMEN:` y llega al bot.
-- [ ] Skill `procesar-pendientes` fina.
-- [ ] Evidencia en `docs\VERIFICACION-SDD.md` y gate en verde.
-- [ ] Commit + push.
+- [x] `matchids_pendientes.py`: resumen, línea `RESUMEN:` y envío a Telegram.
+- [x] Tests de la línea de resumen.
+- [x] Prueba real: `basket pendientes "" 1` imprime `RESUMEN:` y llega al bot.
+- [x] Skill `procesar-pendientes` fina.
+- [x] Evidencia en `docs\VERIFICACION-SDD.md` y gate en verde.
+- [x] Commit + push.
 
 ## Descripciones cortas en todas las skills
 

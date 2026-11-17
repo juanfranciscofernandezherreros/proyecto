@@ -71,7 +71,9 @@ def _escribir_rows(path, rows):
 
 def main():
     args = [a for a in sys.argv[1:]]
-    csv_path = args[0] if args and not args[0].isdigit() else None
+    # "" (o '') para pasar solo el limite llega a veces con las comillas literales.
+    primero = args[0].strip().strip("\"'") if args else ""
+    csv_path = primero if primero and not primero.isdigit() else None
     limit_arg = next((a for a in args if a.isdigit()), "0")
     limit = int(limit_arg)
     if limit < 0:

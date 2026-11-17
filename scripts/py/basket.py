@@ -22,7 +22,7 @@ import config as _config
 CFG = _config.cargar()
 
 # Comandos que no levantan Grafana al empezar (rapidos, de vigilancia o que ya la abren).
-SIN_OBSERVABILIDAD = {"estado", "antibloqueo", "vigilar", "monitor", "grafana"}
+SIN_OBSERVABILIDAD = {"estado", "antibloqueo", "vigilar", "monitor", "grafana", "tokens"}
 DASHBOARD_LOGS = "basket-logs"
 
 # comando coherente -> (modulo lanzador, descripcion)
@@ -43,6 +43,7 @@ COMANDOS = {
     "pendientes":        ("matchids_pendientes",       "Procesar los partidos pendientes hasta el projector (comprueba Mongo) [csv] [limite]"),
     "comprobar":         ("comprobar_results_fixtures","Comprobar que RESULTS y FIXTURES estan listos"),
     "telegram":          ("telegram",                  "Aviso por Telegram de cada CSV procesado [prueba|una-vez|chat]"),
+    "tokens":            ("tokens",                    "Medir la carga de tokens de CLAUDE.md, reglas y skills (para AHORRO-TOKENS.md)"),
     "auditoria":         ("auditoria_fixtures",        "Lanzar la auditoria de fixtures"),
     "auditar":           ("auditar",                   "Auditar la integridad de los datos en Postgres (solo lectura)"),
     "pronostico":        ("pronostico",                "Previa de la proxima jornada: datos [pais] [competicion] | publicar <fichero>"),

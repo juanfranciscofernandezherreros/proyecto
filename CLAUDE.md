@@ -8,3 +8,4 @@ Flujo: Flashscore → CSV → launcher (8088) → **Postgres** (55432) → proje
 - `basket verificar` es el gate: debe dar VERDE.
 - Toda consulta SQL ejecutada se guarda en `sql\consultas\`.
 - Diseño y operación: `docs\SDD.md`, `docs\ESPECIFICACIONES.md`.
+- Tras optimizar tokens: `basket tokens` y una fila en `AHORRO-TOKENS.md`.

@@ -9,8 +9,8 @@ cmd //c "C:\Develop\basketball\1_EJECUTAR\basket.cmd tokens"
 
 **Tokens ≈ caracteres / 4.** Dos tipos de carga:
 
-- **Fija:** se paga en **cada mensaje** de cada sesión: `CLAUDE.md`, `.claude\rules\*.md`
-  y la descripción de cada skill que Claude puede invocar.
+- **Fija:** se paga en **cada mensaje** de cada sesión: `CLAUDE.md`, las reglas de
+  `.claude\rules\` sin `paths:` y la descripción de cada skill que Claude puede invocar.
 - **Al usar una skill:** su `SKILL.md` entero, solo cuando se invoca.
 
 Lo que más gasta, con diferencia, es el historial de una sesión larga (se reenvía en

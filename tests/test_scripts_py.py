@@ -263,3 +263,19 @@ class CuadrarDiaTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.m.validar_fecha("16-11-2026")
         self.assertIsInstance(self.m.validar_fecha(None), date)
+
+
+class ResultadosAyerTests(unittest.TestCase):
+    """basket resultados-ayer: filtrado por dia y nombre RESULTS_YESTERDAY."""
+
+    def test_filtra_el_dia_y_pone_la_liga_delante(self):
+        from datetime import date
+        sys.path.insert(0, str(RAIZ / "scripts" / "py" / "lanzadores"))
+        import resultados_ayer as R
+        filas = [{"matchId": "a", "eventDatetime": "2026-11-16T03:00:00+01:00"},
+                 {"matchId": "b", "eventDatetime": "2026-11-17T03:00:00+01:00"},
+                 {"matchId": "c", "eventDatetime": ""}]
+        r = R.filas_de_liga(filas, date(2026, 11, 16), "usa", "nba")
+        self.assertEqual([f["matchId"] for f in r], ["a"])
+        self.assertEqual((r[0]["country"], r[0]["competition"]), ("usa", "nba"))
+        self.assertEqual(R.nombre_fichero(date(2026, 11, 16)), "RESULTS_YESTERDAY_20261116.csv")

@@ -21,6 +21,7 @@ El detalle vive fuera de este fichero:
 | Consultar los últimos resultados agregados a Postgres | skill `ultimos-resultados` |
 | Extraer jugada a jugada y estadísticas | skill `extraer-datos-partido` |
 | Procesar los partidos pendientes (antes ejecuta `basket datos-ayer`) | skill `procesar-pendientes` |
+| Guardar los resultados de ayer en `RESULTS_YESTERDAY_<fecha>.csv` | skill `resultados-ayer` |
 | Cuadre diario Flashscore / fixtures / Mongo (`basket cuadrar`) | skill `cuadrar-partidos-dia` |
 | Un partido no sale o sale mal en la web | skill `diagnosticar-partido` |
 | Ver qué está levantado y qué falta | skill `estado-del-sistema` |

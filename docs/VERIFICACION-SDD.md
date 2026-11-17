@@ -281,3 +281,11 @@ Evidencia por paso. Ningún paso cambia el flujo del SDD §4 ni los puertos.
 | 3 | Skill `.claude\skills\cuadrar-partidos-dia\SKILL.md` y fila en `CLAUDE.md` | Gate `verificar.py` VERDE (7 comprobaciones) | ✅ |
 | 4 | Ejecución diaria: paso de `ciclo_diario.py` (ver fila 5), tras 90 s de espera al projector (`CICLO_ESPERA_CUADRE`); un fallo del cuadre se anota como AVISO y no cambia el código del ciclo | Paso probado aislado sobre un log temporal: rc 0, `TODO CUADRA`; 36 tests y gate VERDE. Ciclo completo no ejecutado | ✅ |
 | 5 | Orden del ciclo diario (pedido por el usuario): datos de ayer → cuadre → RESULTS → cuadre → pendientes (con `SKIP_DATOS_AYER=1`, ya hechos) → archivado → auditoría. Se quita el cuadre del final | Sintaxis OK; con `SKIP_DATOS_AYER=1`, `datos_ayer.activo()` da False; `_cuadre()` sobre un log temporal: `TODO CUADRA`; 36 tests y gate VERDE. Ciclo completo no ejecutado | ✅ |
+
+## 17. `basket resultados-ayer` y RESULTS_YESTERDAY (plan `PLAN-resultados-ayer.md`)
+
+| # | Cambio | Evidencia | Estado |
+|---|---|---|---|
+| 1 | `scripts\py\lanzadores\resultados_ayer.py` y comando `basket resultados-ayer [AAAA-MM-DD]`: no extrae, filtra el último RESULTS de cada liga y escribe `REPORTS_DIR\resultados-ayer\RESULTS_YESTERDAY_<AAAAMMDD>.csv` | `basket resultados-ayer 2026-11-16`: 8 partidos (NBA 5, WINNER 3) en `RESULTS_YESTERDAY_20261116.csv`, los mismos del cuadre | ✅ |
+| 2 | Test `ResultadosAyerTests` | 37 tests, 0 fallos; gate `verificar.py` VERDE | ✅ |
+| 3 | Skill `.claude\skills\resultados-ayer\SKILL.md` y fila en `CLAUDE.md` | Skill listada en la sesión | ✅ |

@@ -29,3 +29,5 @@ funcionalidad.
 - [x] 4. Prueba real `basket resultados-ayer 2026-11-16` (8 partidos: NBA 5, Winner 3).
 - [x] 5. Skill `resultados-ayer` y fila en `CLAUDE.md`.
 - [x] 6. Evidencia en `docs\VERIFICACION-SDD.md` (§17), commit + push.
+- [x] 7. Sin opciones lo hace todo (pedido por el usuario): CSV → Postgres por el launcher (una parte por liga en `resultados-ayer\<AAAAMMDD>\`) → espera al projector → comprobación en Mongo. `--solo-csv` solo genera el fichero.
+- [x] 8. Al iniciar sesión solo se lanza `basket resultados-ayer` (tarea "Basketball - Resultados de ayer al iniciar", 2 min de retraso); desactivadas "Procesamiento automatico al iniciar" y "Vigilar servicios".

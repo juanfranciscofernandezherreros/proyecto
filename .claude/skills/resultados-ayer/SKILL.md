@@ -1,37 +1,44 @@
 ---
 name: resultados-ayer
-description: Guarda en un CSV llamado RESULTS_YESTERDAY_<fecha>.csv los resultados de ayer de todas las ligas, sacados de los RESULTS ya extraídos (no extrae nada). Usar cuando el usuario pida los resultados de ayer en un fichero, el RESULTS_YESTERDAY, o un CSV con los partidos de un día. Para extraer resultados nuevos de Flashscore, resultados-todas-las-ligas.
+description: Procesa los resultados de ayer de todas las ligas hasta el projector, sin preguntar nada — genera RESULTS_YESTERDAY_<fecha>.csv con los RESULTS ya extraídos, lo carga en PostgreSQL, espera al projector y comprueba en MongoDB (lo que escribe el projector) que cada partido está con su marcador; no abre la web. Usar cuando el usuario pida los resultados de ayer, el RESULTS_YESTERDAY, procesar el CSV de ayer o llevar los resultados de ayer hasta el projector. Para extraer resultados nuevos de Flashscore, resultados-todas-las-ligas.
 ---
 
-# Resultados de ayer en RESULTS_YESTERDAY
+# Resultados de ayer hasta el projector
 
-No extrae nada: usa el último `RESULTS_*.csv` de cada liga, que deja
-`basket resultados ALL`. Una sola llamada:
+Sin preguntar nada al usuario, lanzar en segundo plano (tarda unos minutos) y redirigir
+la salida a un fichero del directorio temporal de la sesión:
 
 ```bash
 cmd //c "C:\Develop\basketball\1_EJECUTAR\basket.cmd resultados-ayer"
 ```
 
-Con fecha: `basket resultados-ayer 2026-11-16`. Por defecto, ayer (hora de Madrid).
+Hace, en este orden:
 
-## Qué genera
+1. Genera `C:\data\basketball\reports\resultados-ayer\RESULTS_YESTERDAY_<AAAAMMDD>.csv`
+   con los partidos de ayer (hora de Madrid) del último `RESULTS_*.csv` de cada liga.
+   No extrae de Flashscore.
+2. Lo carga en Postgres por el launcher, una liga cada vez (las partes quedan en
+   `resultados-ayer\<AAAAMMDD>\`, fuera de `competitions\`).
+3. Espera 90 s (`CICLO_ESPERA_CUADRE`) a que el projector lo lleve a Mongo.
+4. Comprueba en Mongo (lo que escribe el projector) que cada partido está con su marcador. No abre la web.
 
-`C:\data\basketball\reports\resultados-ayer\RESULTS_YESTERDAY_<AAAAMMDD>.csv`, con las
-columnas del RESULTS (`matchId`, equipos, marcador y parciales) y `country` y
-`competition` delante. Se sobrescribe si se vuelve a lanzar para el mismo día.
+Otra fecha: `basket resultados-ayer 2026-11-16`. Solo el CSV: `--solo-csv`.
 
-Va fuera de `competitions\` a propósito: así la carga de RESULTS no lo confunde con
-un RESULTS de una liga.
+## Qué decir al terminar
 
-## Salida
+El total y el reparto por liga, la ruta del CSV, cuántas ligas se cargaron
+(`PROCESAR ... -> COMPLETED`) y la línea `En Mongo (projector): n de m con su marcador`.
+Código 0 si todo está en Mongo; 1 si algo falló.
 
-Una línea por liga con cuántos partidos tiene ese día y de qué RESULTS salen, y el
-total con la ruta del fichero. Decir al usuario el total, el reparto por liga y la ruta.
+| Sale | Qué hacer |
+|---|---|
+| Una liga con 0 partidos que sí jugó | Su RESULTS es de antes del final del día: `basket resultados ALL` y repetir |
+| `PROCESAR ... -> FAILED` | Ver la carga en `public.batch_launch_request` (skill `diagnosticar-partido`) |
+| `NO ESTA EN MONGO` / `MARCADOR DISTINTO EN MONGO` | Esperar un minuto más y repetir; si sigue, skill `diagnosticar-partido` |
 
-Si una liga tiene 0 partidos y sí jugó, su RESULTS es anterior al final del día:
-extraer antes (`basket resultados ALL`) y repetir.
+Las jugadas y estadísticas de esos partidos no van aquí: las cargan los pendientes.
 
 ## Relacionado
 
 - Lógica: `scripts\py\lanzadores\resultados_ayer.py`. Plan: `docs\PLAN-resultados-ayer.md`.
-- Comprobar que esos partidos cuadran con fixtures y la web: skill `cuadrar-partidos-dia`.
+- Cuadre con fixtures y secciones: skill `cuadrar-partidos-dia`.

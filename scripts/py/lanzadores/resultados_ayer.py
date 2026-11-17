@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 r"""Lanzador: resultados de ayer de todas las ligas en un solo fichero.
 
-Uso: resultados_ayer.py [AAAA-MM-DD]   (por defecto, ayer en Europe/Madrid)
+Uso: resultados_ayer.py [AAAA-MM-DD] [--solo-csv]   (por defecto, ayer en Europe/Madrid)
 
-No extrae nada: usa los RESULTS ya extraidos. Del ultimo RESULTS_*.csv de cada liga
-toma los partidos de ese dia y los escribe en
+Sin opciones lo hace todo: genera el CSV, lo carga en Postgres, espera al projector y
+comprueba en Mongo (lo que escribe el projector) que cada partido esta con su marcador. Con --solo-csv solo
+genera el CSV. No extrae de Flashscore: usa los RESULTS ya extraidos.
+
+Del ultimo RESULTS_*.csv de cada liga toma los partidos de ese dia y los escribe en
    REPORTS_DIR\resultados-ayer\RESULTS_YESTERDAY_<AAAAMMDD>.csv
    (columnas del RESULTS con country y competition delante).
 
@@ -41,8 +44,10 @@ def nombre_fichero(dia):
 
 
 def main(argv):
+    procesar = "--solo-csv" not in argv
+    argv = [a for a in argv if a not in ("--solo-csv", "--procesar")]
     if len(argv) > 1:
-        print("Uso: basket resultados-ayer [AAAA-MM-DD]")
+        print("Uso: basket resultados-ayer [AAAA-MM-DD] [--solo-csv]")
         return 1
     try:
         dia = C.validar_fecha(argv[0] if argv else None)
@@ -76,7 +81,65 @@ def main(argv):
     for code, n, origen in resumen:
         print(f"  {code:<9} {n:>3}  ({origen})")
     print(f"Total: {len(filas)} partidos -> {salida}")
+    if procesar:
+        return procesar_en_postgres(salida, cabecera, filas, dia)
     return 0
+
+
+def procesar_en_postgres(salida, cabecera, filas, dia):
+    """Carga RESULTS_YESTERDAY en Postgres: el launcher importa RESULTS por liga, asi
+    que se parte en un RESULTS_<ts>_<pais>_<competicion>.csv por liga (junto al
+    RESULTS_YESTERDAY, no en competitions\\) y se envia cada uno."""
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "importar"))
+    import launcher as L
+    if not filas:
+        print("No hay partidos que procesar.")
+        return 0
+    cfg = dict(CFG)
+    L.asegurar_servicios("postgres", "launcher")
+    carpeta = salida.parent / f"{dia:%Y%m%d}"
+    carpeta.mkdir(parents=True, exist_ok=True)
+    columnas = [c for c in cabecera if c not in ("country", "competition")]
+    ts = datetime.now().strftime("%Y%m%d%H%M%S")
+    fallos = 0
+    for (country, comp) in sorted({(f["country"], f["competition"]) for f in filas}):
+        de_liga = [f for f in filas if (f["country"], f["competition"]) == (country, comp)]
+        parte = carpeta / f"RESULTS_{ts}_{country}_{comp}.csv"
+        with open(parte, "w", encoding="utf-8", newline="") as fh:
+            w = csv.DictWriter(fh, fieldnames=columnas, extrasaction="ignore")
+            w.writeheader()
+            w.writerows(de_liga)
+        try:
+            r = L.submit_and_wait(cfg, parte, timeout_min=30)
+            estado = r.get("status")
+        except Exception as e:
+            estado = f"FALLO ({e})"
+        if estado != "COMPLETED":
+            fallos += 1
+        print(f"  PROCESAR {country}/{comp}: {len(de_liga)} partidos -> {estado}")
+    print("Procesado en Postgres: " + ("OK" if not fallos else f"{fallos} liga(s) con fallo"))
+
+    # Hasta el projector: el projector pasa Postgres -> Mongo cada ~60 s.
+    import time
+    espera = int(CFG.get("CICLO_ESPERA_CUADRE") or 90)
+    print(f"Esperando {espera} s a que el projector lo lleve a Mongo...")
+    time.sleep(espera)
+    mongo = C.leer_mongo({f["matchId"] for f in filas})
+    mal = 0
+    for f in filas:
+        esperado = (C._entero(f.get("homeScore")), C._entero(f.get("awayScore")))
+        m = mongo.get(f["matchId"])
+        if m is None:
+            estado = "NO ESTA EN MONGO"
+        elif m["marcador"] != esperado:
+            estado = f"MARCADOR DISTINTO EN MONGO ({C._m(m['marcador'])})"
+        else:
+            estado = "OK"
+        mal += estado != "OK"
+        print(f"  {estado:<5} {f['matchId']}  {f['country']}/{f['competition']}  "
+              f"{f.get('homeTeam')} - {f.get('awayTeam')}  {C._m(esperado)}")
+    print(f"En Mongo (projector): {len(filas) - mal} de {len(filas)} con su marcador.")
+    return 1 if (fallos or mal) else 0
 
 
 if __name__ == "__main__":

@@ -70,7 +70,9 @@ DEPENDENCIES = {
     "postgres": ["docker"],
     "runtime": ["postgres"],
     "auditoria": ["postgres"],
-    "launcher": ["postgres"],
+    # Cada CSV que procese el launcher se avisa por Telegram (si esta configurado).
+    "launcher": ["postgres", "telegram"],
+    "telegram": ["postgres"],
     "consumo": ["postgres"],
 }
 
@@ -207,6 +209,25 @@ def _ensure_antibloqueo():
         return
     estado("antibloqueo", "iniciando")
     _start_detached(sys.executable, [str(AQUI / "mantener_despierto.py")], str(AQUI), show=7)
+
+
+def _ensure_telegram():
+    r"""Vigilante que envia al bot de Telegram cada CSV procesado (monitor\telegram_csv.py).
+    Sin TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID queda desactivado y no falla nada."""
+    if not ((CFG.get("TELEGRAM_BOT_TOKEN") or "").strip() and (CFG.get("TELEGRAM_CHAT_ID") or "").strip()):
+        estado("telegram", "desactivado (sin token o chat_id en basketball.local.env)")
+        return
+    if _procesos_cmdline("telegram_csv.py"):
+        estado("telegram", "ya estaba en ejecucion")
+        return
+    script = AQUI.parent / "monitor" / "telegram_csv.py"
+    logs = Path(CFG.get("DATA_DIR") or "C:/data/basketball") / "logs"
+    logs.mkdir(parents=True, exist_ok=True)
+    estado("telegram", "iniciando")
+    with open(logs / "telegram_csv.log", "a", encoding="utf-8") as log:
+        subprocess.Popen([sys.executable, str(script)], cwd=str(script.parent), stdout=log,
+                         stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL,
+                         creationflags=CREATE_NO_WINDOW | CREATE_NEW_PROCESS_GROUP)
 
 
 def _ensure_watcher():
@@ -493,6 +514,8 @@ def _ensure_service(service, reiniciar_launcher):
         _ensure_antibloqueo()
     elif service == "watcher":
         _ensure_watcher()
+    elif service == "telegram":
+        _ensure_telegram()
     elif service == "docker":
         _ensure_docker()
     elif service == "postgres":
@@ -514,7 +537,7 @@ def _ensure_service(service, reiniciar_launcher):
         _ensure_consumo()
     else:
         raise FalloArranque(f"Servicio desconocido: {service}. Validos: antibloqueo, watcher, "
-                            "docker, postgres, runtime, auditoria, launcher, grafana, promtail, navegador, consumo")
+                            "docker, postgres, runtime, auditoria, launcher, grafana, promtail, navegador, consumo, telegram")
     _done.add(service)
 
 
@@ -535,7 +558,7 @@ def main(argv=None):
             servicios.append(al)
     if not argv:
         print("ERROR: indica al menos un servicio: antibloqueo watcher docker postgres "
-              "runtime auditoria launcher grafana navegador consumo")
+              "runtime auditoria launcher grafana navegador consumo telegram")
         return 1
     if not servicios:
         return 0

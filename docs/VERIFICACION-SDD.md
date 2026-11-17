@@ -321,3 +321,13 @@ Evidencia por paso. Ningún paso cambia el flujo del SDD §4 ni los puertos.
 | 2 | Al terminar, espera `CICLO_ESPERA_CUADRE` y comprueba en Mongo cada partido `COMPLETED` del `PROCESAR_MATCHIDS_*.csv` de la ejecución: `OK` / `FALTAN <secciones>` / `NO ESTA EN MONGO`; código 1 solo si alguno no está | Prueba con 6 partidos reales de liga-endesa y 1 inventado: 4 OK, 2 FALTAN, 1 NO ESTA EN MONGO → `ausentes: 1`; sin CSV de la ejecución, "No hay partidos procesados" | ✅ |
 | 3 | Skill `procesar-pendientes` con la misma estructura que `resultados-ayer` (comando, pasos en orden, qué decir al terminar, tabla de fallos) y sin mandar a otras skills; ayuda de `basket pendientes` actualizada | Revisada a mano | ✅ |
 | 4 | Ejecución completa de `basket pendientes` con el código nuevo | Pendiente: la ejecución en curso (97 partidos) arrancó con el código anterior | ⏳ |
+
+## 20. Aviso por Telegram de cada CSV procesado (plan `PLAN-telegram-csv-procesados.md`)
+
+| # | Cambio | Evidencia | Estado |
+|---|---|---|---|
+| 1 | Vigilante `scripts\py\monitor\telegram_csv.py`: lee `public.batch_launch_request` cada 10 s y envía cada CSV terminado (`COMPLETED`/`FAILED`) como documento, con estado, batch, carpeta, hora y error; envío con `curl.exe` | Consulta real: 21 CSV terminados en 30 min; `getMe` del bot OK | ✅ |
+| 2 | Servicio `telegram` en `asegurar.py` (el launcher depende de él) y comando `basket telegram [prueba\|una-vez\|chat]`; sin token o chat_id queda desactivado | `basket telegram chat` responde; compila | ✅ |
+| 3 | Token solo en `config\basketball.local.env` (ignorado por git); claves vacías en `basketball.env` | `git check-ignore` lo confirma; test `test_token_no_esta_en_la_configuracion_versionada` | ✅ |
+| 4 | Tests `TelegramCsvTests` (pie, límite 1024, configuración, marca de agua) | 5 tests OK; suite completa OK; gate `verificar.py` VERDE | ✅ |
+| 5 | Prueba real en el móvil | Pendiente: falta que el usuario escriba al bot para obtener el `chat_id` | ⏳ |

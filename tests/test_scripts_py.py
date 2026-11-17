@@ -473,3 +473,47 @@ class ResultadosAyerCuadrePrevioTests(unittest.TestCase):
         mg = {"a": {"marcador": (100, 90), "secciones": []},
               "b": {"marcador": (80, 70), "secciones": []}}
         self.assertEqual(self.R.ligas_pendientes(self.fx, fs, mg)[0], {"usa/nba"})
+
+
+class TelegramCsvTests(unittest.TestCase):
+    """Vigilante que envia al bot de Telegram cada CSV procesado (monitor/telegram_csv.py)."""
+
+    @classmethod
+    def setUpClass(cls):
+        sys.path.insert(0, str(RAIZ / "scripts" / "py" / "monitor"))
+        import telegram_csv
+        cls.T = telegram_csv
+
+    def test_pie_completado_lleva_estado_batch_fichero_y_carpeta(self):
+        pie = self.T.pie({"status": "COMPLETED", "batch_type": "point-by-point",
+                          "file_path": r"C:\data\basketball-ready\current\8zdrsx7r\POINT_BY_POINT_1_8zdrsx7r.csv",
+                          "finished_at": "2026-11-17T10:56:05.123456Z", "exit_code": 0, "error": None})
+        self.assertIn("COMPLETED", pie)
+        self.assertIn("point-by-point", pie)
+        self.assertIn("POINT_BY_POINT_1_8zdrsx7r.csv", pie)
+        self.assertIn("8zdrsx7r", pie)
+        self.assertIn("2026-11-17 10:56:05", pie)
+        self.assertNotIn("Error", pie)
+
+    def test_pie_fallido_lleva_el_error_y_no_pasa_de_1024(self):
+        pie = self.T.pie({"status": "FAILED", "batch_type": "results", "file_path": r"C:\x\R.csv",
+                          "finished_at": "2026-11-17T10:00:00Z", "exit_code": 1, "error": "x" * 5000})
+        self.assertIn("FAILED", pie)
+        self.assertIn("exit_code 1", pie)
+        self.assertIn("Error: x", pie)
+        self.assertLessEqual(len(pie), 1024)
+
+    def test_configurado_solo_con_token_y_chat(self):
+        self.assertFalse(self.T.configurado({"TELEGRAM_BOT_TOKEN": "t", "TELEGRAM_CHAT_ID": ""}))
+        self.assertFalse(self.T.configurado({"TELEGRAM_BOT_TOKEN": " ", "TELEGRAM_CHAT_ID": "1"}))
+        self.assertTrue(self.T.configurado({"TELEGRAM_BOT_TOKEN": "t", "TELEGRAM_CHAT_ID": "1"}))
+
+    def test_marca_de_agua_con_comilla_se_rechaza(self):
+        with self.assertRaises(ValueError):
+            self.T.terminados_desde("2026-01-01'; DROP TABLE x; --")
+
+    def test_token_no_esta_en_la_configuracion_versionada(self):
+        texto = (RAIZ / "config" / "basketball.env").read_text(encoding="utf-8")
+        for linea in texto.splitlines():
+            if linea.startswith(("TELEGRAM_BOT_TOKEN=", "TELEGRAM_CHAT_ID=")):
+                self.assertEqual(linea.split("=", 1)[1].strip(), "", linea.split("=")[0])

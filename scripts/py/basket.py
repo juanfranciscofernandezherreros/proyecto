@@ -42,6 +42,7 @@ COMANDOS = {
     "ultimos":         ("ultimos_partidos",          "Procesar los ultimos partidos de una liga"),
     "pendientes":        ("matchids_pendientes",       "Procesar los partidos pendientes hasta el projector (comprueba Mongo) [csv] [limite]"),
     "comprobar":         ("comprobar_results_fixtures","Comprobar que RESULTS y FIXTURES estan listos"),
+    "telegram":          ("telegram",                  "Aviso por Telegram de cada CSV procesado [prueba|una-vez|chat]"),
     "auditoria":         ("auditoria_fixtures",        "Lanzar la auditoria de fixtures"),
     "auditar":           ("auditar",                   "Auditar la integridad de los datos en Postgres (solo lectura)"),
     "pronostico":        ("pronostico",                "Previa de la proxima jornada: datos [pais] [competicion] | publicar <fichero>"),

@@ -472,6 +472,27 @@ class ResultadosAyerTests(unittest.TestCase):
         self.assertEqual((r[0]["country"], r[0]["competition"]), ("usa", "nba"))
         self.assertEqual(R.nombre_fichero(date(2026, 11, 16)), "RESULTS_YESTERDAY_20261116.csv")
 
+    def test_encadena_pendientes_salvo_solo_csv_o_variable(self):
+        sys.path.insert(0, str(RAIZ / "scripts" / "py" / "lanzadores"))
+        import resultados_ayer as R
+        self.assertTrue(R.encadenar_pendientes([], {}))
+        self.assertTrue(R.encadenar_pendientes(["--forzar"], {}))
+        self.assertFalse(R.encadenar_pendientes(["--solo-csv"], {}))
+        self.assertFalse(R.encadenar_pendientes([], {"RESULTADOS_AYER_PENDIENTES": "0"}))
+
+    def test_main_lanza_pendientes_y_devuelve_el_peor_codigo(self):
+        from unittest import mock
+        sys.path.insert(0, str(RAIZ / "scripts" / "py" / "lanzadores"))
+        import resultados_ayer as R
+        import matchids_pendientes as P
+        with mock.patch.object(R, "_ejecutar", return_value=0), \
+             mock.patch.object(R, "_avisar"), \
+             mock.patch.object(P, "main", return_value=1) as pend, \
+             mock.patch.dict(os.environ, {}, clear=False):
+            os.environ.pop("RESULTADOS_AYER_PENDIENTES", None)
+            self.assertEqual(R.main([]), 1)
+        pend.assert_called_once_with([])
+
 
 class ResultadosAyerCuadrePrevioTests(unittest.TestCase):
     """resultados-ayer: el cuadre previo decide que ligas extraer."""

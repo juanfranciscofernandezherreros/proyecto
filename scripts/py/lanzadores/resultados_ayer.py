@@ -19,6 +19,7 @@ El CSV unico es
 El fichero va fuera de competitions\ para que la importacion de RESULTS no lo recoja.
 """
 import csv
+import os
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -165,7 +166,18 @@ def main(argv):
     if rc and not _R.get("error") and not ({"en_mongo", "ya", "extraidos"} & set(_R)):
         _R["error"] = _R.get("motivo") or "ver el log"
     _avisar(linea_resumen(_R))
+    if encadenar_pendientes(argv, os.environ):
+        # Flujo diario sin Claude: tras los resultados, los pendientes hasta el projector.
+        print("Siguiente paso: pendientes (basket pendientes)...", flush=True)
+        os.environ["SKIP_CSV_WATCHER"] = "1"
+        import matchids_pendientes
+        rc = max(rc, matchids_pendientes.main([]))
     return rc
+
+
+def encadenar_pendientes(argv, env):
+    """Se encadenan los pendientes salvo con --solo-csv o RESULTADOS_AYER_PENDIENTES=0."""
+    return "--solo-csv" not in argv and env.get("RESULTADOS_AYER_PENDIENTES") != "0"
 
 
 def _ejecutar(argv):

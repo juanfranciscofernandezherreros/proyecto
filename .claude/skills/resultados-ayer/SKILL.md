@@ -1,6 +1,6 @@
 ---
 name: resultados-ayer
-description: Trae los resultados de ayer de todas las ligas hasta el projector, sin preguntar nada — primero hace el cuadre diario (fixtures / Mongo) y, si ya están todos, termina sin extraer; si no, extrae de Flashscore los resultados de las ligas con pendientes con el scraper python-pyppeter (Selenium + Edge), genera RESULTS_YESTERDAY_<fecha>.csv con los partidos de ayer, lo carga en PostgreSQL por el launcher, espera al projector y comprueba en MongoDB que cada partido está con su marcador; la salida se ve en vivo en el dashboard basket-logs de Grafana. Usar cuando el usuario pida los resultados de ayer, el RESULTS_YESTERDAY, procesar el CSV de ayer o llevar los resultados de ayer hasta el projector. Para todos los resultados de la temporada de todas las ligas, resultados-todas-las-ligas.
+description: Trae los resultados de ayer de todas las ligas hasta el projector, sin preguntar nada — primero hace el cuadre diario (fixtures / Mongo) y, si ya están todos, termina sin extraer; si no, extrae de Flashscore los resultados de las ligas con pendientes con el scraper python-pyppeter (Selenium + Edge), genera RESULTS_YESTERDAY_<fecha>.csv con los partidos de ayer, lo carga en PostgreSQL por el launcher, espera al projector y comprueba en MongoDB que cada partido está con su marcador; la salida se ve en vivo en el dashboard basket-logs de Grafana. Usar cuando el usuario pida los resultados de ayer, el RESULTS_YESTERDAY, procesar el CSV de ayer o llevar los resultados de ayer hasta el projector.
 ---
 
 # Resultados de ayer hasta el projector
@@ -55,13 +55,13 @@ Código 0 si todo está en Mongo; 1 si algo falló.
 | Una liga con 0 partidos que sí jugó | Flashscore aún no lo tenía: repetir más tarde |
 | `PROCESAR ... -> FAILED` o tiempo agotado | Ver el error de la carga (consulta de abajo) y repetir `basket resultados-ayer` |
 | `NO ESTA EN MONGO` / `MARCADOR DISTINTO EN MONGO` | Esperar un minuto y repetir `basket cuadrar` (solo lectura); si sigue, mirar los logs del projector: `docker logs --tail 50 local-validation-basketball-match-projector-1` |
+| `AVISO: Grafana o promtail no arrancaron` | El comando sigue; los logs solo quedan en el fichero |
 
 Error de las últimas cargas de RESULTS:
 
 ```bash
 docker exec -i local-validation-postgres-1 psql -U test -d basketball -c "SELECT status, exit_code, finished_at, file_path, left(error, 200) AS error FROM public.batch_launch_request WHERE file_path LIKE '%resultados-ayer%' ORDER BY created_at DESC LIMIT 10;"
 ```
-| `AVISO: Grafana o promtail no arrancaron` | El comando sigue; los logs solo quedan en el fichero |
 
 Las jugadas y estadísticas de esos partidos no van aquí: las cargan los pendientes.
 

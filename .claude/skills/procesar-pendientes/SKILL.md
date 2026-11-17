@@ -24,7 +24,9 @@ volver a comprobar:
 
 ```bash
 cmd //c "C:\Develop\basketball\1_EJECUTAR\basket.cmd resultados <LIGA>"
-``` La explicación completa de cada columna está en
+```
+
+La explicación completa de cada columna está en
 `sql\consultas\2026-11-03_1710_results-y-fixtures-listos-para-pendientes.sql`.
 
 ## 2. Ver cuántos pendientes hay
@@ -70,7 +72,6 @@ Los resultados de todas las ligas **no** forman parte del ciclo: se lanzan a man
 con `basket resultados` (`CICLO_RESULTS=1` en `config\basketball.env` los
 reactiva). Log en
 `C:\data\basketball\reports\orchestrator\ciclo-diario-<fecha>.log`.
-eports\orchestrator\ciclo-diario-<fecha>.log`.
 
 ## 4. Verificar
 

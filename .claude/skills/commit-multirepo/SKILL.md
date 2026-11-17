@@ -25,9 +25,8 @@ un repositorio propio, enlazado como submódulo:
 
 ## Cuándo se hace
 
-Solo cuando el usuario lo pide. La excepción es el flujo de bugs (regla
-`flujo-bug-plan-sdd-commit-por-paso`): ahí ya está pedido un commit y un push por
-cada paso verificado.
+Solo cuando el usuario lo pide. La excepción es el flujo de desarrollo (regla
+`flujo-de-trabajo`): ahí ya está pedido un commit y un push por cada paso verificado.
 
 ## 1. Ver qué ha cambiado y dónde
 

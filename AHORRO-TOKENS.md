@@ -22,9 +22,9 @@ cambiar de tarea es el ahorro más grande y no cuesta nada.
 | Carga fija | Caracteres | ~Tokens |
 |---|---:|---:|
 | `CLAUDE.md` | 569 | 142 |
-| Reglas sin `paths:` (`backlog-de-pasos`, `consultas-sql`, `flujo-bug-plan-sdd-commit-por-paso`, `idioma-espanol`) | 3.336 | 834 |
+| Reglas sin `paths:` (`consultas-sql`, `flujo-de-trabajo`, `idioma-espanol`) | 1.558 | 389 |
 | Descripciones de 16 skills | 2.267 | 567 |
-| **Total por mensaje** | **6.172** | **~1.540** |
+| **Total por mensaje** | **4.394** | **~1.100** |
 
 Reglas **condicionales** (llevan `paths:` y solo se cargan al tocar sus ficheros):
 `microservicios-spring` (2.667 car, ~670 tok; `*.java`, `pom.xml`) y `score-summary`
@@ -42,19 +42,19 @@ doble) porque `basket tokens` aún no existía. Desde la fila 5, todo sale de `b
 | 3 | 2026-11-17 | `resultados-ayer`: línea `RESUMEN:` al bot (con la tarea al iniciar sesión, 0 tokens al día); skill fina con Haiku que lee solo `RESUMEN:` | Descripción 704 → 148 · fichero 4.721 → 1.549 bytes · modelo de la sesión → Haiku | ~140 tok por mensaje · ~800 tok por uso, más no leer el log | `d6b0e22` |
 | 4 | 2026-11-17 | Descripciones de 14 skills a ~140 caracteres; Haiku en `aviso-telegram` y `cuadrar-partidos-dia` | 6.230 → 2.177 bytes | ~1.000 tok **por mensaje** | `fbd9441` |
 | 5 | 2026-11-17 | `procesar-pendientes`: línea `RESUMEN:` al bot y skill fina que lee solo `RESUMEN:` | Fichero 5.596 bytes → 1.875 car · descripción 708 bytes → 167 car | ~930 tok por uso, ~130 por mensaje | `84a641c` |
+| 6 | 2026-11-17 | Reglas `backlog-de-pasos` y `flujo-bug-plan-sdd-commit-por-paso` juntas en `flujo-de-trabajo` (decían lo mismo) | 2.494 → 716 car · total fijo 6.172 → 4.394 car | ~445 tok **por mensaje** | `COMMIT6` |
 
-**Acumulado en carga fija:** unos 1.800 tokens menos en cada mensaje de cada sesión.
+**Acumulado en carga fija:** unos 2.250 tokens menos en cada mensaje de cada sesión.
 
 > **Corrección (2026-11-17):** la primera versión de `basket tokens` contaba como fijas las
 > reglas con `paths:` (`microservicios-spring`, `score-summary`), que ya eran
-> condicionales. El total fijo real es ~1.540 tokens, no ~2.490. No es un ahorro nuevo:
+> condicionales. El total fijo real entonces era ~1.540 tokens, no ~2.490. No es un ahorro nuevo:
 > era un error de medida.
 
 ## Próximas mejoras
 
 | Mejora | Ahorro estimado |
 |---|---|
-| Juntar y acortar `backlog-de-pasos` y `flujo-bug-plan-sdd-commit-por-paso` (dicen casi lo mismo) | ~300 tok por mensaje |
 | Skills largas finas (`diagnosticar-partido` 6.007, `auditar-datos` 4.801, `aviso-telegram` 4.370 car), como `resultados-ayer` | ~700–1.000 tok por uso cada una |
 | Haiku en `diagnosticar-partido`, `auditar-datos` y `commit-multirepo` (hoy Sonnet) | Mismos tokens, mucho más baratos |
 

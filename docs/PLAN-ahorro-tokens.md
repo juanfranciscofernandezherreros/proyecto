@@ -36,3 +36,13 @@ match-summary, projector) ya tenían `paths:`: solo se cargan al tocar esos fich
 - [x] Test de una regla condicional.
 - [x] `AHORRO-TOKENS.md`: estado actual corregido y próximas mejoras sin esas dos.
 - [x] Commit + push.
+
+## Juntar `backlog-de-pasos` y `flujo-bug-plan-sdd-commit-por-paso`
+
+Las dos se cargan en cada mensaje y repiten el mismo flujo (plan con backlog →
+implementar marcando → SDD y verificación → commit + push por paso).
+
+- [x] Regla única corta `.claude\rules\flujo-de-trabajo.md`; borrar las dos.
+- [x] Referencia en la skill `commit-multirepo`.
+- [x] `basket tokens` antes / después y fila en `AHORRO-TOKENS.md`.
+- [x] Commit + push.

@@ -1,128 +1,88 @@
 ---
 name: procesar-pendientes
-description: Procesa los partidos pendientes del proyecto Basketball, es decir, los ya jugados a los que les falta algún dataset (resumen, jugada a jugada, estadísticas de equipo o de jugadores): comprueba results y fixtures, lanza la auditoría, extrae e importa lo que falta y explica lo que queda sin datos. Usar cuando el usuario pida procesar los pendientes, completar partidos, ponerse al día, lanzar el ciclo diario, o pregunte cuántos partidos faltan o por qué un partido sigue pendiente.
+description: Procesa hasta el projector los partidos pendientes del proyecto Basketball, sin preguntar nada — los ya jugados a los que les falta algún dataset (resumen, jugada a jugada, estadísticas de equipo o de jugadores) — levanta Grafana y todos los servicios, lanza la auditoría, hace datos-ayer, extrae de Flashscore e importa en PostgreSQL lo que falta partido a partido, espera al projector y comprueba en MongoDB qué secciones tiene cada partido; la salida se ve en vivo en el dashboard basket-logs de Grafana. Usar cuando el usuario pida procesar los pendientes, completar partidos, ponerse al día de jugadas y estadísticas, o pregunte cuántos partidos faltan o por qué un partido sigue pendiente.
 model: haiku
 ---
 
-# Procesar los partidos pendientes
+# Pendientes hasta el projector
 
-Un partido está pendiente cuando ya se jugó y le falta al menos un dataset. Lo
-decide el módulo de auditoría (`csv-extra-batch\fixtures-processing-audit`,
-http://localhost:8090/fixtures-processing-audit).
-
-## 1. Comprobar que results y fixtures están al día
-
-Solo lectura; requiere Postgres arrancado:
-
-```bash
-cmd //c "C:\Develop\basketball\1_EJECUTAR\basket.cmd comprobar"
-```
-
-Si al final `a_revisar = 0`, todo está registrado. Si no, hay ligas con partidos
-jugados sin resultado: extraer antes sus resultados desde aquí, liga por liga, y
-volver a comprobar:
-
-```bash
-cmd //c "C:\Develop\basketball\1_EJECUTAR\basket.cmd resultados <LIGA>"
-```
-
-La explicación completa de cada columna está en
-`sql\consultas\2026-11-03_1710_results-y-fixtures-listos-para-pendientes.sql`.
-
-## 2. Ver cuántos pendientes hay
-
-```bash
-cmd //c "C:\Develop\basketball\1_EJECUTAR\basket.cmd auditoria"
-```
-
-Lanza una auditoría nueva, imprime `Fixtures`, `Elegibles` y `Pendientes`, y deja
-la lista en
-`C:\data\basketball\reports\orchestrator\FIXTURES_PROCESSING_AUDIT_PENDING_<fecha>.csv`
-con los datasets que le faltan a cada partido. El último resultado también está en
-http://localhost:8090/fixtures-processing-audit/latest.
-
-## 3. Procesar
-
-En segundo plano y con ruta completa: puede tardar horas si hay muchos partidos.
+Sin preguntar nada al usuario, lanzar en segundo plano (puede tardar horas: ~1 min
+por partido) y redirigir la salida a un fichero del directorio temporal de la
+sesión. Antes, comprobar que no hay otro `pendientes` en marcha: dos a la vez se pisan.
 
 ```bash
 cmd //c "C:\Develop\basketball\1_EJECUTAR\basket.cmd pendientes"
 ```
 
-- Argumentos opcionales: `[csv_de_seleccion] [limite]`. El CSV limita el trabajo a
-  los partidos de esa lista (por ejemplo, el `ligas-orquestar-pendientes-<fecha>.csv`
-  que deja el orquestador cuando falla una liga). Para pasar solo un límite, el
-  primer argumento va vacío: `MATCHIDS_PENDIENTES.bat "" 20`.
-- Asegura antes `antibloqueo postgres auditoria launcher navegador`.
-- Refresca la auditoría al empezar y después de cada partido, y procesa solo lo que
-  sigue pendiente.
-- Al terminar deja un CSV de resumen en `C:\data\basketball\reports\orchestrator\`.
+Hace, en este orden:
 
-El ciclo diario completo (lo que corre la tarea programada) es:
+1. `basket` levanta Grafana, Loki y promtail, y duplica la salida en
+   `C:\data\basketball\logs\basket\pendientes_<AAAAMMDD_HHMMSS>.log`. Imprime el
+   enlace `Logs en vivo:` al dashboard `basket-logs` (http://localhost:8084/d/basket-logs/basketball-logs-de-basket?orgId=1&from=now-3h&to=now&timezone=browser&var-comando=$__all&var-ejecucion=$__all&var-buscar=&refresh=5s).
+2. Asegura antibloqueo, Postgres, auditoría, launcher, runtime (Mongo, projector,
+   API y web) y navegador.
+3. **Datos de ayer** (`basket datos-ayer`): los datos de los partidos de ayer que hay
+   en `fixtures`. Un fallo aquí no para el resto. Se desactiva con `DATOS_AYER=0` o
+   `SKIP_DATOS_AYER=1`.
+4. **Auditoría** (http://localhost:8090/fixtures-processing-audit): decide qué
+   partidos ya jugados están pendientes y qué dataset le falta a cada uno. Imprime
+   `pendientes: N` y deja la lista en
+   `C:\data\basketball\reports\orchestrator\FIXTURES_PROCESSING_AUDIT_PENDING_<fecha>.csv`.
+5. Partido a partido: resuelve la URL de Flashscore y extrae con el scraper
+   `python-pyppeter\flashscore.py` (Selenium + Edge) **solo** los datasets que
+   faltan. Van a `C:\data\basketball\competitions\<pais>\<competicion>\<match_id>\`.
+6. Carga cada CSV en Postgres por el launcher y vuelve a pasar la auditoría, así no
+   repite lo ya hecho. Un partido que falla queda `ERROR` y se sigue.
+7. Deja el resumen en `C:\data\basketball\reports\orchestrator\PROCESAR_MATCHIDS_<run_id>.csv`
+   e imprime `Completados / omitidos / errores`.
+8. Espera 90 s (`CICLO_ESPERA_CUADRE`) a que el projector lo lleve a Mongo.
+9. Comprueba en Mongo cada partido completado: `OK` (todas las secciones),
+   `FALTAN <secciones>` o `NO ESTA EN MONGO`. No abre la web.
+
+Solo una lista de partidos o un máximo: `basket pendientes <csv_seleccion> <limite>`
+(solo límite: `basket pendientes "" 20`). Ciclo diario completo de la tarea
+programada (pendientes y archivado de CSV): `basket ciclo-diario`.
+
+## Qué decir al terminar
+
+Cuántos pendientes había, la línea `Completados: n; omitidos: n; errores: n`, la
+ruta del CSV de resumen y la línea
+`En Mongo (projector): n de m partidos; k con todas las secciones`.
+Código 0 si todo está en Mongo; 1 si algo falló.
+
+| Sale | Qué hacer |
+|---|---|
+| `AVISO: [match_id] ...` / `ERROR` en un partido | Ver sus líneas en el log y su carga (consulta 1); reintentarlo solo a él: `basket reextraer <match_id>` |
+| `FALTAN <secciones>` en Mongo | Puede que Flashscore no las tenga: consulta 2. Si no aparece ahí, reintentar `basket reextraer --dataset <DATASET> <match_id>` |
+| `NO ESTA EN MONGO` | Esperar un minuto y repetir `basket cuadrar`; si sigue, logs del projector: `docker logs --tail 50 local-validation-basketball-match-projector-1` |
+| Partidos jugados sin resultado (no entran en la auditoría) | `basket comprobar` (`a_revisar` debe ser 0); si no, `basket resultados <LIGA>` |
+| `AVISO: Grafana o promtail no arrancaron` | El comando sigue; los logs solo quedan en el fichero |
+
+Consulta 1 · cargas de un partido en el launcher:
 
 ```bash
-cmd //c "C:\Develop\basketball\1_EJECUTAR\basket.cmd ciclo-diario"
+docker exec -i local-validation-postgres-1 psql -U test -d basketball -c "SELECT batch_type, status, exit_code, attempts, finished_at, left(error, 200) AS error FROM public.batch_launch_request WHERE file_path LIKE '%<match_id>%' ORDER BY created_at DESC LIMIT 10;"
 ```
 
-El ciclo empieza por `basket datos-ayer`: los datos de todos los partidos de ayer que hay
-en `fixtures` (lo ejecuta `matchids_pendientes`, y por tanto también `pendientes`,
-`inicio-automatico` y `extraer-todo`; se desactiva con `DATOS_AYER=0` o
-`SKIP_DATOS_AYER=1`). Sigue con el resto de pendientes y archiva los CSV repetidos.
-Los resultados de todas las ligas **no** forman parte del ciclo: se lanzan a mano
-con `basket resultados` (`CICLO_RESULTS=1` en `config\basketball.env` los
-reactiva). Log en
-`C:\data\basketball\reports\orchestrator\ciclo-diario-<fecha>.log`.
-
-## 4. Verificar
-
-Volver a lanzar el paso 2: `Pendientes` debe haber bajado. Y comprobar las cargas:
-
-```bash
-docker exec -i local-validation-postgres-1 psql -U test -d basketball -c "SELECT batch_type, status, exit_code, attempts, finished_at FROM public.batch_launch_request ORDER BY coalesce(finished_at, created_at) DESC LIMIT 15;"
-```
-
-## 5. Explicar lo que sigue pendiente
-
-No todo pendiente es un fallo. Cuando un dataset se ha intentado y Flashscore no lo
-tiene, se registra para no reprocesarlo en bucle:
+Consulta 2 · datasets que Flashscore no tiene (no se reintentan en bucle):
 
 ```bash
 docker exec -i local-validation-postgres-1 psql -U test -d basketball -c "SELECT estado, dataset, count(*) AS partidos, max(last_seen) AS ultimo_intento FROM fixtures_processing_audit.dataset_unavailable GROUP BY estado, dataset ORDER BY estado, dataset;"
 ```
 
-- `NO_PUBLICADO`: la fuente no ofrece ese dataset para ese partido.
-- `VACIO`: la página existe pero no devolvió filas (`rows_found = 0`).
+`NO_PUBLICADO`: la fuente no ofrece ese dataset. `VACIO`: la página existe pero no
+tiene filas. Para un partido, filtrar por `match_id` (columnas `reason`, `attempts`,
+`source_url`).
 
-Para un partido concreto, filtrar por `match_id`; las columnas `reason`, `attempts`
-y `source_url` dicen por qué y cuántas veces se intentó. Si un partido sigue
-pendiente y **no** aparece en esta tabla, es un fallo real de extracción o de
-importación. Se sigue desde aquí:
+Los procesos largos escriben mucho: leer solo el final del fichero (`tail -40`) o las
+líneas clave (`grep -E "Completados|En Mongo|AVISO|ERROR"`). Las consultas ejecutadas
+se guardan en `sql\consultas\`.
 
-1. Buscar el `match_id` en el log de `pendientes`
-   (`C:\data\basketball\logs\basket\pendientes_<AAAAMMDD_HHMMSS>.log`) y leer las
-   líneas `FALLO` / `ERROR` de ese partido.
-2. Ver sus cargas en el launcher:
+## Relacionado
 
-   ```bash
-   docker exec -i local-validation-postgres-1 psql -U test -d basketball -c "SELECT batch_type, status, exit_code, attempts, finished_at, left(error, 200) AS error FROM public.batch_launch_request WHERE file_path LIKE '%<match_id>%' ORDER BY created_at DESC LIMIT 10;"
-   ```
-
-3. Reintentarlo solo a él: `basket reextraer <match_id>` (o
-   `basket reextraer --dataset <DATASET> <match_id>`).
-
-## Salida de los comandos
-
-Los procesos largos escriben mucho. Redirigir la salida a un fichero del
-directorio temporal de la sesión y leer solo el final (`tail -40`) o las líneas
-clave (`grep -E "RESUMEN|OK|FALLO|ERROR"`). No volcar el log entero ni
-consultar tablas sin `LIMIT`.
-
-## Notas
-
-- Consultas relacionadas ya guardadas en `sql\consultas\`:
-  `2026-11-03_1200_pendientes-que-se-repiten.sql`,
+- Lógica: `scripts\py\lanzadores\matchids_pendientes.py` y
+  `scripts\py\pendientes\procesar_matchids.py`. Plan:
+  `docs\PLAN-pendientes-hasta-projector.md`.
+- Consultas guardadas: `sql\consultas\2026-11-03_1200_pendientes-que-se-repiten.sql`,
   `2026-11-03_1650_pendientes-completados-sin-datos.sql`,
   `2026-11-03_1815_registro-datasets-sin-datos.sql`.
-- `MONITOR_PENDIENTES.bat` y `GRAFANA_PENDIENTES.bat` abren ventanas para una
-  persona; no sirven para comprobar el estado desde aquí.
-- Las consultas ejecutadas se guardan en `sql\consultas\` (regla `consultas-sql`).

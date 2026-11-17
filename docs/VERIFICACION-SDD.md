@@ -312,3 +312,12 @@ Evidencia por paso. Ningún paso cambia el flujo del SDD §4 ni los puertos.
 | 3 | Dashboard `basket-logs` (Loki): filtros comando/ejecución/texto, líneas, fallos, líneas por minuto, fallos y avisos, salida en vivo | Visto en vivo en http://localhost:8084/d/basket-logs durante la ejecución, 0 fallos | ✅ |
 | 4 | Loki 192→768 MB y promtail 96→256 MB (`Start-BasketballLocal.ps1`, `asegurar.py`): sin memoria, Loki no aceptaba envíos | Tras el cambio, Loki 110 MB y promtail 53 MB, CPU ~1 %; 53 de 56 líneas en Loki al momento | ✅ |
 | 5 | Tests `BasketLogsTests` (regex de promtail, comandos sin Grafana, dashboard válido) | 42 tests OK; gate `verificar.py` VERDE | ✅ |
+
+## 19. `basket pendientes` hasta el projector (plan `PLAN-pendientes-hasta-projector.md`)
+
+| # | Cambio | Evidencia | Estado |
+|---|---|---|---|
+| 1 | `matchids_pendientes.py` asegura también `runtime` (Mongo, projector, API y web), como `resultados-ayer`; Grafana, Loki y promtail ya los levanta `basket.py` | Compila; gate `verificar.py` VERDE (17-nov) | ✅ |
+| 2 | Al terminar, espera `CICLO_ESPERA_CUADRE` y comprueba en Mongo cada partido `COMPLETED` del `PROCESAR_MATCHIDS_*.csv` de la ejecución: `OK` / `FALTAN <secciones>` / `NO ESTA EN MONGO`; código 1 solo si alguno no está | Prueba con 6 partidos reales de liga-endesa y 1 inventado: 4 OK, 2 FALTAN, 1 NO ESTA EN MONGO → `ausentes: 1`; sin CSV de la ejecución, "No hay partidos procesados" | ✅ |
+| 3 | Skill `procesar-pendientes` con la misma estructura que `resultados-ayer` (comando, pasos en orden, qué decir al terminar, tabla de fallos) y sin mandar a otras skills; ayuda de `basket pendientes` actualizada | Revisada a mano | ✅ |
+| 4 | Ejecución completa de `basket pendientes` con el código nuevo | Pendiente: la ejecución en curso (97 partidos) arrancó con el código anterior | ⏳ |

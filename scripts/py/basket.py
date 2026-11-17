@@ -40,7 +40,7 @@ COMANDOS = {
     "extraer-todo":      ("extraer_csv_completo",      "Extraer el resto de CSV y procesar pendientes [LIGA] [limite]"),
     "reextraer":         ("reextraer",                 "Reextraer partidos concretos [--dataset D] [--fichero F] [--progreso P] <match_id...>"),
     "ultimos":         ("ultimos_partidos",          "Procesar los ultimos partidos de una liga"),
-    "pendientes":        ("matchids_pendientes",       "Procesar los partidos pendientes [csv] [limite]"),
+    "pendientes":        ("matchids_pendientes",       "Procesar los partidos pendientes hasta el projector (comprueba Mongo) [csv] [limite]"),
     "comprobar":         ("comprobar_results_fixtures","Comprobar que RESULTS y FIXTURES estan listos"),
     "auditoria":         ("auditoria_fixtures",        "Lanzar la auditoria de fixtures"),
     "auditar":           ("auditar",                   "Auditar la integridad de los datos en Postgres (solo lectura)"),

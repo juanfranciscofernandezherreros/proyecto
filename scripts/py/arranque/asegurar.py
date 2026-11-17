@@ -63,7 +63,8 @@ GRAFANA_VIEWS = [
 ]
 
 DEPENDENCIES = {
-    "grafana": ["docker"],
+    # Postgres antes que Grafana: _ensure_grafana aplica las vistas SQL en el contenedor.
+    "grafana": ["docker", "postgres"],
     "promtail": ["grafana"],
     "watcher": ["postgres"],
     "postgres": ["docker"],

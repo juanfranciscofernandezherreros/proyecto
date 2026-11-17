@@ -51,10 +51,16 @@ Código 0 si todo está en Mongo; 1 si algo falló.
 
 | Sale | Qué hacer |
 |---|---|
-| `[FALLO] [LIGA]` en la extracción | Ver el log; repetir, o `basket resultados <LIGA>` (skill `extraer-resultados`) |
+| `[FALLO] [LIGA]` en la extracción | Ver el log y repetir `basket resultados-ayer` (solo extrae las ligas que faltan) |
 | Una liga con 0 partidos que sí jugó | Flashscore aún no lo tenía: repetir más tarde |
-| `PROCESAR ... -> FAILED` o tiempo agotado | Ver la carga en `public.batch_launch_request` (skill `diagnosticar-partido`) |
-| `NO ESTA EN MONGO` / `MARCADOR DISTINTO EN MONGO` | Esperar un minuto más y repetir; si sigue, skill `diagnosticar-partido` |
+| `PROCESAR ... -> FAILED` o tiempo agotado | Ver el error de la carga (consulta de abajo) y repetir `basket resultados-ayer` |
+| `NO ESTA EN MONGO` / `MARCADOR DISTINTO EN MONGO` | Esperar un minuto y repetir `basket cuadrar` (solo lectura); si sigue, mirar los logs del projector: `docker logs --tail 50 local-validation-basketball-match-projector-1` |
+
+Error de las últimas cargas de RESULTS:
+
+```bash
+docker exec -i local-validation-postgres-1 psql -U test -d basketball -c "SELECT status, exit_code, finished_at, file_path, left(error, 200) AS error FROM public.batch_launch_request WHERE file_path LIKE '%resultados-ayer%' ORDER BY created_at DESC LIMIT 10;"
+```
 | `AVISO: Grafana o promtail no arrancaron` | El comando sigue; los logs solo quedan en el fichero |
 
 Las jugadas y estadísticas de esos partidos no van aquí: las cargan los pendientes.
@@ -64,4 +70,3 @@ Las jugadas y estadísticas de esos partidos no van aquí: las cargan los pendie
 - Lógica: `scripts\py\lanzadores\resultados_ayer.py`. Planes:
   `docs\PLAN-resultados-ayer.md`, `docs\PLAN-logs-basket-en-grafana.md`,
   `docs\PLAN-resultados-ayer-cuadre-previo.md`.
-- Cuadre con fixtures y secciones: skill `cuadrar-partidos-dia`.

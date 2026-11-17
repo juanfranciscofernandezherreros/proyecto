@@ -19,8 +19,12 @@ cmd //c "C:\Develop\basketball\1_EJECUTAR\basket.cmd comprobar"
 ```
 
 Si al final `a_revisar = 0`, todo está registrado. Si no, hay ligas con partidos
-jugados sin resultado: ejecutar antes la skill `extraer-resultados` para esas
-ligas. La explicación completa de cada columna está en
+jugados sin resultado: extraer antes sus resultados desde aquí, liga por liga, y
+volver a comprobar:
+
+```bash
+cmd //c "C:\Develop\basketball\1_EJECUTAR\basket.cmd resultados <LIGA>"
+``` La explicación completa de cada columna está en
 `sql\consultas\2026-11-03_1710_results-y-fixtures-listos-para-pendientes.sql`.
 
 ## 2. Ver cuántos pendientes hay
@@ -62,10 +66,11 @@ El ciclo empieza por `basket datos-ayer`: los datos de todos los partidos de aye
 en `fixtures` (lo ejecuta `matchids_pendientes`, y por tanto también `pendientes`,
 `inicio-automatico` y `extraer-todo`; se desactiva con `DATOS_AYER=0` o
 `SKIP_DATOS_AYER=1`). Sigue con el resto de pendientes y archiva los CSV repetidos.
-Los resultados de todas las ligas **no** forman parte del ciclo: son la skill
-`resultados-todas-las-ligas`, que se lanza a mano (`CICLO_RESULTS=1` en
-`configasketball.env` los reactiva). Log en
-`C:\dataasketballeports\orchestrator\ciclo-diario-<fecha>.log`.
+Los resultados de todas las ligas **no** forman parte del ciclo: se lanzan a mano
+con `basket resultados` (`CICLO_RESULTS=1` en `config\basketball.env` los
+reactiva). Log en
+`C:\data\basketball\reports\orchestrator\ciclo-diario-<fecha>.log`.
+eports\orchestrator\ciclo-diario-<fecha>.log`.
 
 ## 4. Verificar
 
@@ -90,8 +95,19 @@ docker exec -i local-validation-postgres-1 psql -U test -d basketball -c "SELECT
 Para un partido concreto, filtrar por `match_id`; las columnas `reason`, `attempts`
 y `source_url` dicen por qué y cuántas veces se intentó. Si un partido sigue
 pendiente y **no** aparece en esta tabla, es un fallo real de extracción o de
-importación: revisar el log y, para seguirlo de punta a punta, la skill
-`diagnosticar-partido`.
+importación. Se sigue desde aquí:
+
+1. Buscar el `match_id` en el log de `pendientes`
+   (`C:\data\basketball\logs\basket\pendientes_<AAAAMMDD_HHMMSS>.log`) y leer las
+   líneas `FALLO` / `ERROR` de ese partido.
+2. Ver sus cargas en el launcher:
+
+   ```bash
+   docker exec -i local-validation-postgres-1 psql -U test -d basketball -c "SELECT batch_type, status, exit_code, attempts, finished_at, left(error, 200) AS error FROM public.batch_launch_request WHERE file_path LIKE '%<match_id>%' ORDER BY created_at DESC LIMIT 10;"
+   ```
+
+3. Reintentarlo solo a él: `basket reextraer <match_id>` (o
+   `basket reextraer --dataset <DATASET> <match_id>`).
 
 ## Salida de los comandos
 

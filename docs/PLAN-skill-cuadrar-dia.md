@@ -33,4 +33,4 @@ la web), y que en Mongo tienen todas las secciones.
 - [x] 4. Skill `cuadrar-partidos-dia` y fila en `CLAUDE.md`.
 - [x] 5. Prueba real con `2026-11-16` (debe salir 8 partidos, todo cuadra).
 - [x] 6. Evidencia en `docs\VERIFICACION-SDD.md` (§16), commit + push.
-- [x] 7. Programarlo cada día: último paso de `basket ciclo-diario` (el usuario eligió esta opción).
+- [x] 7. Programarlo cada día en `basket ciclo-diario` con este orden (pedido por el usuario): datos de ayer → cuadre → RESULTS → cuadre → pendientes.

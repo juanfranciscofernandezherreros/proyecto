@@ -21,6 +21,14 @@ Con fecha: `basket cuadrar 2026-11-16`. Por defecto, ayer en hora de Madrid.
 | fixtures | `fixtures.fixtures`, por la fecha en `Europe/Madrid` |
 | Mongo | `basketball.matches`: marcador de `result` y `availableSections` |
 
+## Dentro del ciclo diario
+
+`basket ciclo-diario` lo lanza dos veces, siempre con este orden:
+datos de ayer (`basket datos-ayer`) → **cuadre** → resultados de todas las ligas →
+**cuadre** → pendientes (sin repetir los datos de ayer). Antes de cada cuadre espera
+90 s (`CICLO_ESPERA_CUADRE`) al projector. La salida queda en el log del ciclo, bajo
+`--- Cuadre de ayer ...`; si algo no cuadra se anota `[AVISO]` y el ciclo sigue.
+
 ## Antes de ejecutarlo
 
 Si en los **AVISOS** sale que el último RESULTS de una liga es anterior al final del

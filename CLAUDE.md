@@ -1,38 +1,10 @@
-# Instrucciones del proyecto Basketball
+# Proyecto Basketball
 
-Flujo de datos: CSV → `csv-batch-launcher` → **Postgres** → `basketball-match-projector`
-→ **MongoDB** → `basketball-match-api` → **web**.
+Flujo: Flashscore → CSV → launcher (8088) → **Postgres** (55432) → projector →
+**MongoDB** (27017) → API (8082) → web (8083). Explicado en `index.html`.
 
-- Web http://localhost:8083 · API http://localhost:8082 · Launcher http://localhost:8088
-  · Mongo 27017 · Postgres 55432
-- Nunca lanzar piezas sueltas con `mvn spring-boot:run` ni `npm run dev` (puertos
-  equivocados: 8080 y 5173).
-- Toda consulta SQL ejecutada contra la base de datos se guarda en `sql\consultas\`.
-
-El detalle vive fuera de este fichero:
-
-| Qué | Dónde |
-|---|---|
-| Pipeline en Python (sin PowerShell). CLI único `basket` | `1_EJECUTAR\basket.cmd <comando>` (doble clic = menú) → `scripts\py\basket.py` → `scripts\py\lanzadores\`. Comandos: `basket ayuda` |
-| Arrancar la web, la API y el projector | skill `arrancar-web` |
-| Extraer resultados de una liga hasta Postgres | skill `extraer-resultados` |
-| Extraer resultados de todas las ligas | skill `resultados-todas-las-ligas` |
-| Cargar en Postgres los CSV de resultados ya extraídos | skill `procesar-csv-resultados` |
-| Consultar los últimos resultados agregados a Postgres | skill `ultimos-resultados` |
-| Pronóstico y artículo de previa de la próxima jornada | skill `pronostico-jornada` |
-| Extraer jugada a jugada y estadísticas | skill `extraer-datos-partido` |
-| Procesar los partidos pendientes (antes ejecuta `basket datos-ayer`) | skill `procesar-pendientes` |
-| Aviso por Telegram de cada CSV procesado (`basket telegram`) | skill `aviso-telegram` |
-| Guardar los resultados de ayer en `RESULTS_YESTERDAY_<fecha>.csv` | skill `resultados-ayer` |
-| Cuadre diario Flashscore / fixtures / Mongo (`basket cuadrar`) | skill `cuadrar-partidos-dia` |
-| Un partido no sale o sale mal en la web | skill `diagnosticar-partido` |
-| Ver qué está levantado y qué falta | `1_EJECUTAR\basket.cmd estado` |
-| Auditar la calidad de los datos en Postgres | skill `auditar-datos` |
-| Commit y push con submódulos | skill `commit-multirepo` |
-| Normas de desarrollo y flujo SDD → plan → verificación | skill `normas-basketball` |
-| Formato de los ficheros de `sql\consultas\` | `.claude\rules\consultas-sql.md` |
-| SCORE_SUMMARY con identidad de partido | `.claude\rules\score-summary.md` |
-| Backlog de pasos antes de desarrollar (y marcarlo) | `.claude\rules\backlog-de-pasos.md` |
-| Idioma, flujo de bugs y microservicios Spring | `.claude\rules\` |
-| Skills, agente y comando de CRUD/microservicios | `.claude\skills\`, `.claude\agents\`, `.claude\commands\` |
-| Arquitectura y operación | `docs\SDD.md`, `docs\ESPECIFICACIONES.md` |
+- Todo se lanza con `1_EJECUTAR\basket.cmd <comando>` (`basket ayuda`). Nunca
+  `mvn spring-boot:run` ni `npm run dev` (puertos equivocados).
+- `basket verificar` es el gate: debe dar VERDE.
+- Toda consulta SQL ejecutada se guarda en `sql\consultas\`.
+- Diseño y operación: `docs\SDD.md`, `docs\ESPECIFICACIONES.md`.

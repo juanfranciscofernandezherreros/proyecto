@@ -260,3 +260,14 @@ Evidencia por paso. Ningún paso cambia el flujo del SDD §4 ni los puertos.
 | 4 | Web: resumen e historial en `PlayerPerformancesPage.tsx`, ordenado por fecha | Comprobado en `/performances/Wembanyama%20V.`: 12 partidos, promedio de puntos 25,7 = 308 / 12 | ✅ |
 | 5 | Web: nombre del jugador enlazado desde `MatchDetailPage.tsx` | `typecheck` y `npm test` (31 tests) en verde | ✅ |
 | 6 | Hallazgo: `teamScore`/`opponentScore` casi siempre `null` | Los jugadores llevan la abreviatura del equipo (`DAL`, `BRE`...) y el resultado el nombre completo. De 200 actuaciones, 2 con marcador (BBL). Pendiente de decidir (ver plan, §3b) | ⚠️ Abierto |
+
+## 14. `basket datos-ayer` y paso previo de los pendientes (plan `PLAN-resultados-por-fixtures.md`)
+
+| # | Cambio | Evidencia | Estado |
+|---|---|---|---|
+| 1 | Consulta `sql\consultas\2026-11-17_0905_partidos-ayer-fixtures-vs-results.sql` | Antes de `basket resultados ALL`: 8 partidos de `fixtures` del 16/11 (Israel 3, NBA 5), los 8 sin resultado. Después: los 8 con marcador (p. ej. Boston 131-94 Dallas) | ✅ |
+| 2 | Lanzador `scripts\py\lanzadores\datos_ayer.py` y comando `basket datos-ayer [AAAA-MM-DD]` | `basket ayuda` lo lista; con `2026-11-16` lee 8 `match_id` de `fixtures` y lanza `reextraer` con progreso reanudable | ✅ |
+| 3 | Paso previo en `matchids_pendientes.py` (lo usan `pendientes`, `ciclo-diario`, `inicio-automatico`, `extraer-todo`), desactivable con `DATOS_AYER=0` / `SKIP_DATOS_AYER=1` | Sintaxis comprobada y 4 tests de `activo()`. **No ejecutado de extremo a extremo** (un `basket pendientes` completo no se ha lanzado) | ⚠️ |
+| 4 | Tests (`DatosAyerTests`) | `python -m unittest tests.test_scripts_py`: 30 tests, 0 fallos (6 nuevos) | ✅ |
+| 5 | Prueba real `basket datos-ayer 2026-11-16` | En curso al cerrar esta nota: partido `0GolR8ad` con los 4 datasets OK (equipo, jugadores, resumen, jugada a jugada); quedan 7 partidos. ~1,5 min por dataset | ⏳ |
+| 6 | Gate `basket verificar` | VERDE (7 comprobaciones). Antes salía ROJO por web, API y Mongo parados; se arrancaron con `basket arrancar` | ✅ |

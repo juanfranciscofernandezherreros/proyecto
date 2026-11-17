@@ -254,7 +254,8 @@ Por defecto `todo`. Con `--progreso` anota cada partido y, si se relanza, salta 
 País y competición salen de `results.results` (o de `fixtures`).
 Un fallo en un partido no detiene los demás; termina con `RESUMEN` y código 1 si hubo
 fallos. Los batches hacen UPSERT: las filas antiguas que no coinciden con ninguna nueva
-no se borran solas. Código: `scripts\py\extraereextraer.py`.
+no se borran solas. Código: `scripts\py\extraer
+eextraer.py`.
 
 ---
 
@@ -283,7 +284,8 @@ cmd //c "1_EJECUTAR\basket.cmd ciclo-diario"
 ```
 
 1. (si `CICLO_RESULTS=1`) extrae RESULTS de todas las ligas.
-2. `MATCHIDS_PENDIENTES` → procesa pendientes.
+2. `MATCHIDS_PENDIENTES` → primero `basket datos-ayer` (datos de los partidos de ayer en
+   `fixtures`; `DATOS_AYER=0` lo desactiva) y después procesa pendientes.
 3. `ARCHIVAR_CSV_REPETIDOS` → deja un CSV vigente por partido/dataset, el resto al histórico.
 4. `basket auditar` → auditoría de integridad de datos (solo lectura); el resumen por
    control queda en el log. También se puede lanzar suelta: `1_EJECUTAR\basket.cmd auditar`.

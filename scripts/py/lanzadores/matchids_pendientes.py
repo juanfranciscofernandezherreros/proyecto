@@ -11,6 +11,15 @@ if __name__ == "__main__":
     if ensure("antibloqueo", "postgres", "auditoria", "launcher", "navegador"):
         print("ERROR: no se pudieron asegurar los servicios necesarios.")
         sys.exit(1)
+    # Paso previo: los datos de los partidos de ayer que hay en fixtures. Un fallo aqui
+    # no impide procesar el resto de pendientes.
+    import datos_ayer
+    if datos_ayer.activo(os.environ, CFG):
+        print("Paso previo: datos de los partidos de ayer en fixtures (basket datos-ayer)...")
+        if datos_ayer.main([]):
+            print("[AVISO] datos-ayer devolvio error; se continua con los pendientes.")
+    else:
+        print("Paso previo datos-ayer desactivado (SKIP_DATOS_AYER=1 o DATOS_AYER=0).")
     print("El proceso refrescara la auditoria antes de empezar y despues de cada partido.")
     rc = run_mod("pendientes/procesar_matchids.py", *a)
     if rc:

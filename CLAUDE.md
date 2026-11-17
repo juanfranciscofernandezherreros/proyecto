@@ -20,7 +20,7 @@ El detalle vive fuera de este fichero:
 | Cargar en Postgres los CSV de resultados ya extraídos | skill `procesar-csv-resultados` |
 | Consultar los últimos resultados agregados a Postgres | skill `ultimos-resultados` |
 | Extraer jugada a jugada y estadísticas | skill `extraer-datos-partido` |
-| Procesar los partidos pendientes | skill `procesar-pendientes` |
+| Procesar los partidos pendientes (antes ejecuta `basket datos-ayer`) | skill `procesar-pendientes` |
 | Un partido no sale o sale mal en la web | skill `diagnosticar-partido` |
 | Ver qué está levantado y qué falta | skill `estado-del-sistema` |
 | Auditar la calidad de los datos en Postgres | skill `auditar-datos` |

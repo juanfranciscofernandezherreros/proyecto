@@ -33,6 +33,7 @@ COMANDOS = {
     "auditoria":         ("auditoria_fixtures",        "Lanzar la auditoria de fixtures"),
     "auditar":           ("auditar",                   "Auditar la integridad de los datos en Postgres (solo lectura)"),
     "ids-ayer":         ("ids_partidos_ayer",         "Imprimir los match_id de ayer"),
+    "datos-ayer":        ("datos_ayer",                "Extraer los datos de los partidos de ayer en fixtures [AAAA-MM-DD]"),
     "monitor":           ("monitor_pendientes",        "Abrir el monitor de pendientes en vivo"),
     "grafana":           ("grafana_pendientes",        "Abrir el dashboard de pendientes en Grafana"),
     "vigilar":           ("vigilar_servicios",         "Vigilante de servicios [minutos|una-vez]"),

@@ -151,5 +151,33 @@ class ConfigTests(unittest.TestCase):
         self.assertTrue(cfg["COMPETITIONS_DIR"].startswith(cfg["DATA_DIR"]))
 
 
+class DatosAyerTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        sys.path.insert(0, str(RAIZ / "scripts" / "py" / "lanzadores"))
+        import datos_ayer
+        cls.datos_ayer = datos_ayer
+
+    def test_consulta_de_ayer_usa_fecha_local_de_madrid(self):
+        sql = self.datos_ayer.consulta()
+        self.assertIn("fixtures.fixtures", sql)
+        self.assertIn("Europe/Madrid", sql)
+        self.assertIn("- 1)", sql)
+
+    def test_consulta_con_fecha_explicita(self):
+        self.assertIn("DATE '2026-11-16'", self.datos_ayer.consulta("2026-11-16"))
+
+    def test_paso_previo_se_puede_desactivar(self):
+        self.assertTrue(self.datos_ayer.activo({}, {}))
+        self.assertFalse(self.datos_ayer.activo({"SKIP_DATOS_AYER": "1"}, {}))
+        self.assertFalse(self.datos_ayer.activo({}, {"DATOS_AYER": "0"}))
+        self.assertTrue(self.datos_ayer.activo({}, {"DATOS_AYER": "1"}))
+
+    def test_fecha_invalida_se_rechaza(self):
+        for mala in ("16/11/2026", "2026-13-40", "2026-11-16'; DROP TABLE x;--"):
+            with self.assertRaises(ValueError):
+                self.datos_ayer.consulta(mala)
+
+
 if __name__ == "__main__":
     unittest.main()

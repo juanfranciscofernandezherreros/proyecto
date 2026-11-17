@@ -23,7 +23,6 @@ El detalle vive fuera de este fichero:
 | Extraer jugada a jugada y estadísticas | skill `extraer-datos-partido` |
 | Procesar los partidos pendientes (antes ejecuta `basket datos-ayer`) | skill `procesar-pendientes` |
 | Guardar los resultados de ayer en `RESULTS_YESTERDAY_<fecha>.csv` | skill `resultados-ayer` |
-| Resultados de ayer y después los pendientes | skill `resultados-ayer-y-pendientes` |
 | Cuadre diario Flashscore / fixtures / Mongo (`basket cuadrar`) | skill `cuadrar-partidos-dia` |
 | Un partido no sale o sale mal en la web | skill `diagnosticar-partido` |
 | Ver qué está levantado y qué falta | skill `estado-del-sistema` |

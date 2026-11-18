@@ -495,6 +495,18 @@ class ResultadosAyerTests(unittest.TestCase):
              mock.patch.object(telegram_csv, "enviar_texto", side_effect=OSError("sin red")):
             PM.avisar_inicio(3)  # no debe lanzar
 
+    def test_seguimiento_genera_sql_seguro_y_no_corta_si_falla(self):
+        from unittest import mock
+        import seguimiento as S
+        sql = S.sql_empezar("r1", "europe/euroleague", "europe", "euroleague", "PLAYER_STATS O'Neal")
+        self.assertIn("'PLAYER_STATS O''Neal'", sql)
+        self.assertIn("'RUNNING') RETURNING id;", sql)
+        self.assertIn("estado = 'FAILED'", S.sql_terminar(7, "FAILED", "x"))
+        with mock.patch.object(S.subprocess, "run", side_effect=OSError("sin docker")):
+            self.assertIsNone(S.empezar({}, "r", "l", "p", "c", "paso"))
+        S.terminar({}, None, "COMPLETED")  # sin id no hace nada
+        S._activo = True
+
     def test_motivo_error_salta_el_volcado_de_la_pila(self):
         sys.path.insert(0, str(RAIZ / "scripts" / "py" / "pendientes"))
         import procesar_matchids as PM

@@ -24,6 +24,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "importar"))
 import config as _config
 import launcher as L
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+import seguimiento
 
 # nombre -> (etiqueta, dataset del scraper o None si va por 'match quarters', prefijo del CSV)
 DATASETS = {
@@ -155,6 +157,7 @@ def reextraer(match_ids, nombres, progreso=None):
     total = len(match_ids)
     print(f"Partidos a reextraer: {total}. Datasets: {', '.join(DATASETS[n][0] for n in nombres)}", flush=True)
     ok = fallo = 0
+    run_id = "reextraer-" + time.strftime("%Y%m%d%H%M%S")
     for n, match_id in enumerate(match_ids, 1):
         if match_id not in ligas:
             print(f"[{n}/{total}] {match_id} FALLO no esta en results ni en fixtures (sin pais/competicion)", flush=True)
@@ -177,6 +180,8 @@ def reextraer(match_ids, nombres, progreso=None):
             etiqueta = DATASETS[nombre][0]
             if (match_id, etiqueta) in hechos:
                 continue
+            paso = seguimiento.empezar(cfg, run_id, f"{country}/{competition}", country, competition,
+                                       f"{etiqueta} {match_id}")
             try:
                 csv_f = _extraer(cfg, env, nombre, match_id, url, raiz)
                 resp = L.submit_and_wait(cfg, csv_f, timeout_min=15)
@@ -184,10 +189,12 @@ def reextraer(match_ids, nombres, progreso=None):
                     raise Fallo(f"launcher {resp.get('status')}")
                 print(f"[{n}/{total}] {match_id} {country}/{competition} {etiqueta} OK {csv_f.name}", flush=True)
                 _anotar(progreso, match_id, etiqueta, "OK", csv_f.name)
+                seguimiento.terminar(cfg, paso, "COMPLETED", csv_f.name)
                 ok += 1
             except Exception as e:  # se anota y se sigue con el siguiente
                 print(f"[{n}/{total}] {match_id} {country}/{competition} {etiqueta} FALLO {str(e)[:300]}", flush=True)
                 _anotar(progreso, match_id, etiqueta, "FALLO", " ".join(str(e)[:200].split()))
+                seguimiento.terminar(cfg, paso, "FAILED", " ".join(str(e).split()))
                 fallo += 1
     print(f"RESUMEN: {ok} OK, {fallo} con fallo", flush=True)
     return 0 if fallo == 0 else 1

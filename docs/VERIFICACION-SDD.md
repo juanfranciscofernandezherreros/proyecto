@@ -415,7 +415,7 @@ Evidencia por paso. Ningún paso cambia el flujo del SDD §4 ni los puertos.
 |---|---|---|---|
 | 1 | `basket csv-faltan [match_id]` cruza auditoría, CSV en disco y último intento | `test_csv_faltan_cruza_disco_e_intentos`; ejecución real: Gr62XNa6 → `ERROR: …ERR_NAME_NOT_RESOLVED`, 4 partidos euroleague del 17/11 sin CSV | ✅ |
 | 2 | El motivo del error es la línea de la excepción, no el volcado de la pila | `test_motivo_error_salta_el_volcado_de_la_pila` | ✅ |
-| 3 | Gate | Tests 68, 2 errores solo porque el worktree no tiene el submódulo `local-validation`; `basket verificar` no ejecutable en el worktree por la misma causa | ⚠️ |
+| 3 | Gate | Tests 71 OK y `basket verificar` VERDE en main el 18/11 tras fusionar | ✅ |
 
 ## «Extrayendo ahora» en el dashboard de pendientes (`docs/PLAN-grafana-extrayendo.md`, 2026-11-18)
 

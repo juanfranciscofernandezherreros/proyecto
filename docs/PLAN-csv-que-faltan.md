@@ -21,5 +21,5 @@ lo había procesado.
   `CSV_FALTAN_<stamp>.csv` en `REPORT_DIR`. Solo lectura (salvo refrescar la auditoría).
 - [x] 2. `procesar_matchids.py`: el motivo del error es la última línea con
   `Error`/`Exception` del log, no el último volcado de la pila.
-- [ ] 3. Skill `.claude/skills/csv-faltan/SKILL.md`, tests, `basket verificar` en VERDE (pendiente: el worktree no tiene el submódulo `local-validation`; ejecutar en el checkout principal),
+- [x] 3. Skill `.claude/skills/csv-faltan/SKILL.md`, tests, `basket verificar` en VERDE (VERDE en main el 18/11),
   evidencia en `docs/VERIFICACION-SDD.md`, commit + push.

@@ -29,8 +29,20 @@ def consulta(fecha=None):
         dia = f"DATE '{fecha}'"
     else:
         dia = HOY_MENOS_1
+    # Solo los que les falta algún dataset (como la auditoría): los completos no se
+    # vuelven a bajar, para no tardar una hora en llegar a los que sí faltan.
+    falta = " OR ".join(
+        f"(NOT EXISTS (SELECT 1 FROM {tabla} x WHERE x.match_id = f.match_id) "
+        f"AND NOT EXISTS (SELECT 1 FROM fixtures_processing_audit.dataset_unavailable u "
+        f"WHERE u.match_id = f.match_id AND u.dataset = '{dataset}'))"
+        for tabla, dataset in (("results.results", "MATCH_SUMMARY"),
+                               ("match_summary.match_summary", "MATCH_SUMMARY"),
+                               ("point_by_point.point_by_point_event", "POINT_BY_POINT"),
+                               ("team_stats.team_stats", "TEAM_STATS"),
+                               ("stats_player.stats_player", "PLAYER_STATS")))
     return ("SELECT f.match_id FROM fixtures.fixtures f "
             f"WHERE (f.event_datetime AT TIME ZONE 'Europe/Madrid')::date = {dia} "
+            f"AND ({falta}) "
             "ORDER BY f.match_id;")
 
 

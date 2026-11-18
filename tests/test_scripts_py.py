@@ -304,6 +304,12 @@ class DatosAyerTests(unittest.TestCase):
     def test_consulta_con_fecha_explicita(self):
         self.assertIn("DATE '2026-11-16'", self.datos_ayer.consulta("2026-11-16"))
 
+    def test_datos_ayer_solo_partidos_con_datasets_que_faltan(self):
+        sql = self.datos_ayer.consulta()
+        for tabla in ("match_summary.match_summary", "point_by_point.point_by_point_event",
+                      "team_stats.team_stats", "stats_player.stats_player", "dataset_unavailable"):
+            self.assertIn(tabla, sql)
+
     def test_paso_previo_se_puede_desactivar(self):
         self.assertTrue(self.datos_ayer.activo({}, {}))
         self.assertFalse(self.datos_ayer.activo({"SKIP_DATOS_AYER": "1"}, {}))

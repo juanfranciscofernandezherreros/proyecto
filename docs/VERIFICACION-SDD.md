@@ -424,3 +424,11 @@ Evidencia por paso. Ningún paso cambia el flujo del SDD §4 ni los puertos.
 | 1 | `reextraer` (y `resultados-ayer`) apuntan cada partido y dataset en `pipeline_step` | `test_seguimiento_genera_sql_seguro_y_no_corta_si_falla`; fila real id 374 creada y cerrada (`2026-11-18_0945_prueba-seguimiento-pipeline-step.sql`) | ✅ |
 | 2 | Dashboard `fixtures-audit-live` con paneles «Extrayendo ahora» y «Ultimos pasos (2 h)» | Publicado en Grafana (versión 7); `csv-extra-batch` en el commit del submódulo | ✅ |
 | 3 | Visto en vivo | Pendiente de la próxima ejecución con esta rama fusionada | ⏳ |
+
+## 2026-11-18 · Contador de ayer y datos-ayer solo incompletos
+
+- Panel «Partidos de ayer» en `fixtures-audit-live`: Ayer 17 · Completos 14 · Extrayendo 1 (visto en Grafana).
+- `datos_ayer.consulta()` en Postgres: 3 filas (los 3 de Euroliga sin datos). Consulta en
+  `sql/consultas/2026-11-18_1000_datos-ayer-solo-incompletos.sql`.
+- Tests: 68 OK; 2 fallos previos de BasketLogsTests por submódulo `local-validation` sin checkout en el worktree.
+- `basket verificar`: VERDE.

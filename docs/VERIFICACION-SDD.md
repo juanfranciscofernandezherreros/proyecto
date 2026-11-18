@@ -408,3 +408,11 @@ Evidencia por paso. Ningún paso cambia el flujo del SDD §4 ni los puertos.
 |---|---|---|---|
 | 1 | Tras cada partido, `✅/❌ i/N · partido · quedan N-i`; un fallo de Telegram no corta | `test_pendientes_avisa_de_cada_partido_y_cuantos_quedan` | ✅ |
 | 2 | Gate | Tests 66 OK; `basket verificar` VERDE el 17/11 | ✅ |
+
+## CSV que faltan por generar (`docs/PLAN-csv-que-faltan.md`, 2026-11-18)
+
+| # | Requisito | Evidencia | Estado |
+|---|---|---|---|
+| 1 | `basket csv-faltan [match_id]` cruza auditoría, CSV en disco y último intento | `test_csv_faltan_cruza_disco_e_intentos`; ejecución real: Gr62XNa6 → `ERROR: …ERR_NAME_NOT_RESOLVED`, 4 partidos euroleague del 17/11 sin CSV | ✅ |
+| 2 | El motivo del error es la línea de la excepción, no el volcado de la pila | `test_motivo_error_salta_el_volcado_de_la_pila` | ✅ |
+| 3 | Gate | Tests 68, 2 errores solo porque el worktree no tiene el submódulo `local-validation`; `basket verificar` no ejecutable en el worktree por la misma causa | ⚠️ |

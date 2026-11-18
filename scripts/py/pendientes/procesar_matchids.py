@@ -61,6 +61,14 @@ def _ultimos_pendientes():
     return rows
 
 
+def motivo_error(lineas):
+    """Ultima linea con Error/Exception (no el volcado '(No symbol) [0x…]' de la pila)."""
+    for l in reversed(lineas):
+        if "Error" in l or "Exception" in l:
+            return l
+    return lineas[-1] if lineas else ""
+
+
 def _escribir_rows(path, rows):
     cols = ["match_date", "country", "competition", "match_id", "home_team", "away_team", "pending_datasets"]
     with open(path, "w", encoding="utf-8", newline="") as fh:
@@ -201,7 +209,7 @@ def main():
                 p.wait()
             if p.returncode != 0:
                 raise RuntimeError(f"process_pending_match_csvs.py termino con codigo {p.returncode}: "
-                                   f"{ultimas[-1] if ultimas else ''}")
+                                   f"{motivo_error(ultimas)}")
             status, message = "COMPLETED", "Solo datasets pendientes extraidos e importados mediante el launcher."
         except Exception as e:
             status, message = "ERROR", str(e)

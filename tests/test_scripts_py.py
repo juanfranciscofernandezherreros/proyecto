@@ -495,6 +495,29 @@ class ResultadosAyerTests(unittest.TestCase):
              mock.patch.object(telegram_csv, "enviar_texto", side_effect=OSError("sin red")):
             PM.avisar_inicio(3)  # no debe lanzar
 
+    def test_motivo_error_salta_el_volcado_de_la_pila(self):
+        sys.path.insert(0, str(RAIZ / "scripts" / "py" / "pendientes"))
+        import procesar_matchids as PM
+        lineas = ["selenium.common.exceptions.WebDriverException: Message: net::ERR_NAME_NOT_RESOLVED",
+                  "Stacktrace:", "(No symbol) [0x7ff87b2d9c5c]"]
+        self.assertIn("ERR_NAME_NOT_RESOLVED", PM.motivo_error(lineas))
+        self.assertEqual(PM.motivo_error(["sin pistas"]), "sin pistas")
+        self.assertEqual(PM.motivo_error([]), "")
+
+    def test_csv_faltan_cruza_disco_e_intentos(self):
+        from unittest import mock
+        sys.path.insert(0, str(RAIZ / "scripts" / "py" / "pendientes"))
+        import csv_faltan as CF
+        self.assertEqual(CF.datasets_con_csv(["SCORE_SUMMARY_1_x.csv", "PLAYER_STATS_1_x.csv"]),
+                         {"MATCH_SUMMARY", "PLAYER_STATS"})
+        row = {"match_id": "Gr62XNa6", "country": "europe", "competition": "euroleague",
+               "pending_datasets": "POINT_BY_POINT,PLAYER_STATS"}
+        with mock.patch.object(CF, "csv_en_disco", return_value=["PLAYER_STATS_1_Gr62XNa6.csv"]):
+            f = CF.filas([row], {"Gr62XNa6": ("20261118080204", "ERROR", "ERR_NAME_NOT_RESOLVED")})[0]
+        self.assertEqual((f["sin_csv"], f["con_csv_sin_cargar"]), ("POINT_BY_POINT", "PLAYER_STATS"))
+        self.assertIn("ERROR: ERR_NAME_NOT_RESOLVED", f["motivo"])
+        self.assertTrue(CF.motivo(None).startswith("nunca"))
+
     def test_pendientes_avisa_de_cada_partido_y_cuantos_quedan(self):
         from unittest import mock
         sys.path.insert(0, str(RAIZ / "scripts" / "py" / "pendientes"))

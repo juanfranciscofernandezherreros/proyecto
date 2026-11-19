@@ -424,3 +424,13 @@ Evidencia por paso. Ningún paso cambia el flujo del SDD §4 ni los puertos.
 | 1 | `reextraer` (y `resultados-ayer`) apuntan cada partido y dataset en `pipeline_step` | `test_seguimiento_genera_sql_seguro_y_no_corta_si_falla`; fila real id 374 creada y cerrada (`2026-11-18_0945_prueba-seguimiento-pipeline-step.sql`) | ✅ |
 | 2 | Dashboard `fixtures-audit-live` con paneles «Extrayendo ahora» y «Ultimos pasos (2 h)» | Publicado en Grafana (versión 7); `csv-extra-batch` en el commit del submódulo | ✅ |
 | 3 | Visto en vivo | Pendiente de la próxima ejecución con esta rama fusionada | ⏳ |
+
+## Fecha y hora de los partidos en la web (`docs/PLAN-fechas-partidos-utc.md`, 2026-11-19)
+
+| # | Requisito | Evidencia | Estado |
+|---|---|---|---|
+| 1 | Análisis de los 40 últimos partidos | 40/40 con la hora UTC (una hora menos); 2/40 (`QgwzkCi3`, `0GolR8ad`) con el día anterior; 67 en todo `results` (`2026-11-19_1010_dia-partidos-desfasado.sql`) | ✅ |
+| 2 | El projector guarda `eventDatetime` en ISO-8601 UTC (`…Z`) | `EventDatetimeInstantTest` (3 tests); projector 7 tests OK; commit `726f5db` | ✅ |
+| 3 | Reproyección de lo existente (`PROJECTION_VERSION` v3) | Mongo: 3533/3533 `matches` con `Z`, 0 con el formato antiguo en `matches` y `player_performances` | ✅ |
+| 4 | La web muestra la hora de Madrid | Navegador (Europe/Madrid): 40/40 coinciden con `event_time`; Besiktas–Real Madrid `18 nov, 18:00`; Celtics–Mavericks `16 nov, 00:00` | ✅ |
+| 5 | Gate | `basket verificar` VERDE el 19/11 | ✅ |

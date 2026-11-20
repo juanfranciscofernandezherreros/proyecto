@@ -25,7 +25,7 @@ de donde lee la web.
 - **API:** paquete nuevo `comeback` con `ComebackCalculator` (cálculo puro),
   `ComebackService` (lee `matches` con marcador y jugadas, y sus `match_point_by_point`),
   `ComebackController` → `GET /api/v1/comebacks?minDeficit=15&competition=&limit=100`
-  y el DTO `ComebackResponse`. Endpoint nuevo, no toca los existentes.
+  y el modelo `Comeback`, que sirve de respuesta. Endpoint nuevo, no toca los existentes.
 - **Web:** tipo `Comeback`, `getComebacks` en `matchesApi.ts`, página `ComebacksPage.tsx`
   en `/comebacks` con filtro de desventaja mínima y competición, y enlace «Remontadas» en la
   cabecera. Cada fila enlaza a la ficha del partido.

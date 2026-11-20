@@ -154,6 +154,12 @@ Base `/api/v1/matches`:
   equipo del jugador no se puede emparejar con el resultado; ver `PLAN-pagina-jugador.md` §3b).
 - Procesamiento: `/{matchId}/processing`, `/processing/pending`, `/processing`.
 
+Base `/api/v1/comebacks`:
+- `GET /` — partidos ganados tras remontar (`minDeficit`, por defecto 15; `competition`;
+  `limit`, por defecto 100, máx. 500). Ganador según `result` (incluye prórrogas) y mayor
+  desventaja según `match_point_by_point`; orden de mayor a menor remontada. Pantalla
+  `/comebacks` en la web (`PLAN-remontadas.md`).
+
 ### 6.2 Launcher (`:8088`)
 `POST /batch-launches` encola una carga; `GET /batch-launches/{id}` consulta estado
 (`QUEUED|RUNNING|COMPLETED|FAILED`). Tabla de cola: `public.batch_launch_request`.

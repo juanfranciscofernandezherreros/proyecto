@@ -434,3 +434,13 @@ Evidencia por paso. Ningún paso cambia el flujo del SDD §4 ni los puertos.
 | 3 | Reproyección de lo existente (`PROJECTION_VERSION` v3) | Mongo: 3533/3533 `matches` con `Z`, 0 con el formato antiguo en `matches` y `player_performances` | ✅ |
 | 4 | La web muestra la hora de Madrid | Navegador (Europe/Madrid): 40/40 coinciden con `event_time`; Besiktas–Real Madrid `18 nov, 18:00`; Celtics–Mavericks `16 nov, 00:00` | ✅ |
 | 5 | Gate | `basket verificar` VERDE el 19/11 | ✅ |
+
+## Grandes remontadas (`docs/PLAN-remontadas.md`, 2026-11-20)
+
+| # | Requisito | Evidencia | Estado |
+|---|---|---|---|
+| 1 | Consulta SQL de partidos ganados tras ≥ 15 puntos en contra | `2026-11-20_1000_partidos-ganados-tras-gran-remontada.sql`: 59 de 888 partidos con jugadas; mayor, 76ers–Cavaliers (`vqjr83tS`), 29 | ✅ |
+| 2 | `GET /api/v1/comebacks` (`minDeficit`, `competition`, `limit`) | `ComebackCalculatorTest` (6) y `ComebackServiceTest` (4); `mvnw verify` 45 tests y JaCoCo ≥ 80 % (con `PredictionArticleServiceImplTest`, el umbral ya fallaba en 0,79); API `8a0d31e` | ✅ |
+| 3 | La API coincide con la consulta SQL | `diff` de `matchId`, puntos y prórroga: 59/59 iguales; respuesta en ~1,5 s | ✅ |
+| 4 | Pantalla `/comebacks` con filtros y enlace «Remontadas» | `comebacks.test.ts` (5); `typecheck` y 36 tests OK; web `0a6cb42`. Navegador: 59 partidos; filtro euroleague → 4 (Valencia 18); vista móvil en fichas | ✅ |
+| 5 | Gate | `basket verificar` VERDE el 20/11 | ✅ |

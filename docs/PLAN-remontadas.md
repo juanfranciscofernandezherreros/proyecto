@@ -3,7 +3,7 @@
 > **Fecha:** 2026-11-20 · **Relacionado:** [SDD.md](SDD.md) (§6.1 API REST, §5.2 read model),
 > [VERIFICACION-SDD.md](VERIFICACION-SDD.md),
 > consulta [2026-11-20_1000_partidos-ganados-tras-gran-remontada.sql](../sql/consultas/2026-11-20_1000_partidos-ganados-tras-gran-remontada.sql).
-> **Repos:** `basketball-match-api`, `basketball-match-web`, raíz. **Estado:** en curso.
+> **Repos:** `basketball-match-api`, `basketball-match-web`, raíz. **Estado:** hecho.
 
 ## 1. Qué se quiere
 
@@ -33,19 +33,19 @@ de donde lee la web.
 ## Backlog
 
 **API (`basketball-match-api`)**
-- [ ] `ComebackCalculator` con tests (gana local, gana visitante, sin desventaja, prórroga, empate/sin marcador).
-- [ ] `ComebackService` + `ComebackController` + DTO, con tests de filtro, orden y límite.
-- [ ] `mvnw verify` en verde (tests y cobertura JaCoCo).
+- [x] `ComebackCalculator` con tests (gana local, gana visitante, sin desventaja, prórroga, empate/sin marcador). 6 tests.
+- [x] `ComebackService` + `ComebackController` + modelo `Comeback` (sirve de respuesta), con tests de filtro, orden y límite. 4 tests.
+- [x] `mvnw verify` en verde: 45 tests. La cobertura ya estaba en 0,79 por `prediction` sin tests; se añade `PredictionArticleServiceImplTest`.
 
 **Web (`basketball-match-web`)**
-- [ ] Tipo, cliente `getComebacks` y test del cliente.
-- [ ] `ComebacksPage.tsx`, ruta `/comebacks` y enlace en `Header.tsx`.
-- [ ] `npm run typecheck` y `npm test` en verde.
+- [x] Tipo, cliente `getComebacks` y test del cliente (`utils/comebacks.test.ts`).
+- [x] `ComebacksPage.tsx`, ruta `/comebacks` y enlace en `Header.tsx`.
+- [x] `npm run typecheck` y `npm test` en verde (36 tests).
 
 **Verificación y cierre (raíz)**
-- [ ] Arrancar el stack, abrir `/comebacks` y comprobar que coincide con la consulta SQL (59 partidos con ≥ 15; el primero, 76ers - Cavaliers, 29).
-- [ ] Evidencia en `docs\VERIFICACION-SDD.md`, §6.1 de `docs\SDD.md` y `basket verificar` en verde.
-- [ ] Commit + push por submódulo y el puntero en la raíz.
+- [x] Arrancar el stack, abrir `/comebacks` y comprobar que coincide con la consulta SQL: 59/59 iguales (partido, puntos y prórroga); el primero, 76ers - Cavaliers, 29.
+- [x] Evidencia en `docs\VERIFICACION-SDD.md`, §6.1 de `docs\SDD.md` y `basket verificar` en verde.
+- [x] Commit + push por submódulo (rama `claude/remontadas` en API y web) y el puntero en la raíz.
 
 ## 4. Riesgos y decisiones
 

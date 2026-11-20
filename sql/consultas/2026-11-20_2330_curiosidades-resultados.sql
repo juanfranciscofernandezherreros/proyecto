@@ -44,7 +44,7 @@ medias AS (
            ROUND(AVG(d3), 1) AS dif_c3, ROUND(AVG(d4), 1) AS dif_c4
     FROM por_equipo GROUP BY equipo, competition HAVING COUNT(*) >= 5
 )
-SELECT * FROM medias ORDER BY dif_c1 DESC LIMIT 10;
+SELECT * FROM medias ORDER BY dif_c1 DESC, equipo LIMIT 10;
 
 -- PASO 1b · Equipos que mejor acaban: diferencia media en el 4º cuarto.
 WITH por_equipo AS (
@@ -64,7 +64,7 @@ medias AS (
            ROUND(AVG(d3), 1) AS dif_c3, ROUND(AVG(d4), 1) AS dif_c4
     FROM por_equipo GROUP BY equipo, competition HAVING COUNT(*) >= 5
 )
-SELECT * FROM medias ORDER BY dif_c4 DESC LIMIT 10;
+SELECT * FROM medias ORDER BY dif_c4 DESC, equipo LIMIT 10;
 
 -- PASO 2a · Mayores palizas: diferencia final.
 SELECT ABS(home_score - away_score) AS diferencia,

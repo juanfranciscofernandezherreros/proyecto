@@ -9,9 +9,11 @@
 --                  jugador y partido), con results.results para la fecha y la competición.
 --                  Las estadísticas vacías (NULL) cuentan como 0: Flashscore deja la
 --                  casilla en blanco cuando el valor es 0.
---                  El jugador se identifica con player_key + team (player_key = player_id o,
---                  si falta, el nombre abreviado). Dos jugadores con el mismo nombre
---                  abreviado en el mismo equipo se mezclarían (PLAN-jugadores-con-nombre-repetido.md).
+--                  El jugador se identifica con nombre + equipo. No se usa player_key
+--                  (player_id o, si falta, el nombre) porque solo 950 de 17325 filas traen
+--                  player_id y partía en dos a 600 jugadores (p. ej. Towns: 14 + 1 partidos).
+--                  Dos jugadores con el mismo nombre abreviado en el mismo equipo se mezclarían
+--                  (PLAN-jugadores-con-nombre-repetido.md).
 -- CUÁNDO USARLA    Para curiosidades/artículos o tras cargar estadísticas nuevas.
 -- CÓMO LEER EL RESULTADO
 --   PASO 1  dobles_dobles / triples_dobles = partidos con 10 o más en dos / tres de:
@@ -21,15 +23,16 @@
 --           toda la temporada (mínimo 8 partidos). dif > 0 = está mejor que su media.
 --   PASO 4  partidos de 40 puntos o más.
 -- QUÉ HACER DESPUÉS  La página de jugador de la web (/performances/<nombre>) da el detalle.
--- RESULTADO EL 2026-11-20  1: Towns 11 dobles-dobles; Jokic 4 triples-dobles. 2: 13
---                  triples-dobles, todos NBA. 3: Wembanyama +9,5 (35,2 en los 5 últimos).
+-- RESULTADO EL 2026-11-20  (tras agrupar por nombre + equipo) 1: Towns 12 dobles-dobles;
+--                  Jokic 4 triples-dobles. 2: 13 triples-dobles, todos NBA. 3: Curry y Jokic
+--                  +7,7 (con player_key salía Wembanyama +9,5 contando solo 12 de 16 partidos).
 --                  4: 30 partidos de 40+, todos NBA; máximo Doncic 53. Fuera de la NBA el
---                  máximo es 37 (euroleague, basket-league, winner-league).
+--                  máximo es 37. Coincide fila a fila con GET /api/v1/curiosities.
 -- =============================================================================
 
 -- PASO 1 · Ranking de dobles-dobles y triples-dobles.
 WITH lineas AS (
-    SELECT s.player_key, s.name, s.team, s.match_id,
+    SELECT s.name, s.team, s.match_id,
            (COALESCE(s.pts, 0) >= 10)::int + (COALESCE(s.reb, 0) >= 10)::int
          + (COALESCE(s.ast, 0) >= 10)::int + (COALESCE(s.st, 0) >= 10)::int
          + (COALESCE(s.bs, 0) >= 10)::int AS dobles
@@ -39,9 +42,9 @@ SELECT name AS jugador, team AS equipo, COUNT(*) AS partidos,
        COUNT(*) FILTER (WHERE dobles >= 2) AS dobles_dobles,
        COUNT(*) FILTER (WHERE dobles >= 3) AS triples_dobles
 FROM lineas
-GROUP BY player_key, name, team
+GROUP BY name, team
 HAVING COUNT(*) FILTER (WHERE dobles >= 2) > 0
-ORDER BY dobles_dobles DESC, triples_dobles DESC, partidos
+ORDER BY dobles_dobles DESC, triples_dobles DESC, partidos, jugador
 LIMIT 15;
 
 -- PASO 2 · Todos los triples-dobles.
@@ -59,8 +62,8 @@ ORDER BY r.event_datetime DESC;
 
 -- PASO 3 · Jugadores en racha: últimos 5 partidos frente a la media de la temporada.
 WITH partidos AS (
-    SELECT s.player_key, s.name, s.team, COALESCE(s.pts, 0) AS pts, r.competition,
-           ROW_NUMBER() OVER (PARTITION BY s.player_key, s.team ORDER BY r.event_datetime DESC) AS reciente
+    SELECT s.name, s.team, COALESCE(s.pts, 0) AS pts, r.competition,
+           ROW_NUMBER() OVER (PARTITION BY s.name, s.team ORDER BY r.event_datetime DESC) AS reciente
     FROM stats_player.stats_player s
     JOIN results.results r USING (match_id)
     WHERE r.event_datetime IS NOT NULL
@@ -71,9 +74,9 @@ SELECT name AS jugador, team AS equipo, MAX(competition) AS competicion,
        ROUND(AVG(pts) FILTER (WHERE reciente <= 5), 1) AS media_ultimos_5,
        ROUND(AVG(pts) FILTER (WHERE reciente <= 5) - AVG(pts), 1) AS dif
 FROM partidos
-GROUP BY player_key, name, team
+GROUP BY name, team
 HAVING COUNT(*) >= 8
-ORDER BY dif DESC
+ORDER BY dif DESC, jugador
 LIMIT 15;
 
 -- PASO 4 · Partidos de 40 puntos o más.

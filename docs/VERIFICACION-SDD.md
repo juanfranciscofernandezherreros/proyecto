@@ -466,3 +466,11 @@ Evidencia por paso. Ningún paso cambia el flujo del SDD §4 ni los puertos.
 | 3 | Mongo y web con el dato bueno | Projector (estaba parado; `docker start`) reproyecta por cambio de `sourceHash`: `pxFIMqFt` 4th Quarter seq 1 → +0/+2 en Mongo; ficha en 8083: «104 – 104 +2», máximo +3 en el 4º cuarto | ✅ |
 | 4 | No pintar «+N» con N > 4 | `utils/pointsAdded.ts` + 2 tests; web 41 tests y `tsc` OK; web `1b17b76`. Quedan 79 saltos > 4 en Mongo por jugadas que faltan en origen (los «saltos raros»); se verán sin «+N» cuando se reconstruya el contenedor web | ✅ |
 | 5 | Gate | `basket verificar` VERDE el 20/11 | ✅ |
+
+## Tests de `consolidate_csv` (`docs/PLAN-tests-consolidate-csv.md`, 2026-11-20)
+
+| # | Requisito | Evidencia | Estado |
+|---|---|---|---|
+| 1 | Causa de los 3 fallos de `test_consolidate_csv.py` | Tests desfasados: `e6fc998` (2026-11-08) reescribió `consolidate_csv.py` como preparador por partido (`--match-id`, el que usan `process_pending_match_csvs.py` y `run_match_pipeline.py`); los tests seguían en el contrato antiguo por competición (`manifest.json`, `run.complete`). `consolidate_csv.py` sin cambios | ✅ |
+| 2 | Tests al contrato vigente | 8 tests: fila de RESULTS por partido (`matchId`/`match_id`), RESULTS más reciente que contiene el partido, CSV más reciente con filas por prefijo, `prefixes`, `ValueError`/`FileNotFoundError`/`RuntimeError`; `python -m pytest -q tests`: 353 OK, 0 fallos; python-pyppeter `1b630d6` | ✅ |
+| 3 | Gate | `basket verificar` VERDE el 20/11 (el aviso de `docker compose` es porque el submódulo `local-validation` no está en este worktree; Postgres ya estaba arriba) | ✅ |

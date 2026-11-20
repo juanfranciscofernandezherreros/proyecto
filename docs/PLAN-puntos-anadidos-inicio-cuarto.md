@@ -21,15 +21,15 @@ Pedido el 2026-11-20 al preparar las consultas de curiosidades (rachas de puntos
 
 ## Backlog
 
-- [ ] 1. `parse(html, source_url, previous_score=(0, 0))`: la primera jugada se compara
+- [x] 1. `parse(html, source_url, previous_score=(0, 0))`: la primera jugada se compara
   con el marcador al final del cuarto anterior; `extract_quarters_with_driver` lo
   arrastra entre cuartos. Test en `tests/test_match_parsers.py`.
-- [ ] 2. Corregir lo ya cargado: `sql/consultas/2026-11-20_2400_corregir-points-added.sql`
+- [x] 2. Corregir lo ya cargado: `sql/consultas/2026-11-20_2355_corregir-points-added.sql`
   (ESCRITURA, guardado antes de ejecutar) con UPDATE que recalcula `*_points_added`
   como diferencia con la jugada anterior del partido (orden `quarter, sequence`) y la
   comprobación del PASO 5 → `points_added_mal = 0`.
-- [ ] 3. Reproyección a Mongo (el projector la hace solo al cambiar el hash) y
+- [x] 3. Reproyección a Mongo (el projector la hace solo al cambiar el hash) y
   comprobar en la API/web que `pxFIMqFt` muestra +2/+3 al empezar el 4º cuarto.
-- [ ] 4. Defensa en `MatchDetailPage.tsx`: no mostrar «+N» si N > 4.
-- [ ] 5. Evidencia en `docs/VERIFICACION-SDD.md`, `basket verificar` en VERDE,
+- [x] 4. Defensa en `MatchDetailPage.tsx`: no mostrar «+N» si N > 4.
+- [x] 5. Evidencia en `docs/VERIFICACION-SDD.md`, `basket verificar` en VERDE,
   commit + push.

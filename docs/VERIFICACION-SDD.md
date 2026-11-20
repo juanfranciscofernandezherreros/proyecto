@@ -445,3 +445,13 @@ Evidencia por paso. Ningún paso cambia el flujo del SDD §4 ni los puertos.
 | 4 | Pantalla `/comebacks` con filtros y enlace «Remontadas» | `comebacks.test.ts` (5); `typecheck` y 36 tests OK; web `0a6cb42`. Navegador: 59 partidos; filtro euroleague → 4 (Valencia 18); vista móvil en fichas | ✅ |
 | 5 | Gate | `basket verificar` VERDE el 20/11 | ✅ |
 | 6 | Ordenar por remontada (mayor/menor) o por fecha, sin recargar | `sortComebacks` (3 tests; web 39 tests y `typecheck` OK). Navegador: «Menor remontada» empieza por las de 15 y «Más reciente» por Lakers–Hornets del 18/11; el contador de llamadas a `/api/v1/comebacks` sigue en 1 | ✅ |
+
+## Puntos añadidos al empezar cuarto (`docs/PLAN-puntos-anadidos-inicio-cuarto.md`, 2026-11-20)
+
+| # | Requisito | Evidencia | Estado |
+|---|---|---|---|
+| 1 | La 1ª jugada de cada cuarto suma respecto al marcador del cuarto anterior | `parse(..., previous_score)` y `extract_quarters_with_driver` lo arrastra; tests en `test_match_parsers.py` (+104 → +2) y `test_streaming_csv.py` (marcador entre cuartos): 15 OK; python-pyppeter `d8af978`. Los 3 fallos de `test_consolidate_csv.py` ya fallaban antes del cambio | ✅ |
+| 2 | Corregir lo cargado sin reextraer | `2026-11-20_2355_corregir-points-added.sql` (ESCRITURA): 2643 jugadas de 882 partidos → `UPDATE 2643`; PASO 5 de `2026-11-20_2300_curiosidades-jugada-a-jugada.sql` → `points_added_mal = 0` | ✅ |
+| 3 | Mongo y web con el dato bueno | Projector (estaba parado; `docker start`) reproyecta por cambio de `sourceHash`: `pxFIMqFt` 4th Quarter seq 1 → +0/+2 en Mongo; ficha en 8083: «104 – 104 +2», máximo +3 en el 4º cuarto | ✅ |
+| 4 | No pintar «+N» con N > 4 | `utils/pointsAdded.ts` + 2 tests; web 41 tests y `tsc` OK; web `1b17b76`. Quedan 79 saltos > 4 en Mongo por jugadas que faltan en origen (los «saltos raros»); se verán sin «+N» cuando se reconstruya el contenedor web | ✅ |
+| 5 | Gate | `basket verificar` VERDE el 20/11 | ✅ |

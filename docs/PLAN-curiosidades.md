@@ -4,7 +4,7 @@
 > [VERIFICACION-SDD.md](VERIFICACION-SDD.md). Consultas de referencia en `sql\consultas\`:
 > `2026-11-20_2230_partidos-con-mas-puntos-por-cuarto.sql`, `2026-11-20_2300_curiosidades-jugada-a-jugada.sql`,
 > `2026-11-20_2330_curiosidades-resultados.sql`, `2026-11-20_2345_curiosidades-jugadores.sql`.
-> **Repos:** `basketball-match-api`, `basketball-match-web`, raíz. **Estado:** en curso.
+> **Repos:** `basketball-match-api`, `basketball-match-web`, raíz. **Estado:** hecho.
 
 ## 1. Qué se quiere
 
@@ -36,17 +36,17 @@ Las sorpresas por cuotas quedan fuera: no hay cuotas cargadas.
 ## Backlog
 
 **API (`basketball-match-api`)**
-- [ ] Modelos de respuesta y `CuriosityCalculator` (cálculo puro por sección) con tests.
-- [ ] `CuriosityService` (carga de Mongo, filtro, caché) y `CuriosityController`, con tests.
-- [ ] `mvnw verify` en verde (cobertura JaCoCo ≥ 80 %).
+- [x] Modelos de respuesta y `CuriosityCalculator` (cálculo puro por sección) con tests (13).
+- [x] `CuriosityService` (carga de Mongo, filtro, caché) y `CuriosityController`, con tests (4).
+- [x] `mvnw verify` en verde: 62 tests, cobertura cumplida.
 
 **Web (`basketball-match-web`)**
-- [ ] Tipos y cliente `getCuriosities`, con test.
-- [ ] `CuriositiesPage.tsx` con pestañas y filtro, ruta `/curiosities` y enlace «Curiosidades».
-- [ ] `typecheck` y tests en verde.
+- [x] Tipos y cliente `getCuriosities`, con test (`utils/curiosities.test.ts`).
+- [x] `CuriositiesPage.tsx` con pestañas y filtro, ruta `/curiosities` y enlace «Curiosidades». El menú superior pasa a desplazarse dentro de la cabecera (seis secciones no cabían entre ~700 y ~900 px).
+- [x] `typecheck` y tests en verde (43).
 
 **Verificación y cierre**
-- [ ] Comparar la respuesta de la API con las cuatro consultas SQL (sin filtro).
-- [ ] Revisar la pantalla en el navegador (escritorio y móvil, filtro de competición).
-- [ ] Evidencia en `VERIFICACION-SDD.md`, §6.1 de `SDD.md`, `basket verificar` en verde.
-- [ ] Commit + push por repo y llevarlo a `main` (pedido por el usuario).
+- [x] Comparar la respuesta de la API con las cuatro consultas SQL (sin filtro): 16/16 secciones iguales fila a fila. Hallazgo: la consulta de jugadores agrupaba por `player_key` y partía a 600 jugadores (solo 950 de 17325 filas tienen `player_id`); se pasa a nombre + equipo en las dos. Los empates se desempatan por nombre en las dos.
+- [x] Revisar la pantalla en el navegador: tres pestañas con una sola llamada a la API; filtro liga-endesa → 72 partidos; móvil en fichas sin desbordar.
+- [x] Evidencia en `VERIFICACION-SDD.md`, §6.1 de `SDD.md`, `basket verificar` en verde.
+- [x] Commit + push por repo y llevarlo a `main` (pedido por el usuario).

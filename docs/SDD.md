@@ -160,6 +160,13 @@ Base `/api/v1/comebacks`:
   desventaja según `match_point_by_point`; orden de mayor a menor remontada. Pantalla
   `/comebacks` en la web (`PLAN-remontadas.md`).
 
+Base `/api/v1/curiosities`:
+- `GET /` — rankings de partidos (igualdad, rachas, última canasta, de principio a fin),
+  marcadores (más puntos por cuarto, equipos por cuarto, palizas, prórrogas, totales) y
+  jugadores (dobles-dobles, triples-dobles, en racha, 40+). `competition` opcional; caché de
+  5 minutos. Mismas reglas que las consultas `2026-11-20_2230/2300/2330/2345_*.sql` de `sql/consultas`.
+  Pantalla `/curiosities` (`PLAN-curiosidades.md`).
+
 ### 6.2 Launcher (`:8088`)
 `POST /batch-launches` encola una carga; `GET /batch-launches/{id}` consulta estado
 (`QUEUED|RUNNING|COMPLETED|FAILED`). Tabla de cola: `public.batch_launch_request`.

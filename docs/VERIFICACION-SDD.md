@@ -445,3 +445,13 @@ Evidencia por paso. Ningún paso cambia el flujo del SDD §4 ni los puertos.
 | 4 | Pantalla `/comebacks` con filtros y enlace «Remontadas» | `comebacks.test.ts` (5); `typecheck` y 36 tests OK; web `0a6cb42`. Navegador: 59 partidos; filtro euroleague → 4 (Valencia 18); vista móvil en fichas | ✅ |
 | 5 | Gate | `basket verificar` VERDE el 20/11 | ✅ |
 | 6 | Ordenar por remontada (mayor/menor) o por fecha, sin recargar | `sortComebacks` (3 tests; web 39 tests y `typecheck` OK). Navegador: «Menor remontada» empieza por las de 15 y «Más reciente» por Lakers–Hornets del 18/11; el contador de llamadas a `/api/v1/comebacks` sigue en 1 | ✅ |
+
+## Curiosidades (`docs/PLAN-curiosidades.md`, 2026-11-20)
+
+| # | Requisito | Evidencia | Estado |
+|---|---|---|---|
+| 1 | Consultas SQL de curiosidades | `2026-11-20_2230_partidos-con-mas-puntos-por-cuarto.sql`, `_2300_curiosidades-jugada-a-jugada.sql`, `_2330_curiosidades-resultados.sql`, `_2345_curiosidades-jugadores.sql`; control de calidad: 2643 jugadas de 882 partidos con `*_points_added` mal en la 1ª jugada del cuarto (lo arregla otra sesión) | ✅ |
+| 2 | `GET /api/v1/curiosities` (`competition` opcional, caché 5 min) | `CuriosityCalculatorTest` (13) y `CuriosityServiceTest` (4); `mvnw verify` 62 tests y JaCoCo OK; API `claude/curiosidades` | ✅ |
+| 3 | La API coincide con las consultas | Script de comparación: 16/16 secciones iguales fila a fila (sin filtro); respuesta ~2 s sin caché | ✅ |
+| 4 | Pantalla `/curiosities` con pestañas, filtro y enlace en la cabecera | `curiosities.test.ts` (4); web 43 tests y `typecheck` OK. Navegador: 893 partidos; cambiar de pestaña no llama a la API; liga-endesa → 72; móvil sin desbordar | ✅ |
+| 5 | Gate | `basket verificar` VERDE el 20/11 | ✅ |

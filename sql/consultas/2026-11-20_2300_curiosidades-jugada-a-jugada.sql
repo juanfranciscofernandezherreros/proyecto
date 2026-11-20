@@ -80,11 +80,11 @@ canastas AS (
     -- Solo canastas de un único equipo; si ambos suben a la vez (jugadas perdidas) la
     -- canasta queda fuera y corta la racha.
     SELECT match_id, quarter, n, home_score, away_score,
-           CASE WHEN dl > 0 THEN 'home' ELSE 'away' END AS anota,
+           CASE WHEN dl > 0 AND dv > 0 THEN 'ambos' WHEN dl > 0 THEN 'home' ELSE 'away' END AS anota,
            dl + dv AS puntos,
            ROW_NUMBER() OVER (PARTITION BY match_id ORDER BY n) AS m
     FROM deltas
-    WHERE (dl > 0 AND dv = 0) OR (dv > 0 AND dl = 0) OR (dl > 0 AND dv > 0)
+    WHERE dl > 0 OR dv > 0
 ),
 islas AS (
     SELECT *, m - ROW_NUMBER() OVER (PARTITION BY match_id, anota ORDER BY m) AS isla
@@ -113,6 +113,7 @@ SELECT ra.racha || '-0' AS parcial,
 FROM rachas ra
 JOIN results.results r USING (match_id)
 WHERE ra.limpia   -- descarta rachas con saltos de más de 3 puntos (jugadas que faltan)
+  AND ra.anota <> 'ambos'
 ORDER BY ra.racha DESC, r.event_datetime DESC
 LIMIT 15;
 

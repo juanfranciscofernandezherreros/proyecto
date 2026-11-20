@@ -47,6 +47,11 @@ de donde lee la web.
 - [x] Evidencia en `docs\VERIFICACION-SDD.md`, §6.1 de `docs\SDD.md` y `basket verificar` en verde.
 - [x] Commit + push por submódulo (rama `claude/remontadas` en API y web) y el puntero en la raíz.
 
+**Ordenar por remontada (2026-11-20, segunda petición)**
+- [x] `sortComebacks` en `utils/comebacks.ts` (mayor/menor remontada, más reciente/antiguo) con tests.
+- [x] Selector «Ordenar por» en `ComebacksPage.tsx`; ordena en el navegador sin volver a llamar a la API (la web pide `limit=500`; con 10 puntos salen 191).
+- [x] Probado en el navegador (una sola llamada a la API tras ordenar dos veces), `basket verificar` en verde y commit + push.
+
 ## 4. Riesgos y decisiones
 
 - **Coste:** el cálculo recorre unas 3.500 páginas de jugadas (888 partidos). Se hace en

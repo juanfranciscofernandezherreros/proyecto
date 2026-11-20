@@ -444,3 +444,4 @@ Evidencia por paso. Ningún paso cambia el flujo del SDD §4 ni los puertos.
 | 3 | La API coincide con la consulta SQL | `diff` de `matchId`, puntos y prórroga: 59/59 iguales; respuesta en ~1,5 s | ✅ |
 | 4 | Pantalla `/comebacks` con filtros y enlace «Remontadas» | `comebacks.test.ts` (5); `typecheck` y 36 tests OK; web `0a6cb42`. Navegador: 59 partidos; filtro euroleague → 4 (Valencia 18); vista móvil en fichas | ✅ |
 | 5 | Gate | `basket verificar` VERDE el 20/11 | ✅ |
+| 6 | Ordenar por remontada (mayor/menor) o por fecha, sin recargar | `sortComebacks` (3 tests; web 39 tests y `typecheck` OK). Navegador: «Menor remontada» empieza por las de 15 y «Más reciente» por Lakers–Hornets del 18/11; el contador de llamadas a `/api/v1/comebacks` sigue en 1 | ✅ |

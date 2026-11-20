@@ -50,3 +50,9 @@ Las sorpresas por cuotas quedan fuera: no hay cuotas cargadas.
 - [x] Revisar la pantalla en el navegador: tres pestañas con una sola llamada a la API; filtro liga-endesa → 72 partidos; móvil en fichas sin desbordar.
 - [x] Evidencia en `VERIFICACION-SDD.md`, §6.1 de `SDD.md`, `basket verificar` en verde.
 - [x] Commit + push por repo y llevarlo a `main` (pedido por el usuario).
+
+**Curiosidades redactadas como texto (2026-11-20, segunda petición)**
+- [x] `utils/curiosityTexts.ts`: un párrafo por sección a partir de los datos de la API (nombres de competición legibles, fechas «20 de octubre», números en español; sin datos → sin párrafo), con tests (5; web 50 en total).
+- [x] Párrafo encima de cada tabla y pestaña «Resumen» (primera) con todos los textos seguidos; las tablas siguen igual.
+- [x] Revisar los textos en el navegador (sin filtro y con euroleague) y `typecheck`/tests en verde. Pulido tras leerlos: empates con el primero, sujeto explícito en «curiosamente», marcador del ganador primero, minutos del cuarto según la liga.
+- [x] Evidencia, `basket verificar` en verde y subir a `main`.

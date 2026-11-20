@@ -455,3 +455,4 @@ Evidencia por paso. Ningún paso cambia el flujo del SDD §4 ni los puertos.
 | 3 | La API coincide con las consultas | Script de comparación: 16/16 secciones iguales fila a fila (sin filtro); respuesta ~2 s sin caché | ✅ |
 | 4 | Pantalla `/curiosities` con pestañas, filtro y enlace en la cabecera | `curiosities.test.ts` (4); web 43 tests y `typecheck` OK. Navegador: 893 partidos; cambiar de pestaña no llama a la API; liga-endesa → 72; móvil sin desbordar | ✅ |
 | 5 | Gate | `basket verificar` VERDE el 20/11 | ✅ |
+| 6 | Curiosidades redactadas: párrafo por sección y pestaña «Resumen» | `curiosityTexts.test.ts` (5); web 50 tests y `typecheck` OK. Navegador: 14 párrafos con datos reales (sin filtro) y adaptados a una sola competición (euroleague) | ✅ |

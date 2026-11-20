@@ -56,3 +56,10 @@ Las sorpresas por cuotas quedan fuera: no hay cuotas cargadas.
 - [x] Párrafo encima de cada tabla y pestaña «Resumen» (primera) con todos los textos seguidos; las tablas siguen igual.
 - [x] Revisar los textos en el navegador (sin filtro y con euroleague) y `typecheck`/tests en verde. Pulido tras leerlos: empates con el primero, sujeto explícito en «curiosamente», marcador del ganador primero, minutos del cuarto según la liga.
 - [x] Evidencia, `basket verificar` en verde y subir a `main`.
+
+**Guion de vídeo por días (2026-11-20, tercera petición)**
+- [x] `utils/videoScript.ts`: guion con entrada, un bloque por día (fecha de Madrid) y, dentro, un párrafo por partido con todas sus curiosidades con fecha (remontadas de `/api/v1/comebacks`, rachas, última canasta, igualdad, de principio a fin, cuartos récord, palizas, partidos con más y menos puntos, triples-dobles, 40+); cierre con los datos de temporada sin fecha. Orden cronológico o inverso y versión en texto plano. Con tests (6). Tras leerlo con datos reales: sin repetir el protagonista en frases seguidas («Además,» / «Y también») y cuartos récord seguidos en versión corta.
+- [x] Pestaña «Guion de vídeo» en `/curiosities` con selector de orden y botón «Copiar guion».
+- [x] Revisar el guion con datos reales: 57 días, 216 partidos y 268 curiosidades sin filtro; liga-endesa 17 días y 55 partidos; copiar funciona; móvil sin desbordar; `typecheck` y 56 tests en verde.
+- [x] Evidencia, `basket verificar` en verde y subir a `main`.
+

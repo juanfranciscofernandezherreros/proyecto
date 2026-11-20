@@ -456,6 +456,7 @@ Evidencia por paso. Ningún paso cambia el flujo del SDD §4 ni los puertos.
 | 4 | Pantalla `/curiosities` con pestañas, filtro y enlace en la cabecera | `curiosities.test.ts` (4); web 43 tests y `typecheck` OK. Navegador: 893 partidos; cambiar de pestaña no llama a la API; liga-endesa → 72; móvil sin desbordar | ✅ |
 | 5 | Gate | `basket verificar` VERDE el 20/11 | ✅ |
 | 6 | Curiosidades redactadas: párrafo por sección y pestaña «Resumen» | `curiosityTexts.test.ts` (5); web 50 tests y `typecheck` OK. Navegador: 14 párrafos con datos reales (sin filtro) y adaptados a una sola competición (euroleague) | ✅ |
+| 7 | Guion de vídeo por días (pestaña «Guion de vídeo») | `videoScript.test.ts` (6); web 56 tests y `typecheck` OK. Navegador: 57 días, 216 partidos y 268 curiosidades (sin filtro), liga-endesa 17 días; «Copiar guion» copia el texto; móvil sin desbordar | ✅ |
 
 ## Puntos añadidos al empezar cuarto (`docs/PLAN-puntos-anadidos-inicio-cuarto.md`, 2026-11-20)
 

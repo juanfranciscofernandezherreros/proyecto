@@ -55,3 +55,19 @@ de vídeo: `/api/v1/curiosities` y `/api/v1/comebacks`):
 - [x] Pestaña «Periódico» con estilo de periódico (cabecera, portada por día, noticias en columnas); `typecheck` y tests en verde.
 - [x] Revisar en el navegador con datos reales: 59 ediciones y 219 noticias del 2 de mayo al 20 de noviembre, días en orden y horas en orden dentro de cada día (0 días desordenados); liga-endesa 17 ediciones y 55 noticias; móvil sin desbordar. Tras leerlo: el ganador de la frase de arranque no se repite en la siguiente («Además,»).
 - [x] Evidencia, `basket verificar` en verde, commit + push y llevarlo a `main` (web `72b2480`).
+
+## 4. Tercera petición (2026-11-21): guion de vídeo bien redactado con Postgres e internet
+
+Guion escrito a mano (no el automático de la pestaña «Guion de vídeo», que solo puede usar la API)
+de la última semana con datos, `docs/guion-video-semana-2026-11-14_20.md`: orden cronológico por
+día, locución, indicaciones de imagen, datos de Postgres marcados **[BD]** y contexto de internet
+marcado **[web]** con sus fuentes.
+
+### Backlog (guion)
+
+- [x] Consulta de datos de la semana: `sql\consultas\2026-11-21_1100_datos-guion-video.sql` (partidos por día, anotadores, clasificaciones) y las 64 curiosidades de la semana con `2026-11-21_1000_curiosidades-cronologicas.sql -v desde=2026-11-14 -v hasta=2026-11-20`.
+- [x] Contexto de internet: crónica Besiktas–Real Madrid (Eurohoops), Grimes 47 con los Lakers (theScore/AP/ABC7), inauguración NBA (ESPN). Cruzado con la base de datos: los 13-2 de los Lakers según la prensa no cuadraban con los 15-6 de Postgres.
+- [x] Hallazgo: `results.results` trae la **pretemporada de la NBA** (4-19 oct., liga regular desde el 20/10): `2026-11-21_1130_nba-lakers-partidos-cargados.sql`. Con liga regular, Lakers 13-3 (cuadra con 13-2 antes del Jazz).
+- [x] Redactar el guion (≈ 1.400 palabras, 9 min, 8 bloques), repasar cada cifra contra la consulta y corregir cuatro frases que iban más allá de los datos.
+- [ ] **Pendiente (no hecho):** los rankings de la API/pantalla (`/api/v1/curiosities`) incluyen la pretemporada de la NBA («mayor remontada de la temporada», etc.). Decidir si se filtra en la API o en la carga.
+- [x] Evidencia en `VERIFICACION-SDD.md`, `basket verificar` y commit + push.

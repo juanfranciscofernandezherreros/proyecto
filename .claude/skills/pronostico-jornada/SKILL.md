@@ -61,8 +61,17 @@ Normas de redacción:
   "cuatro de cinco") se contrasta con `_ayuda.clasificacion` antes de publicar. Repasar
   también los recuentos de la introducción (cuántos favoritos superan el 70 %, cuántos
   son visitantes) contando sobre la lista de partidos.
-- No añadir nada que no esté en los datos: ni jugadores, ni lesiones, ni fichajes, ni
-  rachas históricas. El conocimiento propio sobre plantillas puede estar desfasado.
+- **Buscar información en internet** (WebSearch y, para leer una página, el agente `web-fetch`) y
+  añadirla a cada `analysis` como un párrafo final «Bajas y noticias»: informes de lesiones de la
+  Euroliga (Eurohoops publica uno por jornada; el de la jornada que se pronostica sale el mismo día
+  del partido, así que hay que citar el último disponible con su fecha), fichajes y crónicas del
+  último partido. Reglas: solo lo que diga la página leída (nada de memoria propia sobre plantillas),
+  con el nombre del jugador, el motivo y desde cuándo si lo dice; ignorar páginas de otras
+  temporadas (la búsqueda mezcla la 2025-26); decir «sin motivo indicado» cuando la fuente no lo da;
+  cuidar los nombres (en las fuentes Lyon-Villeurbanne es ASVEL). Poner las URLs en `sourceUrls` de
+  cada partido y en `sources` del artículo (`{title, url}`), y una frase en la introducción que diga
+  que esas notas no entran en las probabilidades.
+- Sin búsqueda o si falla, decirlo en la introducción; no rellenar con suposiciones.
 - No cambiar `prediction`, `winner`, `winnerProbability` ni `methodology`.
 - Español, frases cortas, sin exagerar la certeza: una probabilidad del 57 % es un
   partido abierto.

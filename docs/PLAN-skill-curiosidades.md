@@ -90,3 +90,10 @@ marcado **[web]** con sus fuentes.
 - [ ] **Pendiente:** el mensaje de Telegram de la jornada 14 lleva las probabilidades antiguas (81,4 % etc.); reenviarlo si el usuario quiere.
 - [ ] **Pendiente:** `csv-extra-batch\pronostico\README.md` (módulo Java) sigue diciendo escala 9; revisar si ese módulo aún se usa.
 - [ ] Propuestas de mejora del modelo sin hacer: peso de la temporada 80-100 %, localía por liga, rangos de probabilidad (ver `docs/REVISION-PRONOSTICO-EUROLIGA-J12.md`).
+
+### Backlog (pronóstico con información de internet, 2026-11-21)
+
+- [x] Norma nueva en la skill `pronostico-jornada`: buscar bajas y noticias en internet, solo lo que diga la página leída, con fecha y enlace (`sourceUrls` y `sources`); la metodología publicada ya no dice «sin fuentes externas».
+- [x] Previa de la jornada 14 con un párrafo «Bajas y noticias» por partido (informes de lesiones de Eurohoops de las jornadas 11, 12 y 13, hasta el 19/11, y la crónica Besiktas–Real Madrid), 5 fuentes, y aviso en la introducción de que no entran en las probabilidades. Las páginas se leyeron una a una; la búsqueda traía datos de otra temporada (2025-26) que se descartaron. Actualizada en Mongo; sin reenviar a Telegram (las probabilidades no cambian).
+- [ ] **Pendiente:** releer los informes oficiales de la jornada 14 el 24 y 25/11 (se publican el día del partido) y actualizar las notas.
+- [ ] **Pendiente (Telegram):** los avisos por CSV de `resultados-ayer` (≈ 4 por partido, ~125 en 4 horas) entierran los mensajes del pronóstico. Decidir: pausar el vigilante, avisar solo por partido, o mandar el pronóstico a otro chat.

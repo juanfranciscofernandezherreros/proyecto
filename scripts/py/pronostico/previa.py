@@ -54,9 +54,11 @@ METODOLOGIA = (
     "de Euroliga, Liga Endesa y NBA de esta temporada, para que no sean más seguras que los aciertos reales, "
     "pero no se ha comprobado con otras temporadas. Con pocos "
     "partidos por equipo la muestra es corta, y la media de los últimos cinco se mueve mucho con un solo "
-    "resultado abultado. El modelo no conoce lesiones, sanciones ni cansancio por viajes, y no distingue el "
+    "resultado abultado. El modelo no conoce lesiones, sanciones ni cansancio por viajes (eso solo está en las notas), y no distingue el "
     "rendimiento en casa y fuera de cada equipo más allá de los 2,5 puntos fijos de localía; el análisis de "
-    "cada partido menciona esos balances para matizar la cifra. No se han consultado cuotas ni fuentes externas."
+    "cada partido menciona esos balances para matizar la cifra. Las bajas y noticias de cada partido salen de fuentes "
+    "externas (informes de lesiones de la Euroliga recogidos por Eurohoops y webs de los clubes), con su fecha y enlace: "
+    "no entran en las probabilidades, solo las matizan, y hay que releerlas el día del partido. No se han consultado cuotas."
 )
 
 

@@ -2,7 +2,7 @@
 
 > **Fecha:** 2026-11-21 · **Relacionado:** [PLAN-curiosidades.md](PLAN-curiosidades.md) (pantalla
 > `/curiosities`), [SDD.md](SDD.md), [VERIFICACION-SDD.md](VERIFICACION-SDD.md).
-> **Repos:** raíz y `basketball-match-web`. **Estado:** en curso (pestaña «Periódico»).
+> **Repos:** raíz y `basketball-match-web`. **Estado:** hecho.
 
 ## 1. Qué se quiere
 
@@ -51,7 +51,7 @@ de vídeo: `/api/v1/curiosities` y `/api/v1/comebacks`):
 
 ### Backlog (periódico)
 
-- [ ] `utils/newspaper.ts` (reutiliza la recogida de frases de `videoScript.ts`) con tests.
-- [ ] Pestaña «Periódico» con estilo de periódico; `typecheck` y tests en verde.
-- [ ] Revisar en el navegador con datos reales (orden cronológico de días y de partidos).
-- [ ] Evidencia, `basket verificar` en verde, commit + push y llevarlo a `main`.
+- [x] `utils/newspaper.ts` (reutiliza la recogida de frases de `videoScript.ts`, que ahora guarda un titular con peso por curiosidad) con tests (7; web 63 en total).
+- [x] Pestaña «Periódico» con estilo de periódico (cabecera, portada por día, noticias en columnas); `typecheck` y tests en verde.
+- [x] Revisar en el navegador con datos reales: 59 ediciones y 219 noticias del 2 de mayo al 20 de noviembre, días en orden y horas en orden dentro de cada día (0 días desordenados); liga-endesa 17 ediciones y 55 noticias; móvil sin desbordar. Tras leerlo: el ganador de la frase de arranque no se repite en la siguiente («Además,»).
+- [x] Evidencia, `basket verificar` en verde, commit + push y llevarlo a `main` (web `72b2480`).

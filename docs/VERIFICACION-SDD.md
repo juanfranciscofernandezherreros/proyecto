@@ -477,3 +477,4 @@ Evidencia por paso. Ningún paso cambia el flujo del SDD §4 ni los puertos.
 | 3 | Filtros opcionales `-v liga/desde/hasta` | Sin `-v` se ejecuta tal cual; `-v desde=2026-11-01 -v liga=liga-endesa` → 9 filas, todas de liga-endesa y desde el 01/11 | ✅ |
 | 4 | Skill `curiosidades` autocontenida | `.claude/skills/curiosidades/SKILL.md`: comando, filtros, tipos y cómo contarlo (siempre cronológico, agrupado por día y partido) | ✅ |
 | 5 | Gate | `basket verificar` VERDE el 21/11 | ✅ |
+| 6 | Pestaña «Periódico» en `/curiosities`, en orden cronológico | `newspaper.test.ts` (7); web 63 tests y `typecheck` OK; web `72b2480`. Navegador: 59 ediciones y 219 noticias (2 de mayo → 20 de noviembre), horas en orden dentro de cada día; liga-endesa 17 ediciones y 55 noticias; móvil sin desbordar | ✅ |

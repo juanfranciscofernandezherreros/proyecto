@@ -2,7 +2,7 @@
 
 > **Fecha:** 2026-11-21 · **Relacionado:** [PLAN-curiosidades.md](PLAN-curiosidades.md) (pantalla
 > `/curiosities`), [SDD.md](SDD.md), [VERIFICACION-SDD.md](VERIFICACION-SDD.md).
-> **Repos:** raíz. **Estado:** en curso.
+> **Repos:** raíz. **Estado:** hecho.
 
 ## 1. Qué se quiere
 
@@ -29,8 +29,9 @@ Una skill que cuente curiosidades sacadas directamente de nuestras tablas de Pos
 
 ## Backlog
 
-- [ ] Consulta `sql\consultas\2026-11-21_HHMM_curiosidades-cronologicas.sql` con cabecera.
-- [ ] Ejecutarla sin filtro y con filtro de liga y fechas; comprobar el orden cronológico y
-      contrastar algunas filas con las consultas de rankings del 2026-11-20.
-- [ ] Skill `.claude/skills/curiosidades/SKILL.md` (cuándo usarla, comando, cómo contarlo).
-- [ ] Evidencia en `VERIFICACION-SDD.md`, `basket verificar` en verde, commit + push.
+- [x] Consulta `sql\consultas\2026-11-21_1000_curiosidades-cronologicas.sql` con cabecera.
+- [x] Ejecutarla sin filtro y con filtro de liga y fechas; comprobar el orden cronológico y
+      contrastar algunas filas con las consultas de rankings del 2026-11-20 (447 filas;
+      remontadas 61, prórrogas 54, triples-dobles 13 y 40+ 30, iguales que las de referencia).
+- [x] Skill `.claude/skills/curiosidades/SKILL.md` (cuándo usarla, comando, cómo contarlo).
+- [x] Evidencia en `VERIFICACION-SDD.md`, `basket verificar` en verde, commit + push.

@@ -467,3 +467,13 @@ Evidencia por paso. Ningún paso cambia el flujo del SDD §4 ni los puertos.
 | 3 | Mongo y web con el dato bueno | Projector (estaba parado; `docker start`) reproyecta por cambio de `sourceHash`: `pxFIMqFt` 4th Quarter seq 1 → +0/+2 en Mongo; ficha en 8083: «104 – 104 +2», máximo +3 en el 4º cuarto | ✅ |
 | 4 | No pintar «+N» con N > 4 | `utils/pointsAdded.ts` + 2 tests; web 41 tests y `tsc` OK; web `1b17b76`. Quedan 79 saltos > 4 en Mongo por jugadas que faltan en origen (los «saltos raros»); se verán sin «+N» cuando se reconstruya el contenedor web | ✅ |
 | 5 | Gate | `basket verificar` VERDE el 20/11 | ✅ |
+
+## Skill de curiosidades desde Postgres (`docs/PLAN-skill-curiosidades.md`, 2026-11-21)
+
+| # | Requisito | Evidencia | Estado |
+|---|---|---|---|
+| 1 | Consulta única de curiosidades con fecha, en orden cronológico | `2026-11-21_1000_curiosidades-cronologicas.sql` (LECTURA): 447 filas de 916 partidos, del 29/04/2026 al 20/11/2026, ordenadas por `event_datetime` | ✅ |
+| 2 | Mismas reglas que las consultas de rankings | Recuentos iguales: remontadas 61 = `2026-11-20_1000_…`, prórrogas 54 = `results.results`, 13 triples-dobles y 30 partidos de 40+ = `2026-11-20_2345_…` | ✅ |
+| 3 | Filtros opcionales `-v liga/desde/hasta` | Sin `-v` se ejecuta tal cual; `-v desde=2026-11-01 -v liga=liga-endesa` → 9 filas, todas de liga-endesa y desde el 01/11 | ✅ |
+| 4 | Skill `curiosidades` autocontenida | `.claude/skills/curiosidades/SKILL.md`: comando, filtros, tipos y cómo contarlo (siempre cronológico, agrupado por día y partido) | ✅ |
+| 5 | Gate | `basket verificar` VERDE el 21/11 | ✅ |

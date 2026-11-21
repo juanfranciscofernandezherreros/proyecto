@@ -478,3 +478,4 @@ Evidencia por paso. Ningún paso cambia el flujo del SDD §4 ni los puertos.
 | 4 | Skill `curiosidades` autocontenida | `.claude/skills/curiosidades/SKILL.md`: comando, filtros, tipos y cómo contarlo (siempre cronológico, agrupado por día y partido) | ✅ |
 | 5 | Gate | `basket verificar` VERDE el 21/11 | ✅ |
 | 6 | Pestaña «Periódico» en `/curiosities`, en orden cronológico | `newspaper.test.ts` (7); web 63 tests y `typecheck` OK; web `72b2480`. Navegador: 59 ediciones y 219 noticias (2 de mayo → 20 de noviembre), horas en orden dentro de cada día; liga-endesa 17 ediciones y 55 noticias; móvil sin desbordar | ✅ |
+| 7 | `/curiosities` abre en cronológico (pestaña «Cronológico» primera y por defecto) y la web desplegada en 8083 | web `c4c54eb`; contenedor reconstruido (`docker compose build/up basketball-match-web`); navegador en 8083: abre en el periódico, 59 ediciones y 219 noticias del 2 de mayo al 20 de noviembre | ✅ |

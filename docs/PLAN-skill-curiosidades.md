@@ -2,7 +2,7 @@
 
 > **Fecha:** 2026-11-21 · **Relacionado:** [PLAN-curiosidades.md](PLAN-curiosidades.md) (pantalla
 > `/curiosities`), [SDD.md](SDD.md), [VERIFICACION-SDD.md](VERIFICACION-SDD.md).
-> **Repos:** raíz. **Estado:** hecho.
+> **Repos:** raíz y `basketball-match-web`. **Estado:** en curso (pestaña «Periódico»).
 
 ## 1. Qué se quiere
 
@@ -35,3 +35,23 @@ Una skill que cuente curiosidades sacadas directamente de nuestras tablas de Pos
       remontadas 61, prórrogas 54, triples-dobles 13 y 40+ 30, iguales que las de referencia).
 - [x] Skill `.claude/skills/curiosidades/SKILL.md` (cuándo usarla, comando, cómo contarlo).
 - [x] Evidencia en `VERIFICACION-SDD.md`, `basket verificar` en verde, commit + push.
+
+## 3. Segunda petición (2026-11-21): la web lo redacta como un periódico, en orden cronológico
+
+Pestaña **«Periódico»** en `/curiosities` (web, sobre los mismos datos de la API que el guion
+de vídeo: `/api/v1/curiosities` y `/api/v1/comebacks`):
+
+- Una **edición por día** (fecha de Madrid), del día más antiguo al más reciente, con un
+  titular de portada (la curiosidad de más peso del día) y una entradilla.
+- Dentro del día, una **noticia por partido en orden de hora de inicio**: titular, subtítulo
+  (partido, marcador, competición y hora) y crónica (frase de arranque + curiosidades).
+- Titular por peso: récord de temporada > 40 puntos > remontada > última canasta >
+  triple-doble > racha > paliza > igualdad > cuartos > totales > de principio a fin.
+- Botón «Copiar periódico» (texto plano). Lo que no tiene fecha (temporada) no entra.
+
+### Backlog (periódico)
+
+- [ ] `utils/newspaper.ts` (reutiliza la recogida de frases de `videoScript.ts`) con tests.
+- [ ] Pestaña «Periódico» con estilo de periódico; `typecheck` y tests en verde.
+- [ ] Revisar en el navegador con datos reales (orden cronológico de días y de partidos).
+- [ ] Evidencia, `basket verificar` en verde, commit + push y llevarlo a `main`.

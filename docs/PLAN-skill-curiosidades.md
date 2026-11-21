@@ -71,3 +71,18 @@ marcado **[web]** con sus fuentes.
 - [x] Redactar el guion (≈ 1.400 palabras, 9 min, 8 bloques), repasar cada cifra contra la consulta y corregir cuatro frases que iban más allá de los datos.
 - [ ] **Pendiente (no hecho):** los rankings de la API/pantalla (`/api/v1/curiosities`) incluyen la pretemporada de la NBA («mayor remontada de la temporada», etc.). Decidir si se filtra en la API o en la carga.
 - [x] Evidencia en `VERIFICACION-SDD.md`, `basket verificar` y commit + push.
+
+## 5. Cuarta petición (2026-11-21): filtrar la pretemporada de la NBA y pronóstico de la Euroliga
+
+### Backlog (pretemporada)
+
+- [x] `RegularSeason` (API): `onlyRegularSeason()` deja fuera los partidos de la NBA anteriores al 20/10/2026 (22:00Z del 19/10); aplicado en `CuriosityService` y `ComebackService`, con tests (`RegularSeasonTest` y los de los dos servicios ampliados). `mvnw verify` en verde, API `06c2b32`.
+- [x] Desplegada: el Dockerfile copia `target/app.jar` de la copia principal (estaba desactualizado y la primera imagen salió sin `/comebacks`); compilado el jar y reconstruida. Navegador/curl: 52 remontadas (antes 61, sin las de pretemporada), 0 de NBA anteriores al 20/10, NBA 226 partidos = Mongo de liga regular; mayor remontada: 76ers 29 (22/10).
+- [ ] **Pendiente:** el aviso de que el `Dockerfile` depende de un `app.jar` local es una trampa (`basket arrancar` debería compilarlo); proponer que lo haga.
+- [ ] **Pendiente:** al empezar otra temporada hay que actualizar la fecha en `RegularSeason.START_BY_COMPETITION`.
+
+### Backlog (pronóstico Euroliga)
+
+- [x] Revisión del pronóstico de la jornada 12: `docs/REVISION-PRONOSTICO-EUROLIGA-J12.md` (6 de 10; causas y propuestas).
+- [x] Pronóstico de la jornada 14 (24-25/11) con la skill `pronostico-jornada`: publicado `euroliga-jornada-14-2026-11-24`; calendario contrastado en la web.
+- [ ] Propuestas de mejora del modelo (localía, probabilidades, revisión automática): sin hacer, ver el documento de revisión.

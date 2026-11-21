@@ -36,7 +36,7 @@ cmd //c "C:\Develop\basketball\1_EJECUTAR\basket.cmd pronostico datos"
 
 Criterio (el de `csv-extra-batch\pronostico\README.md`): 65 % diferencial de puntos de
 la temporada, 35 % el de los últimos cinco partidos, 2,5 puntos de localía, logística
-de escala 9. La consulta que usa es
+de escala 14 (antes 9; calibrada el 2026-11-21). La consulta que usa es
 `sql\consultas\2026-11-15_2330_previa-jornada-datos.sql` (ya guardada).
 
 ## 3. Redactar

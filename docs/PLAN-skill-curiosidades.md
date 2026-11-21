@@ -85,4 +85,8 @@ marcado **[web]** con sus fuentes.
 
 - [x] Revisión del pronóstico de la jornada 12: `docs/REVISION-PRONOSTICO-EUROLIGA-J12.md` (6 de 10; causas y propuestas).
 - [x] Pronóstico de la jornada 14 (24-25/11) con la skill `pronostico-jornada`: publicado `euroliga-jornada-14-2026-11-24`; calendario contrastado en la web.
-- [ ] Propuestas de mejora del modelo (localía, probabilidades, revisión automática): sin hacer, ver el documento de revisión.
+- [x] Calibración del modelo (pedida por el usuario): `scripts\py\pronostico\calibrar.py`. La **localía no mejora** (2,0-5,0 igual); el problema era la **escala** (9 → 14: Brier 0,2212 → 0,2158 en 255 partidos). Aplicado en `previa.py` (`ESCALA`, metodología), `SKILL.md`, test nuevo y tests ajustados (68 OK; 2 fallos preexistentes de `BasketLogsTests` porque `local-validation` no está inicializado en el worktree).
+- [x] Previa de la jornada 14 regenerada con la escala 14 y actualizada en Mongo (sin reenviar a Telegram).
+- [ ] **Pendiente:** el mensaje de Telegram de la jornada 14 lleva las probabilidades antiguas (81,4 % etc.); reenviarlo si el usuario quiere.
+- [ ] **Pendiente:** `csv-extra-batch\pronostico\README.md` (módulo Java) sigue diciendo escala 9; revisar si ese módulo aún se usa.
+- [ ] Propuestas de mejora del modelo sin hacer: peso de la temporada 80-100 %, localía por liga, rangos de probabilidad (ver `docs/REVISION-PRONOSTICO-EUROLIGA-J12.md`).

@@ -29,12 +29,10 @@
 ## Por qué falló
 
 1. **Tres de los cuatro fallos eran favoritos visitantes** (Crvena Zvezda, Panathinaikos y Real Madrid), con
-   probabilidades de 74 a 78 %. Los favoritos locales acertaron 3 de 4; los visitantes, 3 de 6. El propio
-   artículo avisaba de que seis de los diez favoritos eran visitantes «porque los equipos en peor forma
-   juegan en casa». El modelo suma solo 2,5 puntos de localía, y la ventaja de campo real de la Euroliga en
-   nuestros datos es mayor: el local gana el 55-56 % y el margen medio del local es +3,1 antes del 1/11 y
-   +4,2 desde el 1/11 (consulta PASO 2). Esa diferencia por sí sola no explica 4 fallos, pero va en la
-   dirección de los errores.
+   probabilidades de 74 a 78 %. Los favoritos locales acertaron 3 de 4; los visitantes, 3 de 6. Era mi primera
+   hipótesis que el modelo infravaloraba la localía (suma solo 2,5 puntos). **La calibración la descartó**
+   (ver más abajo): en 255 partidos los favoritos visitantes aciertan el 62,8 % y los locales el 66,9 %,
+   una diferencia pequeña, y mover la localía de 2,0 a 5,0 no mejora ninguna métrica.
 2. **Se confió en equipos en mala racha, que a veces rompen la racha.** Olimpia Milano llevaba nueve derrotas
    seguidas y ganó por 14; Virtus llevaba cinco y ganó por 5. El modelo mide diferenciales de 13 partidos
    y los de los últimos cinco: una mala racha larga pesa mucho en la previsión y no avisa de que un equipo
@@ -50,10 +48,40 @@
    empezó con un parcial de 16-0 mientras Real Madrid solo lideró en el 2-0 inicial. Eso es ruido que ningún
    modelo de diferenciales puede prever.
 
+## Calibración del modelo (2026-11-21)
+
+Herramienta: `scripts\py\pronostico\calibrar.py` (walk-forward: cada partido usa solo los datos anteriores; 255
+partidos evaluables de Euroliga 80, Liga Endesa 27 y NBA 148, **solo liga regular**).
+
+| Qué se probó | Resultado | Decisión |
+|---|---|---|
+| **Localía** 2,0 a 5,0 (escala 14) | Brier 0,2156-0,2163, aciertos 165-167 de 255, error de margen 12,1-12,3: prácticamente igual | **Se queda en 2,5.** |
+| Ventaja de campo real por liga | Euroliga +3,4 (el local gana el 55,4 %), Liga Endesa +5,0 (63,9 %), NBA +1,05 (50,0 %) | Una sola cifra no encaja en las tres, pero con localía propia por liga el Brier solo mejora en Liga Endesa (0,187 → 0,182, con 27 partidos) y no mejora en Euroliga ni NBA. Sin cambio. |
+| **Escala** de la curva 7 a 18 | Brier 0,2292 (7), **0,2212 (9, la usada)**, 0,2174 (11), 0,2159 (13), **0,2158 (14-15)**, 0,2168 (18); log-loss 0,641 → 0,621 | **Pasa de 9 a 14.** |
+| Peso de la temporada (50-100 %) | Más peso a la temporada mejora un poco (Brier 0,2226 → 0,2199 y error de margen 12,35 → 11,80 al pasar de 50 % a 100 %), pero la diferencia es pequeña | Sin cambio (65/35); queda como propuesta. |
+
+**El problema real era la escala (sobreconfianza).** Con la escala 9, los favoritos que el modelo daba entre el
+80 y el 100 % (media 87,5 %) acertaban el 77,8 %; entre el 70 y el 80 % (75,1 %), el 67,3 %; entre el 60 y el
+70 % (65,6 %), el 58,3 %. Con la escala 14 los favoritos del 70 % o más (media 77,7 %) aciertan el 79,3 %.
+La mejora es consistente: Brier 0,2283 → 0,2243 en Euroliga, 0,2235 → 0,2162 en NBA (también en sus dos
+mitades) y sin cambio en Liga Endesa (0,1871 → 0,1878). **La escala no cambia ningún ganador previsto,
+solo las probabilidades**, así que no habría evitado los 4 fallos de la jornada 12; habría dicho, por
+ejemplo, 59 % en vez de 77,8 % al Real Madrid en Besiktas.
+
+Con la escala 14 la confianza «alta» (75 % o más) exige unos 15 puntos de margen, por lo que casi nunca
+sale: en el contraste de la Euroliga, alta 8 de 10, media 28 de 40 y baja 14 de 30. Los umbrales de confianza
+(75 y 60 %) no se han tocado.
+
+**Límites:** una sola temporada y 255 partidos; el máximo de la escala es plano entre 13 y 15, y no se ha
+probado con otras temporadas. La escala 14 se ha ajustado con estos mismos 255 partidos, así que la mejora
+medida es optimista; conviene volver a ejecutar `calibrar.py` cuando haya más partidos.
+
 ## Qué se ha hecho en el pronóstico de la jornada 14
 
-- El modelo y las cifras no se han tocado (misma metodología); lo que cambia es **cómo se cuenta**:
-  la introducción avisa del 6/10 de la jornada 12, de que tres de los fallos eran favoritos visitantes y de
+- Los márgenes y los ganadores son los mismos; **las probabilidades se han recalibrado** (escala 14): Efes pasa
+  del 81,4 % al 72,1 %, Olympiacos del 76,7 % al 68,3 %, Crvena Zvezda del 75,1 % al 67,1 %, y Besiktas–Paris
+  del 52,1 % al 51,3 %. La previa ya publicada se actualizó en Mongo (el mensaje que recibió Telegram antes
+  de recalibrar lleva las probabilidades antiguas). Además cambia **cómo se cuenta**: la introducción avisa del 6/10 de la jornada 12, de que tres de los fallos eran favoritos visitantes y de
   que los tres favoritos visitantes de la jornada 14 son los que la comparación por pista discute.
 - Cada análisis señala el dato que matiza la cifra (por ejemplo, Efes fuera lleva 1-5 con −9,2 aunque el
   modelo le da el 81,4 %; Crvena Zvezda ya falló como favorita con el 77 % en la jornada 12).
@@ -61,10 +89,10 @@
 
 ## Propuestas pendientes (no hechas)
 
-- [ ] Calibrar la **localía** con los datos (hoy fija en 2,5 puntos; el margen medio real del local es 3-4)
-      y comprobar si mejora el contraste sobre los 80 partidos ya jugados.
-- [ ] **Recortar la probabilidad** de los favoritos visitantes o de los que dependen de la racha, o mostrar
-      un rango en lugar de un porcentaje único.
+- [x] ~~Calibrar la localía~~: probado, no mejora (ver «Calibración»). Hecho: escala de 9 a 14.
+- [ ] Probar un **peso mayor de la temporada** (80-100 %) y una localía propia por liga cuando haya más partidos.
+- [ ] Mostrar un **rango** en lugar de un porcentaje único, o recortar la probabilidad de los favoritos que
+      dependen de una racha.
 - [ ] Guardar cada previa con su **revisión** (ya existe `euroliga-jornada-8-…-review` en `prediction_articles`),
       para ir midiendo si el modelo mejora jornada a jornada.
 

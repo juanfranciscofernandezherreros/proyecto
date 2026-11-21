@@ -191,8 +191,16 @@ class PronosticoPreviaTests(unittest.TestCase):
     def test_margen_y_probabilidad_del_local(self):
         margen = self.previa.margen_local(_equipo("L", 3.3, 12.6), _equipo("V", -8.4, -12.2))
         self.assertAlmostEqual(margen, 18.785, places=3)
-        self.assertAlmostEqual(self.previa.probabilidad_local(margen), 89.0, places=1)
+        self.assertAlmostEqual(self.previa.probabilidad_local(margen), 79.3, places=1)
         self.assertAlmostEqual(self.previa.probabilidad_local(0), 50.0, places=6)
+
+    def test_la_escala_esta_calibrada_en_14(self):
+        """Escala 14 (calibrada el 2026-11-21): 10 puntos de margen son un 67 %, no el 75 % de la escala 9,
+        y la confianza alta (75 % o mas) exige unos 15 puntos."""
+        self.assertEqual(self.previa.ESCALA, 14.0)
+        self.assertAlmostEqual(self.previa.probabilidad_local(10.0), 67.1, places=1)
+        self.assertLess(self.previa.probabilidad_local(15.0), 75.0)
+        self.assertGreaterEqual(self.previa.probabilidad_local(15.4), 75.0)
 
     def test_confianza_por_tramos(self):
         self.assertEqual(self.previa.confianza(75.0), "alta")
@@ -207,8 +215,8 @@ class PronosticoPreviaTests(unittest.TestCase):
         self.assertEqual(borrador["competition"], "EuroLeague")
         partizan = borrador["games"][1]
         self.assertEqual(partizan["winner"], "Valencia")
-        self.assertEqual(partizan["winnerProbability"], 56.8)
-        self.assertTrue(partizan["prediction"].startswith("2 · Valencia · 1: 43,2% · 2: 56,8%"))
+        self.assertEqual(partizan["winnerProbability"], 54.4)  # escala 14 (con la 9 era 56,8)
+        self.assertTrue(partizan["prediction"].startswith("2 · Valencia · 1: 45,6% · 2: 54,4%"))
 
     def test_borrador_falla_sin_calendario_o_con_un_equipo_sin_resultados(self):
         with self.assertRaises(ValueError):

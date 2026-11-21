@@ -14,7 +14,7 @@ artículo y publicarlo en la sección Pronósticos de la web.
 - La skill encadena los dos pasos y deja a Claude la redacción (introducción y análisis de
   cada partido), con la norma de contrastar cada cifra del texto contra los datos.
 - Criterio numérico: el de `csv-extra-batch\pronostico\README.md` (65 % diferencial de
-  temporada, 35 % últimos cinco partidos, 2,5 puntos de localía, logística de escala 9).
+  temporada, 35 % últimos cinco partidos, 2,5 puntos de localía, logística de escala 14, antes 9).
 - Fuera de alcance: lesiones, cuotas y fuentes externas; el módulo Java `pronostico` y su
   redacción con Ollama no se tocan.
 

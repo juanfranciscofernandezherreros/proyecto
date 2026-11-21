@@ -10,7 +10,7 @@ Dos pasos (los lanza `basket pronostico`, ver lanzadores\pronostico.py):
 
 Criterio numerico (csv-extra-batch\pronostico\README.md): 65 % diferencial de puntos de
 la temporada, 35 % diferencial de los ultimos cinco partidos, 2,5 puntos de localia y
-logistica de escala 9. La logica de calculo es pura y tiene tests en tests\test_scripts_py.py.
+logistica de escala 14 (calibrada el 2026-11-21 con calibrar.py; antes 9). La logica de calculo es pura y tiene tests en tests\test_scripts_py.py.
 """
 import json
 import math
@@ -23,7 +23,12 @@ from pathlib import Path
 PESO_TEMPORADA = 0.65
 PESO_RECIENTE = 0.35
 LOCALIA = 2.5
-ESCALA = 9.0
+# Escala de la curva logistica. Con 9 las probabilidades eran demasiado seguras: sobre 255 partidos de
+# Euroliga, Liga Endesa y NBA los favoritos del 80 % acertaban el 78 %, y los del 60-70 % el 58 %.
+# 14 baja el Brier de 0,221 a 0,216 y deja la probabilidad media del favorito al nivel de sus aciertos
+# (ver calibrar.py y docs\REVISION-PRONOSTICO-EUROLIGA-J12.md). La localia no se cambia: barrer 2,0-5,0
+# no mejora nada (Euroliga +3,4 de margen real, Liga Endesa +5,0 y NBA +1,0 por liga regular).
+ESCALA = 14.0
 
 WORKSPACE = Path(__file__).resolve().parents[3]
 SQL_DATOS = WORKSPACE / "sql" / "consultas" / "2026-11-15_2330_previa-jornada-datos.sql"
@@ -40,12 +45,14 @@ METODOLOGIA = (
     "diferencial de puntos de toda la temporada y el de los últimos cinco partidos. El margen esperado del "
     "local es el 65 % de la diferencia entre los diferenciales de temporada, más el 35 % de la diferencia "
     "entre los diferenciales recientes, más 2,5 puntos por jugar en casa. Ese margen se convierte en "
-    "probabilidad con una curva logística de escala 9. Es el mismo criterio numérico del módulo de "
-    "pronósticos del proyecto.\n\n"
+    "probabilidad con una curva logística de escala 14. Es el criterio numérico del módulo de "
+    "pronósticos del proyecto, con la escala ajustada el 21 de noviembre de 2026 (antes 9).\n\n"
     "Lectura de la confianza. Alta: 75 % o más. Media: entre el 60 % y el 75 %. Baja: menos del 60 %. Una "
     "probabilidad del 80 % significa que, en partidos con este perfil, el favorito debería perder uno de "
     "cada cinco.\n\n"
-    "Límites. Las probabilidades son heurísticas y no están calibradas con temporadas anteriores. Con pocos "
+    "Límites. Las probabilidades son heurísticas: la escala de la curva se ajustó con los 255 partidos ya jugados "
+    "de Euroliga, Liga Endesa y NBA de esta temporada, para que no sean más seguras que los aciertos reales, "
+    "pero no se ha comprobado con otras temporadas. Con pocos "
     "partidos por equipo la muestra es corta, y la media de los últimos cinco se mueve mucho con un solo "
     "resultado abultado. El modelo no conoce lesiones, sanciones ni cansancio por viajes, y no distingue el "
     "rendimiento en casa y fuera de cada equipo más allá de los 2,5 puntos fijos de localía; el análisis de "

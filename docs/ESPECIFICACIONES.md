@@ -297,6 +297,24 @@ entero corre sin intervención:
 «Ciclo diario» y «Procesamiento automatico al iniciar» siguen deshabilitadas para no
 repetir el trabajo.
 
+### 7.2c Resultados de ayer a las 7:30 (tarea «Resultados de ayer por la manana»)
+
+Desde el 2026-11-23 hay una segunda tarea, **«Basketball - Resultados de ayer por la
+manana»**: cada día a las 07:30 lanza `basket resultados-ayer` (con sus pendientes) y,
+con `WakeToRun`, **despierta el portátil** si está en suspensión o hibernado. También
+corre con batería. Se instala con `python scripts\py\arranque\tareas.py resultados
+instalar [HH:mm]` (por defecto 07:30). No apaga el equipo al terminar.
+
+Para que despierte hacen falta los temporizadores de activación del plan de energía
+(este portátil los tenía deshabilitados): `powercfg /setacvalueindex SCHEME_CURRENT
+SUB_SLEEP RTCWAKE 1`, `setdcvalueindex` igual para batería y `powercfg /setactive
+SCHEME_CURRENT`. Un equipo **apagado** no lo enciende Windows: hay que dejarlo
+suspendido o hibernado (o usar el encendido programado de la BIOS, si lo tiene). Debe
+quedar la sesión iniciada (bloqueada vale): la tarea corre con el usuario.
+
+La tarea «al iniciar» sigue activa; si a las 7:30 ya está todo en Mongo,
+`resultados-ayer` termina sin extraer.
+
 ### 7.3 Ciclo diario (tarea programada, deshabilitada)
 
 ```bash

@@ -484,3 +484,12 @@ Evidencia por paso. Ningún paso cambia el flujo del SDD §4 ni los puertos.
 | 10 | Revisión del pronóstico J12 y previa de la J14 de la Euroliga | `docs/REVISION-PRONOSTICO-EUROLIGA-J12.md` (6/10, 7,4 esperados); `basket comprobar`: Euroliga 0 jugados sin resultado; `basket pronostico datos` + `publicar`: `euroliga-jornada-14-2026-11-24` creado (10 partidos, web 200, Telegram enviado); consultas `2026-11-21_1200_euroliga-jornadas-12-y-13.sql` | ✅ |
 | 11 | Calibración del modelo de pronósticos (localía y escala) | `calibrar.py` sobre 255 partidos walk-forward (Euroliga 80, Liga Endesa 27, NBA liga regular 148): localía 2,0-5,0 sin efecto (Brier 0,2156-0,2163); escala 9 → 14: Brier 0,2212 → 0,2158, log-loss 0,641 → 0,621; fiabilidad: favoritos del 80 % acertaban el 77,8 %. `tests/test_scripts_py.py` 68 OK (+1 test de la escala; fallan 2 `BasketLogsTests` ya antes por falta de `local-validation` en el worktree). J14 actualizada en Mongo: Efes 81,4 % → 72,1 % | ✅ |
 | 12 | Pronóstico con información de internet (bajas y noticias con fuentes) | `euroliga-jornada-14-2026-11-24` actualizado en Mongo: 10 partidos con «Bajas y noticias» y `sourceUrls`, 5 fuentes (Eurohoops jornadas 11-13 y crónica); skill `pronostico-jornada` y metodología actualizadas; `tests/test_scripts_py.py` 68 OK (2 `BasketLogsTests` ya fallaban por `local-validation` no inicializado); consulta `2026-11-21_2240_telegram-csv-avisos.sql` (≈ 125 CSV en 4 h, partidos distintos, sin bucle) | ✅ |
+
+## Resultados de ayer a las 7:30 despertando el portátil (`docs/PLAN-resultados-ayer-0730.md`, 2026-11-23)
+
+| # | Requisito | Evidencia | Estado |
+|---|---|---|---|
+| 1 | Tarea diaria 07:30 que despierta el equipo y lanza `resultados-ayer` | `tareas.py resultados instalar [HH:mm]` (por defecto 07:30); `TareaResultadosTests` (2): `StartBoundary` 07:30, `WakeToRun`, `StartWhenAvailable`, con batería, `basket.cmd" resultados-ayer`. `tests/test_scripts_py.py` 72: 70 OK, 2 `BasketLogsTests` ya fallaban por `local-validation` no inicializado en el worktree | ✅ |
+| 2 | Instalada y apuntando al checkout principal | `schtasks /query /xml` de «Basketball - Resultados de ayer por la manana»: `WakeToRun true`, `Arguments … C:\Develop\basketball\1_EJECUTAR\basket.cmd" resultados-ayer`; estado Listo, próxima ejecución 24/11/2026 7:30 | ✅ |
+| 3 | Temporizadores de activación habilitados | Ajuste del sistema: lo hace el usuario (`powercfg … RTCWAKE 1`); hoy AC y batería = 0 (deshabilitados) | ⏳ |
+| 4 | Gate | `basket verificar` VERDE el 23/11 | ✅ |

@@ -3,8 +3,9 @@ r"""Instala/quita las tareas del Programador de Windows (equivale a
 scripts\arranque\TAREA_DIARIA/INICIO/VIGILANCIA.ps1 + .bat, sin PowerShell; usa
 schtasks con XML). Las tareas ejecutan los lanzadores de 1_EJECUTAR (shims a Python).
 
-Uso:  python scripts\py\arranque\tareas.py <diaria|inicio|vigilancia> <instalar|quitar|estado|ejecutar> [valor]
+Uso:  python scripts\py\arranque\tareas.py <diaria|resultados|inicio|vigilancia> <instalar|quitar|estado|ejecutar> [valor]
   diaria     [HH:mm]     CICLO_DIARIO.bat cada dia (por defecto 06:00)
+  resultados [HH:mm]     basket resultados-ayer cada dia (por defecto 07:30), despertando el equipo
   inicio     [minutos]   AUTOMATICO_INICIO.bat al iniciar sesion (espera, por defecto 2)
   vigilancia [minutos]   VIGILAR_SERVICIOS.bat al iniciar sesion (por defecto 5)
 """
@@ -29,11 +30,17 @@ BASKET = EJECUTAR / "basket.cmd"
 TAREAS = {
     "diaria": {"name": "Basketball - Ciclo diario", "cmd": "ciclo-diario",
                "titulo": "Basketball ciclo diario"},
+    "resultados": {"name": "Basketball - Resultados de ayer por la manana", "cmd": "resultados-ayer",
+                   "titulo": "Basketball resultados de ayer"},
     "inicio": {"name": "Basketball - Procesamiento automatico al iniciar",
                "cmd": "inicio-automatico", "titulo": "Basketball automatico"},
     "vigilancia": {"name": "Basketball - Vigilar servicios",
                    "cmd": "vigilar", "titulo": "Vigilante"},
 }
+
+# Tareas que corren cada dia a una hora (HH:mm) y despiertan el equipo si esta en suspension
+HORARIAS = ("diaria", "resultados")
+POR_DEFECTO = {"diaria": "06:00", "resultados": "07:30", "inicio": "2", "vigilancia": "5"}
 
 CABECERA = '<?xml version="1.0" encoding="UTF-16"?>\n<Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">'
 
@@ -41,7 +48,7 @@ CABECERA = '<?xml version="1.0" encoding="UTF-16"?>\n<Task version="1.2" xmlns="
 def _xml(clave, valor):
     t = TAREAS[clave]
     arg_min = f'/c start "{t["titulo"]}" /min "{BASKET}" {t["cmd"]}'
-    if clave == "diaria":
+    if clave in HORARIAS:
         trigger = (f'<CalendarTrigger><StartBoundary>2026-01-01T{valor}:00</StartBoundary>'
                    f'<Enabled>true</Enabled><ScheduleByDay><DaysInterval>1</DaysInterval></ScheduleByDay></CalendarTrigger>')
         wake = "<WakeToRun>true</WakeToRun>"
@@ -78,7 +85,7 @@ def main():
     name = TAREAS[clave]["name"]
 
     if accion == "instalar":
-        valor = a[2] if len(a) > 2 else ({"diaria": "06:00", "inicio": "2", "vigilancia": "5"}[clave])
+        valor = a[2] if len(a) > 2 else POR_DEFECTO[clave]
         xml = _xml(clave, valor)
         tmp = Path(tempfile.gettempdir()) / f"tarea-{clave}.xml"
         tmp.write_text(xml, encoding="utf-16")

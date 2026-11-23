@@ -379,6 +379,26 @@ class BasketLogsTests(unittest.TestCase):
     def test_no_abre_con_variable(self):
         self._observabilidad("pendientes", {"BASKET_NO_ABRIR_GRAFANA": "1"}).assert_not_called()
 
+
+class TareaResultadosTests(unittest.TestCase):
+    """Tarea «Resultados de ayer por la manana»: diaria, despierta el equipo y lanza resultados-ayer."""
+
+    def _tareas(self):
+        sys.path.insert(0, str(RAIZ / "scripts" / "py" / "arranque"))
+        import tareas
+        return tareas
+
+    def test_xml_diario_con_despertar(self):
+        xml = self._tareas()._xml("resultados", "07:30")
+        self.assertIn("<StartBoundary>2026-01-01T07:30:00</StartBoundary>", xml)
+        self.assertIn("<WakeToRun>true</WakeToRun>", xml)
+        self.assertIn("<StartWhenAvailable>true</StartWhenAvailable>", xml)
+        self.assertIn("<DisallowStartIfOnBatteries>false</DisallowStartIfOnBatteries>", xml)
+        self.assertIn("basket.cmd\" resultados-ayer</Arguments>", xml)
+
+    def test_hora_por_defecto(self):
+        self.assertEqual(self._tareas().POR_DEFECTO["resultados"], "07:30")
+
 if __name__ == "__main__":
     unittest.main()
 

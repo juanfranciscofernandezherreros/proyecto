@@ -493,3 +493,15 @@ Evidencia por paso. Ningún paso cambia el flujo del SDD §4 ni los puertos.
 | 2 | Instalada y apuntando al checkout principal | `schtasks /query /xml` de «Basketball - Resultados de ayer por la manana»: `WakeToRun true`, `Arguments … C:\Develop\basketball\1_EJECUTAR\basket.cmd" resultados-ayer`; estado Listo, próxima ejecución 24/11/2026 7:30 | ✅ |
 | 3 | Temporizadores de activación habilitados | Ajuste del sistema: lo hace el usuario (`powercfg … RTCWAKE 1`); hoy AC y batería = 0 (deshabilitados) | ⏳ |
 | 4 | Gate | `basket verificar` VERDE el 23/11 | ✅ |
+
+## Curiosidades ampliadas, con lo más destacado y de la más nueva a la más antigua (`docs/PLAN-curiosidades-ampliadas.md`, 2026-11-23)
+
+| # | Requisito | Evidencia | Estado |
+|---|---|---|---|
+| 1 | 17 tipos nuevos (partido, jugador, equipo), columna `nivel` y orden de la más nueva a la más antigua | `2026-11-23_1400_curiosidades-ampliadas.sql` (LECTURA): 649 filas, primera del 23/11/2026 y última del 29/04/2026; nivel 3: 73, nivel 2: 203, nivel 1: 373. Umbrales de `2026-11-23_1330_…-exploracion.sql` | ✅ |
+| 2 | Sin pretemporada de la NBA (mismo corte que `RegularSeason` de la API) | Antes del corte salían 774 filas y récords falsos (49 en un cuarto el 06/10, Kings «1-19»); ahora récord NBA de cuarto = Cleveland 48 (01/11) y Kings 1-14 | ✅ |
+| 3 | Revisión a mano de lo más destacado | `2026-11-23_1500_curiosidades-revision-destacadas.sql`: Wembanyama 52-24 con 8 tapones, Grimes 10/14 en triples, Cleveland 48-21 en un cuarto, Hapoel Jerusalem 25-0 (7-7 → 32-7), Kings 1-14 / Celtics 11-4: todo cuadra con las tablas de origen | ✅ |
+| 4 | Comparativa de ligas y «la jornada en números» | `2026-11-23_1430_curiosidades-por-liga.sql`: 11 ligas (NBA 226,7 puntos por partido; factor cancha Liga Endesa 65,4 % frente a NBA 52,0 %; Euroliga 35,4 % de finales por 5 o menos) y 77 días, del más reciente al más antiguo | ✅ |
+| 5 | Skill `curiosidades` | `.claude/skills/curiosidades/SKILL.md`: dos consultas, filtro `-v nivel`, «Lo más destacado» primero y luego todas de la más nueva a la más antigua (★ en las de nivel 3) | ✅ |
+| 6 | Web: «Periódico» con lo más reciente primero | web `aecbc21` (rama `claude/curiosidades-mas-nuevas-primero`): ediciones y partidos del día en orden descendente; vitest 63 OK y `typecheck` OK. Sin desplegar en 8083: el contenedor se construye desde el checkout principal | ⏳ |
+| 7 | Gate | `basket verificar` VERDE el 23/11 | ✅ |

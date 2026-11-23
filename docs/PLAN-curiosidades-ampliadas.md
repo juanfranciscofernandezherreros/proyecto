@@ -55,7 +55,4 @@ Cambios sobre lo planeado: `mejor marca` pide 30+ puntos y superar el máximo en
 25 y 5 salían 107); `doble turno` exige mismo nombre **y** mismo equipo (había
 homónimos); se quitó la pretemporada de la NBA (falseaba récords y balances).
 
-Pendiente: desplegar la web en 8083. El contenedor se construye desde el checkout
-principal (`C:\Develop\basketball\basketball-match-web`), que sigue en `main`; hace falta
-fusionar la rama web `claude/curiosidades-mas-nuevas-primero` y reconstruir
-`basketball-match-web`.
+Desplegado el 2026-11-23: rama web fusionada en `main` y `basketball-match-web` reconstruido.

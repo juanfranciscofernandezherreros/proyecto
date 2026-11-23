@@ -32,6 +32,10 @@ Si hay que cambiar el SQL (otro umbral, otro tipo), se guarda como fichero nuevo
 regla `consultas-sql`. Si no responde Postgres:
 `cmd //c "C:\Develop\basketball\1_EJECUTAR\basket.cmd ayuda"`; no inventar datos.
 
+La web (pestaña «Todas» de `/curiosities`) muestra lo mismo: lo publica
+`basket curiosidades` en Mongo, y `resultados-ayer` lo refresca cada mañana. Si piden
+verlo en la web con datos nuevos, lanzar `cmd //c "C:\Develop\basketball\1_EJECUTAR\basket.cmd curiosidades"`.
+
 ## Qué devuelve la primera
 
 Una fila por curiosidad, **de la más nueva a la más antigua** (fecha y hora del partido

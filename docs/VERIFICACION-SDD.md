@@ -505,3 +505,13 @@ Evidencia por paso. Ningún paso cambia el flujo del SDD §4 ni los puertos.
 | 5 | Skill `curiosidades` | `.claude/skills/curiosidades/SKILL.md`: dos consultas, filtro `-v nivel`, «Lo más destacado» primero y luego todas de la más nueva a la más antigua (★ en las de nivel 3) | ✅ |
 | 6 | Web: «Periódico» con lo más reciente primero | web `aecbc21` (rama `claude/curiosidades-mas-nuevas-primero`): ediciones y partidos del día en orden descendente; vitest 63 OK y `typecheck` OK. Fusionada en `main` del repo web (avance rápido) y contenedor reconstruido; navegador en 8083: 58 ediciones del lunes 23 de noviembre al sábado 2 de mayo y, dentro del 22/11, partidos de 18:00 → 17:00 → 15:50 | ✅ |
 | 7 | Gate | `basket verificar` VERDE el 23/11 | ✅ |
+
+## Curiosidades ampliadas en la web (`docs/PLAN-curiosidades-en-la-web.md`, 2026-11-23)
+
+| # | Requisito | Evidencia | Estado |
+|---|---|---|---|
+| 1 | `basket curiosidades` publica en Mongo la consulta validada | `scripts/py/lanzadores/curiosidades.py` + `CuriosidadesFeedTests` (3 OK); ejecución: «649 (nivel 3: 73, nivel 2: 203, nivel 1: 373); la más nueva del 2026-11-23» en `curiosity_feed` | ✅ |
+| 2 | Se refresca cada día | `resultados_ayer.publicar_curiosidades()` tras los pendientes; un fallo es `[AVISO]` y no cambia el código de salida | ✅ |
+| 3 | API `GET /api/v1/curiosities/feed` (solo lee Mongo, como manda el SDD) | API `c7bd83d` en `main`: `CuriosityFeedService` + controlador, caché 1 min, `CuriosityFeedServiceTest` (2); `mvnw verify` 66 tests OK. Desplegada: 649 sin filtro (23/11 → 29/04), `minLevel=3` → 73, `competition=liga-endesa` → 39, todas de esa liga | ✅ |
+| 4 | Web: pestaña «Todas» por defecto | web `cf171cc` + `413983a` en `main`: lo más destacado y luego por día y partido, de la más nueva a la más antigua; filtro de nivel y de competición; copiar. vitest 67 OK, `typecheck` y `build` OK. Navegador (8083): carga en 0,2 s sin esperar a los rankings, «649 curiosidades de 435 partidos (73 excepcionales)», primer día lunes 23/11; nivel 3 → 73; Liga Endesa → 39; móvil 375 px sin desbordar | ✅ |
+| 5 | Gate | `basket verificar` VERDE el 23/11 | ✅ |

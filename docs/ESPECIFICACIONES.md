@@ -247,7 +247,7 @@ Los extractores anteriores saltan los partidos que ya tienen filas en Postgres. 
 volver a extraer y reimportar partidos concretos (datos mal cargados):
 
 ```text
-1_EJECUTARasket.cmd reextraer [--dataset equipo|jugadores|resumen|jugadas|todo] [--fichero lista.txt] [--progreso progreso.txt] <match_id...>
+1_EJECUTAR\basket.cmd reextraer [--dataset equipo|jugadores|resumen|jugadas|todo] [--fichero lista.txt] [--progreso progreso.txt] <match_id...>
 ```
 
 Por defecto `todo`. Con `--progreso` anota cada partido y, si se relanza, salta lo ya hecho.
@@ -314,6 +314,15 @@ quedar la sesión iniciada (bloqueada vale): la tarea corre con el usuario.
 
 La tarea «al iniciar» sigue activa; si a las 7:30 ya está todo en Mongo,
 `resultados-ayer` termina sin extraer.
+
+### 7.2d Curiosidades en la web (`basket curiosidades`)
+
+`basket curiosidades` ejecuta en Postgres `sql/consultas/2026-11-23_1400_curiosidades-ampliadas.sql`
+y reemplaza la colección `curiosity_feed` de Mongo (un documento por curiosidad: `rank`,
+`date`, `level`, `competition`, `match`, `type`, `detail`, `matchId`). La API la sirve en
+`GET /api/v1/curiosities/feed?competition=&minLevel=` (de la más nueva a la más antigua)
+y la web la pinta en la pestaña «Todas» de `/curiosities`. `resultados-ayer` lo lanza al
+terminar; también se puede lanzar a mano tras cargar partidos.
 
 ### 7.3 Ciclo diario (tarea programada, deshabilitada)
 

@@ -399,6 +399,36 @@ class TareaResultadosTests(unittest.TestCase):
     def test_hora_por_defecto(self):
         self.assertEqual(self._tareas().POR_DEFECTO["resultados"], "07:30")
 
+
+class CuriosidadesFeedTests(unittest.TestCase):
+    """basket curiosidades: filas de psql -> documentos de curiosity_feed."""
+
+    def _mod(self):
+        sys.path.insert(0, str(RAIZ / "scripts" / "py" / "lanzadores"))
+        import curiosidades
+        return curiosidades
+
+    def test_parsea_y_convierte_en_orden(self):
+        c = self._mod()
+        us = c.SEPARADOR
+        texto = (us.join(["22/11/2026", "2", "lnb", "Lyon 91-101 Bourg", "sorpresa", "Bourg (2-6) ganó", "pnQ"]) + "\n"
+                 + us.join(["21/11/2026", "3", "nba", "PHI 132-129 MIL", "40 puntos", "Herro 50", "abc"]) + "\n")
+        docs = c.documentos(c.parsear(texto))
+        self.assertEqual([d["rank"] for d in docs], [0, 1])
+        self.assertEqual(docs[0]["date"], "2026-11-22")
+        self.assertEqual(docs[1]["level"], 3)
+        self.assertEqual(docs[1]["type"], "40 puntos")
+        self.assertEqual(docs[0]["_id"], "00000-pnQ-sorpresa")
+
+    def test_fila_mal_formada_falla(self):
+        c = self._mod()
+        with self.assertRaises(ValueError):
+            c.parsear(c.SEPARADOR.join(["22/11/2026", "2", "lnb"]))
+
+    def test_usa_la_consulta_validada(self):
+        self.assertTrue(self._mod().SQL.exists())
+
+
 if __name__ == "__main__":
     unittest.main()
 

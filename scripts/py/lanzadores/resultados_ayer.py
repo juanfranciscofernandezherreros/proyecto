@@ -172,7 +172,20 @@ def main(argv):
         os.environ["SKIP_CSV_WATCHER"] = "1"
         import matchids_pendientes
         rc = max(rc, matchids_pendientes.main([]))
+        publicar_curiosidades()
     return rc
+
+
+def publicar_curiosidades():
+    """Refresca las curiosidades de la web (basket curiosidades). Un fallo es solo un
+    AVISO: no cambia el codigo de salida de resultados-ayer."""
+    print("Siguiente paso: curiosidades para la web (basket curiosidades)...", flush=True)
+    try:
+        import curiosidades
+        if curiosidades.main([]):
+            print("[AVISO] No se pudieron publicar las curiosidades en Mongo.")
+    except Exception as e:
+        print(f"[AVISO] Curiosidades: {e}")
 
 
 def encadenar_pendientes(argv, env):

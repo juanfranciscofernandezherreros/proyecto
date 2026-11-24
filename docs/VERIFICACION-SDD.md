@@ -579,3 +579,4 @@ salía «Extrayendo ahora 0» con los lotes en marcha). Plan: `docs/PLAN-h2h-cuo
   `test_un_paso_por_partido_en_el_panel_del_orquestador`,
   `test_si_falla_la_carga_el_paso_queda_failed`).
 - `basket verificar`: VERDE.
+- Comprobado en Grafana (Procesamiento en vivo, Euroliga): «Extrayendo ahora 1» y fila «EN CURSO europe/euroleague H2H+CUOTAS EZya2rat».

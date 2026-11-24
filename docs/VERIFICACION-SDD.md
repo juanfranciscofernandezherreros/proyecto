@@ -515,3 +515,15 @@ Evidencia por paso. Ningún paso cambia el flujo del SDD §4 ni los puertos.
 | 3 | API `GET /api/v1/curiosities/feed` (solo lee Mongo, como manda el SDD) | API `c7bd83d` en `main`: `CuriosityFeedService` + controlador, caché 1 min, `CuriosityFeedServiceTest` (2); `mvnw verify` 66 tests OK. Desplegada: 649 sin filtro (23/11 → 29/04), `minLevel=3` → 73, `competition=liga-endesa` → 39, todas de esa liga | ✅ |
 | 4 | Web: pestaña «Todas» por defecto | web `cf171cc` + `413983a` en `main`: lo más destacado y luego por día y partido, de la más nueva a la más antigua; filtro de nivel y de competición; copiar. vitest 67 OK, `typecheck` y `build` OK. Navegador (8083): carga en 0,2 s sin esperar a los rankings, «649 curiosidades de 435 partidos (73 excepcionales)», primer día lunes 23/11; nivel 3 → 73; Liga Endesa → 39; móvil 375 px sin desbordar | ✅ |
 | 5 | Gate | `basket verificar` VERDE el 23/11 | ✅ |
+
+## H2H y cuotas desde los CSV existentes (`docs/PLAN-h2h.md`, 2026-11-24)
+
+| # | Requisito | Evidencia | Estado |
+|---|---|---|---|
+| 1 | Diagnóstico del flujo | `2026-11-24_1010_h2h-estado.sql`: schema `h2h` inexistente; Mongo 0/3533 partidos con `h2h`; projector sin código de H2H ni de cuotas; web con tablas en bruto | ✅ |
+| 2 | Carga en Postgres de los CSV existentes | `csv-extra-batch` `02f2e8c` en `main`: `--files-from` (1969 CSV en 9 s, 0 fallos; antes ~10 s por CSV) y `market_type` completo; tests del importador 4 OK. `2026-11-24_1100_cuotas-estado.sql`: H2H 3924 filas, 292 CSV con contenido distinto, 217 partidos (de 394: 79 vacíos y 23 copias); cuotas 38063 filas (home_away 272 partidos, 1x2 186, over_under 274, asian_handicap 274). `2026-11-24_1110_…` (ESCRITURA): mercado corregido en lo ya cargado, mismas filas | ✅ |
+| 3 | Projector: H2H y cuotas de Postgres a Mongo | projector `19fb92f` en `main`: datasources `h2h` y `odds`, último CSV por partido (y mercado), `H2hRows` corrige eliminatorias y prórrogas; sin tabla → aviso y proyección sin esa sección; `mvn verify` 21 tests OK. Consultas del lector probadas: `2026-11-24_1030_…` (ABQKswin, 15 filas en orden) y `2026-11-24_1130_…` (0fAJZWz1) | ✅ |
+| 4 | Mongo y API | Desplegado: 217 partidos con `h2h` y 275 con `odds` (= Postgres); `GET /api/v1/matches/ABQKswin` devuelve las 15 filas de H2H | ✅ |
+| 5 | Web: pestañas H2H y Cuotas legibles | web `6821102` en `main`: H2H por bloques (local, visitante, cara a cara con balance), V/D/E, notas en español y `TeamLink`; Cuotas: ganador y 1X2 con mejor cuota y probabilidad sin margen, total y hándicap con línea principal. vitest 83 OK, `typecheck` y `build` OK | ✅ |
+| 6 | Navegador (8083) | ABQKswin: «Últimos partidos de Trieste / de Venezia / Cara a cara», balance Trieste 0 – 5 Venezia, 34 enlaces a equipos. OCsaPYRs: 10 casas; Ganador Fenerbahce 81 % – Partizan 19 %; 1X2 77/5/18 %; total 162,5 (35 líneas); hándicap Fenerbahce -10,5 (30 líneas) | ✅ |
+| 7 | Gate | `basket verificar` VERDE el 24/11 | ✅ |

@@ -538,3 +538,13 @@ Evidencia por paso. Ningún paso cambia el flujo del SDD §4 ni los puertos.
 | 5 | Web: pestañas H2H y Cuotas legibles | web `6821102` en `main`: H2H por bloques (local, visitante, cara a cara con balance), V/D/E, notas en español y `TeamLink`; Cuotas: ganador y 1X2 con mejor cuota y probabilidad sin margen, total y hándicap con línea principal. vitest 83 OK, `typecheck` y `build` OK | ✅ |
 | 6 | Navegador (8083) | ABQKswin: «Últimos partidos de Trieste / de Venezia / Cara a cara», balance Trieste 0 – 5 Venezia, 34 enlaces a equipos. OCsaPYRs: 10 casas; Ganador Fenerbahce 81 % – Partizan 19 %; 1X2 77/5/18 %; total 162,5 (35 líneas); hándicap Fenerbahce -10,5 (30 líneas) | ✅ |
 | 7 | Gate | `basket verificar` VERDE el 24/11 | ✅ |
+
+### Cierre en `main` (2026-11-24)
+
+| # | Requisito | Evidencia | Estado |
+|---|---|---|---|
+| 1 | PR fusionados | proyecto#1 (`a00186a`) y proyecto#2 (`59373c1`); conflicto de puntero web resuelto a `6821102` (contiene `a389b40`) | ✅ |
+| 2 | Checkout principal en `main` | `C:\Develop\basketball` y sus submódulos api `b97c284`, projector `19fb92f`, web `6821102`, csv-extra-batch `02f2e8c` en `main`, sin cambios locales | ✅ |
+| 3 | Jar del launcher | `extra-importer` recompilado en el checkout principal (4 tests OK); recargar `ODDS_HOME_AWAY` de 0fAJZWz1 deja los mercados igual (home_away 2232, sin «home») | ✅ |
+| 4 | Despliegue desde `main` | Los Dockerfile de API y projector copian `target/app.jar`: sin `mvn package` antes, `docker compose build` reutiliza el jar viejo. Al primer intento el projector viejo dejó H2H y cuotas a 0 en Mongo; tras compilar (API 74 tests, projector 21) y redesplegar, el primer ciclo los repuso: 217 con H2H y 275 con cuotas. Actuaciones 100/100 con `teamName`, curiosidades 35/35 | ✅ |
+| 5 | Gate | `basket verificar` VERDE desde el checkout principal | ✅ |

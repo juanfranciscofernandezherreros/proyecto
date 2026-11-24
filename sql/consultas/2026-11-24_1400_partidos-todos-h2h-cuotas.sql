@@ -91,3 +91,19 @@ FROM (
 ORDER BY (fecha >= now()) NULLS LAST,
          CASE WHEN fecha < now() THEN fecha END DESC,
          fecha ASC;
+
+-- PASO 6 · Alcance final pedido por el usuario («solo quiero los datos del mes de
+--          noviembre»): partidos del 1 al 30 de noviembre de 2026 sin H2H; primero los
+--          jugados (del más reciente al más antiguo) y después los próximos.
+SELECT match_id
+FROM (
+    SELECT match_id, max(event_datetime) AS fecha
+    FROM (SELECT match_id, event_datetime FROM fixtures.fixtures
+          UNION ALL SELECT match_id, event_datetime FROM results.results) u
+    WHERE NOT EXISTS (SELECT 1 FROM h2h.h2h h WHERE h.match_id = u.match_id)
+    GROUP BY match_id
+) p
+WHERE fecha >= '2026-11-01' AND fecha < '2026-12-01'
+ORDER BY (fecha >= now()),
+         CASE WHEN fecha < now() THEN fecha END DESC,
+         fecha ASC;

@@ -37,7 +37,9 @@ repartió en `C:\data\basketball\h2h-cuotas\lista-t1..t4.txt` (progreso-t1..t4).
 Notas: la NBA no publica cuotas en Flashscore desde aquí (sale «sin datos»); los
 partidos lejanos aún no tienen cuotas y habrá que volver a extraerlas cerca de la fecha.
 
-- [ ] Extraer los 3298 partidos en 4 lotes en segundo plano.
+- [ ] Extraer en 4 lotes en segundo plano. Alcance final pedido por el usuario: **solo
+      noviembre de 2026**, 462 partidos sin H2H (Paso 6 de la consulta 1400), primero los
+      jugados del más reciente al más antiguo y después los próximos.
 - [ ] Revisar fallos y retomarlos con el mismo `--progreso`.
 - [ ] Contar en Postgres y Mongo cuántos partidos tienen H2H y cuotas al terminar.
 

@@ -611,3 +611,15 @@ los CSV de H2H y cuotas. Plan: `docs/PLAN-procesamiento-h2h-cuotas.md`.
   COMPLETED (15 / 10 / 6 / 104 / 72 filas).
 - Lotes de las demás ligas (lista-t1..t4) parados a petición del usuario; se pueden retomar
   con su `--progreso`.
+
+## H2H y cuotas de los próximos partidos de Euroliga (2026-11-24)
+
+Petición: «Actualiza la información». Se refrescan H2H y cuotas de los 10 partidos de
+Euroliga de los próximos 7 días (6 hoy y 4 mañana; 9 no tenían nada), Paso 3 de
+`sql/consultas/2026-11-24_1530_euroliga-h2h-cuotas-resultado.sql`.
+
+- Lotes P1 y P2: «RESUMEN: 25 OK, 0 con fallo» cada uno.
+- Postgres: los 10 con H2H (12–15 filas) y cuotas (132–224 filas).
+- Mongo: los 10 con `h2h` y `odds` (Monitor «mongo 10/10»). API de jyeyBUmS: h2h 15, odds 193.
+- Navegador, Valencia–Panathinaikos (jyeyBUmS, hoy 19:30 UTC): pestaña Cuotas con 10 casas,
+  ganador 52 % / 48 %, total 175,5 y hándicap Valencia -1,5.

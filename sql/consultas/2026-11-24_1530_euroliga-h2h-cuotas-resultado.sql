@@ -14,7 +14,8 @@
 -- QUÉ HACER DESPUÉS       Si falta alguno, basket reextraer --dataset h2h-cuotas <id>.
 -- RESULTADO EL 2026-11-24  Paso 1: 30 partidos, 30 con H2H, 30 con cuotas. Paso 2:
 --                  0 filas. En Mongo también 30/30/30 (el último, thIAMoUj, proyectado
---                  a las 11:31:05 UTC).
+--                  a las 11:31:05 UTC). Paso 3 (tras los lotes P1/P2, 25 + 25 CSV OK, 0
+--                  fallos): los 10 próximos con H2H (12–15 filas) y cuotas (132–224 filas).
 -- =============================================================================
 
 -- PASO 1 · Totales.
@@ -36,3 +37,15 @@ WHERE r.competition = 'euroleague'
   AND (NOT EXISTS (SELECT 1 FROM h2h.h2h h WHERE h.match_id = r.match_id)
        OR NOT EXISTS (SELECT 1 FROM odds.odds o WHERE o.match_id = r.match_id))
 ORDER BY r.event_datetime DESC;
+
+-- PASO 3 · «Actualiza la información»: partidos de Euroliga de los próximos 7 días (sin
+--          resultado), con o sin H2H, para volver a extraer H2H y cuotas (las cuotas
+--          cambian hasta el inicio del partido). Del más cercano al más lejano.
+SELECT f.match_id, f.event_datetime, f.home_team, f.away_team,
+       (SELECT count(*) FROM h2h.h2h h WHERE h.match_id = f.match_id) AS filas_h2h,
+       (SELECT count(*) FROM odds.odds o WHERE o.match_id = f.match_id) AS filas_cuotas
+FROM fixtures.fixtures f
+WHERE f.competition = 'euroleague'
+  AND f.event_datetime >= now() AND f.event_datetime < now() + interval '7 days'
+  AND NOT EXISTS (SELECT 1 FROM results.results r WHERE r.match_id = f.match_id AND r.home_score IS NOT NULL)
+ORDER BY f.event_datetime;

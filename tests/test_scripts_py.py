@@ -172,6 +172,49 @@ class ReextraerH2hCuotasTests(unittest.TestCase):
             self.assertIn("ODDS_OVER_UNDER", str(error.exception.args[0]))
             self.assertEqual(list(error.exception.args[1]), ["h2h"])
 
+    def _reextraer_con_paneles(self, extraidos, estado_launcher="COMPLETED"):
+        """Ejecuta reextraer() de h2h-cuotas sin navegador, launcher ni Postgres.
+
+        Devuelve (rc, llamadas a seguimiento.empezar, llamadas a seguimiento.terminar).
+        """
+        with tempfile.TemporaryDirectory() as d:
+            raiz = Path(d)
+            for f in ("py", "fs.py", "python/resolve_flashscore_redirect.py"):
+                (raiz / f).parent.mkdir(parents=True, exist_ok=True)
+                (raiz / f).write_text("", encoding="utf-8")
+            cfg = {"PYTHON": str(raiz / "py"), "SCRAPER": str(raiz / "fs.py"), "WORKSPACE": str(raiz),
+                   "COMPETITIONS_DIR": str(raiz / "c")}
+            csvs = {n: (raiz / f"{n}.csv" if hay else None) for n, hay in extraidos.items()}
+            nombres = list(reextraer.GRUPOS["h2h-cuotas"])
+            with mock.patch.object(reextraer._config, "cargar", return_value=cfg), \
+                 mock.patch.object(reextraer, "_ligas", return_value={"m1": ("europe", "euroleague")}), \
+                 mock.patch.object(reextraer, "_url", return_value="https://x/?mid=m1"), \
+                 mock.patch.object(reextraer, "_extraer_juntos", return_value=csvs), \
+                 mock.patch.object(reextraer.L, "submit_and_wait", return_value={"status": estado_launcher}), \
+                 mock.patch.object(reextraer.seguimiento, "empezar", return_value="paso-1") as empezar, \
+                 mock.patch.object(reextraer.seguimiento, "terminar") as terminar:
+                rc = reextraer.reextraer(["m1"], nombres)
+        return rc, empezar, terminar
+
+    def test_un_paso_por_partido_en_el_panel_del_orquestador(self):
+        rc, empezar, terminar = self._reextraer_con_paneles(
+            {"h2h": True, "cuota-ganador": True, "cuota-1x2": False, "cuota-total": True, "cuota-handicap": True})
+        self.assertEqual(rc, 0)
+        empezar.assert_called_once()
+        self.assertEqual(empezar.call_args.args[-1], "H2H+CUOTAS m1")
+        terminar.assert_called_once()
+        _cfg, paso, estado, detalle = terminar.call_args.args
+        self.assertEqual((paso, estado), ("paso-1", "COMPLETED"))
+        self.assertIn("H2H OK", detalle)
+        self.assertIn("ODDS_1X2 sin datos", detalle)
+
+    def test_si_falla_la_carga_el_paso_queda_failed(self):
+        rc, _empezar, terminar = self._reextraer_con_paneles(
+            {n: True for n in reextraer.GRUPOS["h2h-cuotas"]}, estado_launcher="FAILED")
+        self.assertEqual(rc, 1)
+        self.assertEqual(terminar.call_args.args[2], "FAILED")
+        self.assertIn("5 con fallo", terminar.call_args.args[3])
+
 
 class ReextraerProgresoTests(unittest.TestCase):
     def test_solo_cuenta_lo_anotado_como_ok(self):

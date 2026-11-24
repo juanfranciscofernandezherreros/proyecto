@@ -564,3 +564,18 @@ Petición: «No me abras 2000000 grafanas, solo necesito un dashboard». Plan:
   pedido («empieza por los más recientes»): jugados del más reciente al más antiguo y
   después los próximos (Paso 5 de `sql/consultas/2026-11-24_1400_partidos-todos-h2h-cuotas.sql`).
 - `basket verificar`: VERDE.
+
+## H2H y cuotas en el panel del orquestador (2026-11-24)
+
+Petición: que la extracción de H2H y cuotas se vea en «Procesamiento en vivo» (antes
+salía «Extrayendo ahora 0» con los lotes en marcha). Plan: `docs/PLAN-h2h-cuotas-recientes.md`.
+
+- `scripts/py/extraer/reextraer.py`: por partido, `seguimiento.empezar` con el paso
+  `H2H+CUOTAS <match_id>` antes de la extracción conjunta y `seguimiento.terminar` al
+  cargar los 5 CSV: COMPLETED con el resumen («H2H OK, ODDS_1X2 sin datos…») o FAILED
+  con «n con fallo». Se escribe en `public.pipeline_step`, que es lo que leen los paneles
+  «Extrayendo ahora» y «Orquestador: pasos en curso y recientes» (sin filtro por paso).
+- Tests `ReextraerH2hCuotasTests` + `ReextraerProgresoTests`: 7 OK (nuevos:
+  `test_un_paso_por_partido_en_el_panel_del_orquestador`,
+  `test_si_falla_la_carga_el_paso_queda_failed`).
+- `basket verificar`: VERDE.

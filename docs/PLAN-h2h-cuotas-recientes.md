@@ -42,6 +42,10 @@ partidos lejanos aún no tienen cuotas y habrá que volver a extraerlas cerca de
       últimos 14 días**, 30 partidos sin H2H (Paso 8 de la consulta 1400), en 2 lotes
       (`lista-e1/e2`). Solo los CSV de H2H y cuotas; el resto ya estaba.
 - [ ] Revisar fallos y retomarlos con el mismo `--progreso`.
+- [x] Que la extracción de H2H y cuotas se vea en Grafana («Procesamiento en vivo»,
+      panel del orquestador): un paso `H2H+CUOTAS <match_id>` por partido con
+      `seguimiento.empezar/terminar` (COMPLETED con el resumen de CSV, FAILED si falla
+      alguno); test en `tests/test_scripts_py.py`.
 - [ ] Contar en Postgres y Mongo cuántos partidos tienen H2H y cuotas al terminar.
 
 Fuera de alcance: que el ciclo diario extraiga H2H y cuotas de forma automática.

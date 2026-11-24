@@ -223,7 +223,11 @@ def reextraer(match_ids, nombres, progreso=None):
             continue
         juntos = [n for n in nombres if n in OPCIONALES and (match_id, DATASETS[n][0]) not in hechos]
         extraidos = {}
+        paso_juntos, fallo_antes, resumen_juntos = None, fallo, []
         if juntos:
+            # Un paso por partido en el panel del orquestador de Grafana (Procesamiento en vivo).
+            paso_juntos = seguimiento.empezar(cfg, run_id, f"{country}/{competition}", country, competition,
+                                              f"H2H+CUOTAS {match_id}")
             try:
                 extraidos = _extraer_juntos(cfg, env, juntos, match_id, url, raiz)
             except Fallo as e:
@@ -250,6 +254,7 @@ def reextraer(match_ids, nombres, progreso=None):
                 if csv_f is None:
                     print(f"[{n}/{total}] {match_id} {country}/{competition} {etiqueta} OK sin datos", flush=True)
                     _anotar(progreso, match_id, etiqueta, "OK", "sin datos")
+                    resumen_juntos.append(f"{etiqueta} sin datos")
                     ok += 1
                     continue
                 try:
@@ -258,6 +263,7 @@ def reextraer(match_ids, nombres, progreso=None):
                         raise Fallo(f"launcher {resp.get('status')}")
                     print(f"[{n}/{total}] {match_id} {country}/{competition} {etiqueta} OK {csv_f.name}", flush=True)
                     _anotar(progreso, match_id, etiqueta, "OK", csv_f.name)
+                    resumen_juntos.append(f"{etiqueta} OK")
                     ok += 1
                 except Exception as e:  # se anota y se sigue
                     print(f"[{n}/{total}] {match_id} {country}/{competition} {etiqueta} FALLO {str(e)[:300]}", flush=True)
@@ -280,6 +286,12 @@ def reextraer(match_ids, nombres, progreso=None):
                 _anotar(progreso, match_id, etiqueta, "FALLO", " ".join(str(e)[:200].split()))
                 seguimiento.terminar(cfg, paso, "FAILED", " ".join(str(e).split()))
                 fallo += 1
+        if paso_juntos is not None:
+            fallidos = fallo - fallo_antes
+            detalle = ", ".join(resumen_juntos) or "sin CSV"
+            if fallidos:
+                detalle = f"{fallidos} con fallo; {detalle}"
+            seguimiento.terminar(cfg, paso_juntos, "FAILED" if fallidos else "COMPLETED", detalle)
     print(f"RESUMEN: {ok} OK, {fallo} con fallo", flush=True)
     return 0 if fallo == 0 else 1
 

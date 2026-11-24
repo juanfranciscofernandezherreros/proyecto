@@ -63,3 +63,31 @@ FROM (
     GROUP BY match_id
 ) p
 GROUP BY 1 ORDER BY 1;
+
+-- PASO 4 · La misma lista del Paso 2, pero de lo más cercano a hoy a lo más lejano
+--          (jugados recientes y próximos primero). El Paso 2 empezaba por partidos de
+--          mayo de 2027, que aún no tienen cuotas publicadas.
+SELECT match_id
+FROM (
+    SELECT match_id, event_datetime FROM fixtures.fixtures
+    UNION ALL
+    SELECT match_id, event_datetime FROM results.results
+) p
+WHERE NOT EXISTS (SELECT 1 FROM h2h.h2h h WHERE h.match_id = p.match_id)
+GROUP BY match_id
+ORDER BY abs(extract(epoch FROM max(event_datetime) - now())) NULLS LAST;
+
+-- PASO 5 · Orden definitivo pedido por el usuario («empieza por los más recientes»):
+--          primero los jugados, del más reciente al más antiguo; después los próximos,
+--          del más cercano al más lejano.
+SELECT match_id
+FROM (
+    SELECT match_id, max(event_datetime) AS fecha
+    FROM (SELECT match_id, event_datetime FROM fixtures.fixtures
+          UNION ALL SELECT match_id, event_datetime FROM results.results) u
+    WHERE NOT EXISTS (SELECT 1 FROM h2h.h2h h WHERE h.match_id = u.match_id)
+    GROUP BY match_id
+) p
+ORDER BY (fecha >= now()) NULLS LAST,
+         CASE WHEN fecha < now() THEN fecha END DESC,
+         fecha ASC;

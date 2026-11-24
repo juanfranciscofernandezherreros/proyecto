@@ -548,3 +548,18 @@ Evidencia por paso. Ningún paso cambia el flujo del SDD §4 ni los puertos.
 | 3 | Jar del launcher | `extra-importer` recompilado en el checkout principal (4 tests OK); recargar `ODDS_HOME_AWAY` de 0fAJZWz1 deja los mercados igual (home_away 2232, sin «home») | ✅ |
 | 4 | Despliegue desde `main` | Los Dockerfile de API y projector copian `target/app.jar`: sin `mvn package` antes, `docker compose build` reutiliza el jar viejo. Al primer intento el projector viejo dejó H2H y cuotas a 0 en Mongo; tras compilar (API 74 tests, projector 21) y redesplegar, el primer ciclo los repuso: 217 con H2H y 275 con cuotas. Actuaciones 100/100 con `teamName`, curiosidades 35/35 | ✅ |
 | 5 | Gate | `basket verificar` VERDE desde el checkout principal | ✅ |
+
+## Una sola pestaña de Grafana (2026-11-24)
+
+Petición: «No me abras 2000000 grafanas, solo necesito un dashboard». Plan:
+`docs/PLAN-grafana-una-pestana.md`.
+
+- `scripts/py/basket.py`: `_asegurar_observabilidad` solo abre el dashboard `basket-logs`
+  si la marca `DATA_DIR\logs\basket\.grafana-abierta` tiene más de 12 h (o no existe);
+  si no, solo imprime el enlace. `BASKET_NO_ABRIR_GRAFANA=1` sigue sin abrir nada.
+- Tests `BasketLogsTests`: 6 OK (nuevos: `test_una_sola_pestana_aunque_se_lancen_varios_comandos`,
+  `test_vuelve_a_abrir_pasadas_12_horas`); los 2 errores son los ya conocidos del worktree
+  sin `local-validation`.
+- Los 4 lotes de H2H y cuotas se relanzaron con `BASKET_NO_ABRIR_GRAFANA=1`, en el orden
+  pedido («empieza por los más recientes»): jugados del más reciente al más antiguo y
+  después los próximos (Paso 5 de `sql/consultas/2026-11-24_1400_partidos-todos-h2h-cuotas.sql`).

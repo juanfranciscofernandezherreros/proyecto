@@ -83,12 +83,39 @@ def _asegurar_observabilidad(comando, log):
               f"&from=now-3h&to=now&timezone=browser&var-comando=$__all&var-ejecucion=$__all"
               f"&var-buscar=&refresh=5s")
     print(f"Logs en vivo: {enlace}", flush=True)
-    # Pedido por el usuario: abrir siempre el dashboard, también en tareas programadas.
-    if os.environ.get("BASKET_NO_ABRIR_GRAFANA") != "1":
+    # Pedido por el usuario (2026-11-24): una sola pestaña. El dashboard muestra todas
+    # las ejecuciones y se refresca solo, así que se abre como mucho una vez cada 12 h.
+    if os.environ.get("BASKET_NO_ABRIR_GRAFANA") != "1" and _toca_abrir_grafana():
         try:
             webbrowser.open(enlace)
         except Exception as e:  # sin navegador no se corta el comando
             print(f"AVISO: no se pudo abrir el navegador ({e}).", flush=True)
+
+
+HORAS_ENTRE_PESTANAS = 12
+
+
+def marca_grafana():
+    """Fichero cuya fecha indica cuándo se abrió por última vez el dashboard."""
+    return fichero_log("x").parent / ".grafana-abierta"
+
+
+def _toca_abrir_grafana(ahora=None):
+    """True (y renueva la marca) si no se abrió el dashboard en las últimas 12 h."""
+    marca = marca_grafana()
+    ahora = ahora if ahora is not None else datetime.now().timestamp()
+    try:
+        if ahora - marca.stat().st_mtime < HORAS_ENTRE_PESTANAS * 3600:
+            return False
+    except OSError:
+        pass  # no existe: primera vez
+    try:
+        marca.parent.mkdir(parents=True, exist_ok=True)
+        marca.touch()
+        os.utime(marca, (ahora, ahora))
+    except OSError:
+        pass  # si no se puede guardar la marca, se abre igual
+    return True
 
 
 def _ejecutar(comando, args):

@@ -402,13 +402,17 @@ class BasketLogsTests(unittest.TestCase):
         for panel in d["dashboard"]["panels"]:
             self.assertEqual(panel["datasource"]["uid"], "loki-local")
 
-    def _observabilidad(self, comando, env=None):
+    def _observabilidad(self, comando, env=None, marca=None):
         """Ejecuta _asegurar_observabilidad sin Docker ni navegador; devuelve lo abierto."""
+        import tempfile
         from unittest import mock
         import basket
         ok = mock.Mock(returncode=0)
+        if marca is None:  # marca nueva en cada llamada: la primera vez siempre abre
+            marca = Path(tempfile.mkdtemp()) / ".grafana-abierta"
         with mock.patch.object(basket.subprocess, "run", return_value=ok), \
              mock.patch.object(basket.webbrowser, "open") as abrir, \
+             mock.patch.object(basket, "marca_grafana", return_value=marca), \
              mock.patch.dict(basket.os.environ, env or {}, clear=False):
             basket.os.environ.pop("BASKET_SIN_GRAFANA", None)
             if not env:
@@ -427,6 +431,22 @@ class BasketLogsTests(unittest.TestCase):
 
     def test_no_abre_con_variable(self):
         self._observabilidad("pendientes", {"BASKET_NO_ABRIR_GRAFANA": "1"}).assert_not_called()
+
+    def test_una_sola_pestana_aunque_se_lancen_varios_comandos(self):
+        import tempfile
+        marca = Path(tempfile.mkdtemp()) / ".grafana-abierta"
+        self._observabilidad("reextraer", marca=marca).assert_called_once()
+        for _ in range(3):  # lotes en paralelo: ya no abren más pestañas
+            self._observabilidad("reextraer", marca=marca).assert_not_called()
+
+    def test_vuelve_a_abrir_pasadas_12_horas(self):
+        import os
+        import tempfile
+        marca = Path(tempfile.mkdtemp()) / ".grafana-abierta"
+        marca.touch()
+        hace_13h = marca.stat().st_mtime - 13 * 3600
+        os.utime(marca, (hace_13h, hace_13h))
+        self._observabilidad("pendientes", marca=marca).assert_called_once()
 
 
 class TareaResultadosTests(unittest.TestCase):

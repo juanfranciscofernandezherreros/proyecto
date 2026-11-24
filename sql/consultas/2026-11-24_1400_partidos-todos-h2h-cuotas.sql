@@ -107,3 +107,30 @@ WHERE fecha >= '2026-11-01' AND fecha < '2026-12-01'
 ORDER BY (fecha >= now()),
          CASE WHEN fecha < now() THEN fecha END DESC,
          fecha ASC;
+
+-- PASO 7 · Alcance final definitivo («quiero las últimas dos semanas solo»): partidos
+--          jugados en los últimos 14 días sin H2H, del más reciente al más antiguo.
+SELECT match_id
+FROM (
+    SELECT match_id, max(event_datetime) AS fecha
+    FROM (SELECT match_id, event_datetime FROM fixtures.fixtures
+          UNION ALL SELECT match_id, event_datetime FROM results.results) u
+    WHERE NOT EXISTS (SELECT 1 FROM h2h.h2h h WHERE h.match_id = u.match_id)
+    GROUP BY match_id
+) p
+WHERE fecha >= now() - interval '14 days' AND fecha < now()
+ORDER BY fecha DESC;
+
+-- PASO 8 · Alcance final («si solo quiero los partidos de Euroliga»): Euroliga, jugados
+--          en los últimos 14 días y sin H2H, del más reciente al más antiguo.
+SELECT match_id
+FROM (
+    SELECT match_id, max(event_datetime) AS fecha, max(competition) AS competition
+    FROM (SELECT match_id, event_datetime, competition FROM fixtures.fixtures
+          UNION ALL SELECT match_id, event_datetime, competition FROM results.results) u
+    WHERE NOT EXISTS (SELECT 1 FROM h2h.h2h h WHERE h.match_id = u.match_id)
+    GROUP BY match_id
+) p
+WHERE competition = 'euroleague'
+  AND fecha >= now() - interval '14 days' AND fecha < now()
+ORDER BY fecha DESC;

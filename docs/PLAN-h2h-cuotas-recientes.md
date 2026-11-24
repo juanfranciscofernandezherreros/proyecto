@@ -37,9 +37,10 @@ repartió en `C:\data\basketball\h2h-cuotas\lista-t1..t4.txt` (progreso-t1..t4).
 Notas: la NBA no publica cuotas en Flashscore desde aquí (sale «sin datos»); los
 partidos lejanos aún no tienen cuotas y habrá que volver a extraerlas cerca de la fecha.
 
-- [ ] Extraer en 4 lotes en segundo plano. Alcance final pedido por el usuario: **solo
-      noviembre de 2026**, 462 partidos sin H2H (Paso 6 de la consulta 1400), primero los
-      jugados del más reciente al más antiguo y después los próximos.
+- [ ] Extraer en 4 lotes en segundo plano. Alcance final pedido por el usuario (tras pasar
+      por «todos», «noviembre» y «últimas dos semanas»): **solo Euroliga, jugados en los
+      últimos 14 días**, 30 partidos sin H2H (Paso 8 de la consulta 1400), en 2 lotes
+      (`lista-e1/e2`). Solo los CSV de H2H y cuotas; el resto ya estaba.
 - [ ] Revisar fallos y retomarlos con el mismo `--progreso`.
 - [ ] Contar en Postgres y Mongo cuántos partidos tienen H2H y cuotas al terminar.
 

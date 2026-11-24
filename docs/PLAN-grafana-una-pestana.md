@@ -17,4 +17,4 @@ con una pestaña.
       `DATA_DIR\logs\basket\.grafana-abierta`); si no, solo imprime el enlace.
 - [x] Tests en `tests/test_scripts_py.py` (`BasketLogsTests`): abre la primera vez, no
       la segunda, vuelve a abrir pasadas 12 h; `BASKET_NO_ABRIR_GRAFANA=1` sigue igual.
-- [ ] Evidencia en `docs/VERIFICACION-SDD.md`, `basket verificar` en verde y a `main`.
+- [x] Evidencia en `docs/VERIFICACION-SDD.md`, `basket verificar` en verde y a `main`.

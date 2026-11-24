@@ -563,3 +563,4 @@ Petición: «No me abras 2000000 grafanas, solo necesito un dashboard». Plan:
 - Los 4 lotes de H2H y cuotas se relanzaron con `BASKET_NO_ABRIR_GRAFANA=1`, en el orden
   pedido («empieza por los más recientes»): jugados del más reciente al más antiguo y
   después los próximos (Paso 5 de `sql/consultas/2026-11-24_1400_partidos-todos-h2h-cuotas.sql`).
+- `basket verificar`: VERDE.

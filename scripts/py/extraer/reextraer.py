@@ -6,9 +6,12 @@ ya tienen filas; este no, y sirve para corregir partidos cuyos datos estan mal.
 Pais y competicion se leen de results.results (o de fixtures.fixtures). Un fallo en un
 partido no detiene los demas.
 
-Uso:  python scripts\py\extraer\reextraer.py [--dataset equipo|jugadores|resumen|jugadas|todo]
+Uso:  python scripts\py\extraer\reextraer.py [--dataset equipo|jugadores|resumen|jugadas|todo|h2h-cuotas]
                                              [--fichero lista.txt] [--progreso progreso.txt] <match_id...>
-      --dataset  por defecto: todo
+      --dataset  por defecto: todo (equipo, jugadores, resumen y jugadas).
+                 h2h-cuotas: H2H y los 4 mercados de cuotas en una sola sesión del
+                 navegador; sirve también para partidos aún sin jugar. Un CSV vacío de
+                 estos (p. ej. la NBA no ofrece 1X2) se anota como OK «sin datos».
       --fichero  un match_id por linea (se ignora lo que haya tras un '|')
       --progreso fichero donde se anota cada partido y dataset (OK o FALLO). Si ya
                  existe, lo anotado como OK se salta: sirve para retomar un lote largo.
@@ -33,7 +36,20 @@ DATASETS = {
     "jugadores": ("PLAYER_STATS",   "player_stats.csv",      "PLAYER_STATS"),
     "resumen":   ("MATCH_SUMMARY",  "score_summary.csv",     "SCORE_SUMMARY"),
     "jugadas":   ("POINT_BY_POINT", None,                    "POINT_BY_POINT"),
+    # H2H y cuotas: van juntos en una sola llamada al bundle (ver _extraer_juntos).
+    "h2h":            ("H2H",                 "h2h.csv",                 "H2H"),
+    "cuota-ganador":  ("ODDS_HOME_AWAY",      "odds_home_away.csv",      "ODDS_HOME_AWAY"),
+    "cuota-1x2":      ("ODDS_1X2",            "odds_1x2.csv",            "ODDS_1X2"),
+    "cuota-total":    ("ODDS_OVER_UNDER",     "odds_over_under.csv",     "ODDS_OVER_UNDER"),
+    "cuota-handicap": ("ODDS_ASIAN_HANDICAP", "odds_asian_handicap.csv", "ODDS_ASIAN_HANDICAP"),
 }
+# Grupos de --dataset. «todo» no cambia (lo usa datos_ayer).
+GRUPOS = {
+    "todo": ["equipo", "jugadores", "resumen", "jugadas"],
+    "h2h-cuotas": ["h2h", "cuota-ganador", "cuota-1x2", "cuota-total", "cuota-handicap"],
+}
+# Datasets que pueden venir vacíos sin que sea un fallo y que se extraen juntos.
+OPCIONALES = set(GRUPOS["h2h-cuotas"])
 ID_VALIDO = re.compile(r"^[A-Za-z0-9_-]{4,20}$")
 
 
@@ -111,6 +127,35 @@ def _extraer(cfg, env, nombre, match_id, url, raiz):
     raise Fallo(f"{ultimo} tras 3 intentos")
 
 
+def _extraer_juntos(cfg, env, nombres, match_id, url, raiz):
+    """Extrae varios datasets opcionales con una sola llamada al bundle (un navegador).
+
+    Devuelve {nombre: CSV con filas o None si salió vacío}. Reintenta hasta 3 veces
+    mientras falte algún CSV; lanza Fallo con los que sigan sin generarse.
+    """
+    python, scraper = Path(cfg["PYTHON"]), Path(cfg["SCRAPER"])
+    resultado, ultimo = {}, ""
+    pendientes = list(nombres)
+    for _intento in range(3):
+        inicio = time.time() - 2
+        cmd = [str(python), str(scraper), "match", "bundle", url, "--data-dir", str(raiz)]
+        for nombre in pendientes:
+            cmd += ["--dataset", DATASETS[nombre][1]]
+        p = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8",
+                           errors="replace", timeout=900, env=env)
+        if p.returncode not in (0, 3):  # 3 = extracción parcial: se recoge lo que haya
+            ultimo = "scraper rc=%s: %s" % (p.returncode, (p.stdout + p.stderr)[-200:].replace("\n", " "))
+        for nombre in list(pendientes):
+            csv_f = _mas_reciente((raiz / match_id).glob(f"{DATASETS[nombre][2]}_*.csv"))
+            if csv_f and csv_f.stat().st_mtime >= inicio:
+                resultado[nombre] = csv_f if _tiene_filas(csv_f) else None
+                pendientes.remove(nombre)
+        if not pendientes:
+            return resultado
+        ultimo = ultimo or "sin CSV de " + ", ".join(DATASETS[n][0] for n in pendientes)
+    raise Fallo(f"{ultimo} tras 3 intentos", resultado)
+
+
 def _leer_progreso(progreso):
     """Devuelve el conjunto de (match_id, etiqueta) ya anotados como OK."""
     hechos = set()
@@ -176,9 +221,48 @@ def reextraer(match_ids, nombres, progreso=None):
                 _anotar(progreso, match_id, DATASETS[nombre][0], "FALLO", str(e)[:200])
             fallo += len(nombres)
             continue
+        juntos = [n for n in nombres if n in OPCIONALES and (match_id, DATASETS[n][0]) not in hechos]
+        extraidos = {}
+        if juntos:
+            try:
+                extraidos = _extraer_juntos(cfg, env, juntos, match_id, url, raiz)
+            except Fallo as e:
+                extraidos = e.args[1] if len(e.args) > 1 else {}
+                for nombre in juntos:
+                    if nombre not in extraidos:
+                        etiqueta = DATASETS[nombre][0]
+                        print(f"[{n}/{total}] {match_id} {country}/{competition} {etiqueta} FALLO {str(e.args[0])[:300]}", flush=True)
+                        _anotar(progreso, match_id, etiqueta, "FALLO", " ".join(str(e.args[0])[:200].split()))
+                        fallo += 1
+            except subprocess.TimeoutExpired as e:
+                for nombre in juntos:
+                    _anotar(progreso, match_id, DATASETS[nombre][0], "FALLO", "tiempo agotado")
+                print(f"[{n}/{total}] {match_id} {country}/{competition} FALLO tiempo agotado ({e.timeout}s)", flush=True)
+                fallo += len(juntos)
         for nombre in nombres:
             etiqueta = DATASETS[nombre][0]
             if (match_id, etiqueta) in hechos:
+                continue
+            if nombre in OPCIONALES:
+                if nombre not in extraidos:
+                    continue  # ya anotado como fallo
+                csv_f = extraidos[nombre]
+                if csv_f is None:
+                    print(f"[{n}/{total}] {match_id} {country}/{competition} {etiqueta} OK sin datos", flush=True)
+                    _anotar(progreso, match_id, etiqueta, "OK", "sin datos")
+                    ok += 1
+                    continue
+                try:
+                    resp = L.submit_and_wait(cfg, csv_f, timeout_min=15)
+                    if resp.get("status") != "COMPLETED":
+                        raise Fallo(f"launcher {resp.get('status')}")
+                    print(f"[{n}/{total}] {match_id} {country}/{competition} {etiqueta} OK {csv_f.name}", flush=True)
+                    _anotar(progreso, match_id, etiqueta, "OK", csv_f.name)
+                    ok += 1
+                except Exception as e:  # se anota y se sigue
+                    print(f"[{n}/{total}] {match_id} {country}/{competition} {etiqueta} FALLO {str(e)[:300]}", flush=True)
+                    _anotar(progreso, match_id, etiqueta, "FALLO", " ".join(str(e)[:200].split()))
+                    fallo += 1
                 continue
             paso = seguimiento.empezar(cfg, run_id, f"{country}/{competition}", country, competition,
                                        f"{etiqueta} {match_id}")
@@ -226,15 +310,15 @@ def _argumentos(args):
         else:
             ids.append(a.strip())
             i += 1
-    if dataset != "todo" and dataset not in DATASETS:
-        raise ValueError(f"Dataset invalido: {dataset}. Usa {', '.join(DATASETS)} o todo.")
+    if dataset not in GRUPOS and dataset not in DATASETS:
+        raise ValueError(f"Dataset invalido: {dataset}. Usa {', '.join(DATASETS)}, {' o '.join(GRUPOS)}.")
     unicos = list(dict.fromkeys(ids))
     if not unicos:
         raise ValueError("Indica al menos un match_id (o --fichero lista.txt).")
     malos = [m for m in unicos if not ID_VALIDO.match(m)]
     if malos:
         raise ValueError(f"match_id invalido: {', '.join(malos[:5])}")
-    return unicos, (list(DATASETS) if dataset == "todo" else [dataset]), progreso
+    return unicos, (list(GRUPOS[dataset]) if dataset in GRUPOS else [dataset]), progreso
 
 
 def main():
@@ -242,7 +326,7 @@ def main():
         match_ids, nombres, progreso = _argumentos(sys.argv[1:])
     except ValueError as e:
         print(f"[ERROR] {e}")
-        print("Uso: basket reextraer [--dataset equipo|jugadores|resumen|jugadas|todo] [--fichero lista.txt] [--progreso progreso.txt] <match_id...>")
+        print("Uso: basket reextraer [--dataset equipo|jugadores|resumen|jugadas|todo|h2h-cuotas] [--fichero lista.txt] [--progreso progreso.txt] <match_id...>")
         return 1
     return reextraer(match_ids, nombres, progreso)
 

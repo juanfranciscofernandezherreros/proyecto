@@ -9,6 +9,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 RAIZ = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(RAIZ / "scripts" / "py"))
@@ -122,6 +123,54 @@ class ReextraerArgumentosTests(unittest.TestCase):
                      ["--fichero", "no-existe.txt"], ["x'; DROP TABLE t; --"]):
             with self.assertRaises(ValueError, msg=str(args)):
                 reextraer._argumentos(args)
+
+
+class ReextraerH2hCuotasTests(unittest.TestCase):
+    def test_grupo_h2h_cuotas(self):
+        ids, nombres, _ = reextraer._argumentos(["--dataset", "h2h-cuotas", "vyf2I8i5"])
+        self.assertEqual(ids, ["vyf2I8i5"])
+        self.assertEqual(nombres, ["h2h", "cuota-ganador", "cuota-1x2", "cuota-total", "cuota-handicap"])
+        # «todo» no incluye H2H ni cuotas (lo usa datos_ayer).
+        _, todo, _ = reextraer._argumentos(["vyf2I8i5"])
+        self.assertNotIn("h2h", todo)
+
+    def _scraper_falso(self, raiz, contenido):
+        """subprocess.run falso: escribe los CSV indicados como haría el bundle."""
+        def run(cmd, **_kwargs):
+            carpeta = raiz / "m1"
+            carpeta.mkdir(exist_ok=True)
+            for prefijo, filas in contenido.items():
+                cuerpo = "cabecera\n" + "".join("fila\n" for _ in range(filas))
+                (carpeta / f"{prefijo}_20261124120000_m1.csv").write_text(cuerpo, encoding="utf-8")
+            return mock.Mock(returncode=0, stdout="", stderr="")
+        return run
+
+    def test_una_sola_llamada_y_vacio_no_es_fallo(self):
+        with tempfile.TemporaryDirectory() as d:
+            raiz = Path(d)
+            run = self._scraper_falso(raiz, {"H2H": 15, "ODDS_HOME_AWAY": 15, "ODDS_1X2": 0})
+            with mock.patch.object(reextraer.subprocess, "run", side_effect=run) as llamado:
+                res = reextraer._extraer_juntos(
+                    {"PYTHON": "py", "SCRAPER": "fs.py"}, {}, ["h2h", "cuota-ganador", "cuota-1x2"],
+                    "m1", "https://x/?mid=m1", raiz)
+            self.assertEqual(llamado.call_count, 1)
+            cmd = llamado.call_args.args[0]
+            self.assertEqual(cmd.count("--dataset"), 3)
+            self.assertEqual(res["h2h"].name, "H2H_20261124120000_m1.csv")
+            self.assertIsNone(res["cuota-1x2"])  # la NBA no ofrece 1X2
+
+    def test_si_falta_un_csv_reintenta_y_falla_con_lo_conseguido(self):
+        with tempfile.TemporaryDirectory() as d:
+            raiz = Path(d)
+            run = self._scraper_falso(raiz, {"H2H": 5})
+            with mock.patch.object(reextraer.subprocess, "run", side_effect=run) as llamado:
+                with self.assertRaises(reextraer.Fallo) as error:
+                    reextraer._extraer_juntos(
+                        {"PYTHON": "py", "SCRAPER": "fs.py"}, {}, ["h2h", "cuota-total"],
+                        "m1", "https://x/?mid=m1", raiz)
+            self.assertEqual(llamado.call_count, 3)
+            self.assertIn("ODDS_OVER_UNDER", str(error.exception.args[0]))
+            self.assertEqual(list(error.exception.args[1]), ["h2h"])
 
 
 class ReextraerProgresoTests(unittest.TestCase):

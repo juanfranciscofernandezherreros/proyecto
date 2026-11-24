@@ -516,6 +516,17 @@ Evidencia por paso. Ningún paso cambia el flujo del SDD §4 ni los puertos.
 | 4 | Web: pestaña «Todas» por defecto | web `cf171cc` + `413983a` en `main`: lo más destacado y luego por día y partido, de la más nueva a la más antigua; filtro de nivel y de competición; copiar. vitest 67 OK, `typecheck` y `build` OK. Navegador (8083): carga en 0,2 s sin esperar a los rankings, «649 curiosidades de 435 partidos (73 excepcionales)», primer día lunes 23/11; nivel 3 → 73; Liga Endesa → 39; móvil 375 px sin desbordar | ✅ |
 | 5 | Gate | `basket verificar` VERDE el 23/11 | ✅ |
 
+## Enlaces a la ficha del equipo (`docs/PLAN-enlaces-equipo.md`, 2026-11-24)
+
+| # | Requisito | Evidencia | Estado |
+|---|---|---|---|
+| 1 | API: nombre completo de la abreviatura en actuaciones (y `teamScore` correcto) | API `b97c284` en `main`: `TeamNames` decide el lado por la suma de puntos (players viene en orden alfabético; exacto en 811/878 partidos, el resto por cercanía, empate → sin resolver). Desplegada: 100/100 de la primera página con `teamName` y `teamScore` (antes `teamScore` siempre null); 19 505 actuaciones, 397 sin resolver (2 %); abreviaturas repetidas en una liga (TRE = Trento/Treviso, HAP = 4 Hapoel) se resuelven por partido | ✅ |
+| 2 | API: `teamName` en las curiosidades de jugadores | `PlayerLine`, `PlayerDoubles`, `HotPlayer`; desplegada: dobles-dobles 15/15, triples-dobles 16/16, 40 puntos 35/35, en racha 15/15 resueltos | ✅ |
+| 3 | API: tests | `TeamNamesTest` (6), `CuriosityCalculatorTest` +1, `MatchServiceImplTest` +1; `mvnw verify` 74 tests OK | ✅ |
+| 4 | Web: `TeamLink` en las tres páginas | web `a389b40` en `main`: enlaza con el nombre completo y deja como texto una abreviatura sin resolver; `TeamLink.test.tsx` (4); vitest 71 OK, `typecheck` y `build` OK | ✅ |
+| 5 | Desplegada y comprobada en el navegador (8083) | Imágenes reconstruidas desde el worktree y `docker compose up --no-build`. `/performances`: 100/100 equipos enlazados («SAS» → `/teams/San Antonio Spurs`, ficha con partidos); `/comebacks`: ganador 56/56 y rival 56/56; `/curiosities`: Partidos (equipo 15/15, ganador 40/40), Marcadores (20/20), Jugadores (equipo 30/30, equipo junto al jugador 51/51) | ✅ |
+| 6 | Gate | `basket verificar` VERDE el 24/11 | ✅ |
+
 ## H2H y cuotas desde los CSV existentes (`docs/PLAN-h2h.md`, 2026-11-24)
 
 | # | Requisito | Evidencia | Estado |

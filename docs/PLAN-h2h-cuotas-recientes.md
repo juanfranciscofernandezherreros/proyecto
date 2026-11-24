@@ -27,4 +27,18 @@ Euroliga y NBA y 125 jugados en 10 ligas).
 - [ ] Comprobar en Postgres, Mongo y en el navegador un partido próximo y uno jugado.
 - [ ] Evidencia en `docs/VERIFICACION-SDD.md`, `basket verificar` en verde y todo en `main`.
 
+## Ampliación: todos los partidos
+
+Petición: «Quiero que se extraigan todos los H2H y cuotas de los partidos». Según
+`sql/consultas/2026-11-24_1400_partidos-todos-h2h-cuotas.sql`: 3533 partidos, 3300 sin
+H2H (794 jugados, 133 próximos 14 días, 2372 más adelante). El usuario eligió **los
+3300** con **4 navegadores en paralelo** (~28 h). Los lotes A y B se pararon y todo se
+repartió en `C:\dataasketball\h2h-cuotas\lista-t1..t4.txt` (progreso-t1..t4).
+Notas: la NBA no publica cuotas en Flashscore desde aquí (sale «sin datos»); los
+partidos lejanos aún no tienen cuotas y habrá que volver a extraerlas cerca de la fecha.
+
+- [ ] Extraer los 3298 partidos en 4 lotes en segundo plano.
+- [ ] Revisar fallos y retomarlos con el mismo `--progreso`.
+- [ ] Contar en Postgres y Mongo cuántos partidos tienen H2H y cuotas al terminar.
+
 Fuera de alcance: que el ciclo diario extraiga H2H y cuotas de forma automática.

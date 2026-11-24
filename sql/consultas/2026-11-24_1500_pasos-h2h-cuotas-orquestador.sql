@@ -14,7 +14,9 @@
 --                  5 CSV; FAILED con «n con fallo».
 -- QUÉ HACER DESPUÉS       Si no hay filas con lotes en marcha, revisar que el lote se
 --                  lanzó con el reextraer.py de main (commit 1fe9075 o posterior).
--- RESULTADO EL 2026-11-24 (se completa tras ejecutarla)
+-- RESULTADO EL 2026-11-24  Primero 0 filas (lotes aún arrancando); después
+--                  RUNNING europe/euroleague «H2H+CUOTAS EZya2rat», visible en Grafana
+--                  como «Extrayendo ahora 1».
 -- =============================================================================
 
 -- PASO 1 · Los últimos pasos H2H+CUOTAS.

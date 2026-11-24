@@ -599,3 +599,15 @@ los CSV de H2H y cuotas. Plan: `docs/PLAN-procesamiento-h2h-cuotas.md`.
   Navegador: la pestaña muestra la tabla «H2H Y CUOTAS» con esos 5 CSV, «Completado» y
   sus horas (24/11/26 12:06–12:07).
 - `basket verificar`: VERDE.
+
+## H2H y cuotas de Euroliga, últimas dos semanas: cierre (2026-11-24)
+
+- Alcance final pedido por el usuario: Euroliga, jugados en los últimos 14 días, solo los
+  CSV de H2H y cuotas (Paso 8 de `sql/consultas/2026-11-24_1400_partidos-todos-h2h-cuotas.sql`).
+- Lotes: E1 «RESUMEN: 60 OK, 0 con fallo»; E2 «RESUMEN: 63 OK, 0 con fallo» (incluye lo
+  hecho antes de relanzarlos con el paso en Grafana); 0 FALLO en los ficheros de progreso.
+- `sql/consultas/2026-11-24_1530_euroliga-h2h-cuotas-resultado.sql`: 30 partidos, 30 con H2H
+  y 30 con cuotas en Postgres; Mongo 30/30/30. API de thIAMoUj (el último): los 5 CSV
+  COMPLETED (15 / 10 / 6 / 104 / 72 filas).
+- Lotes de las demás ligas (lista-t1..t4) parados a petición del usuario; se pueden retomar
+  con su `--progreso`.

@@ -37,15 +37,15 @@ repartió en `C:\data\basketball\h2h-cuotas\lista-t1..t4.txt` (progreso-t1..t4).
 Notas: la NBA no publica cuotas en Flashscore desde aquí (sale «sin datos»); los
 partidos lejanos aún no tienen cuotas y habrá que volver a extraerlas cerca de la fecha.
 
-- [ ] Extraer en 4 lotes en segundo plano. Alcance final pedido por el usuario (tras pasar
+- [x] Extraer en 4 lotes en segundo plano. Alcance final pedido por el usuario (tras pasar
       por «todos», «noviembre» y «últimas dos semanas»): **solo Euroliga, jugados en los
       últimos 14 días**, 30 partidos sin H2H (Paso 8 de la consulta 1400), en 2 lotes
       (`lista-e1/e2`). Solo los CSV de H2H y cuotas; el resto ya estaba.
-- [ ] Revisar fallos y retomarlos con el mismo `--progreso`.
+- [x] Revisar fallos y retomarlos con el mismo `--progreso`.
 - [x] Que la extracción de H2H y cuotas se vea en Grafana («Procesamiento en vivo»,
       panel del orquestador): un paso `H2H+CUOTAS <match_id>` por partido con
       `seguimiento.empezar/terminar` (COMPLETED con el resumen de CSV, FAILED si falla
       alguno); test en `tests/test_scripts_py.py`.
-- [ ] Contar en Postgres y Mongo cuántos partidos tienen H2H y cuotas al terminar.
+- [x] Contar en Postgres y Mongo cuántos partidos tienen H2H y cuotas al terminar.
 
 Fuera de alcance: que el ciclo diario extraiga H2H y cuotas de forma automática.

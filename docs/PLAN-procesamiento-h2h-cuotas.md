@@ -24,5 +24,5 @@ activar «Relanzar procesamiento» ni el aviso de orden en partidos sin H2H ni c
       0 filas. Test unitario.
 - [x] Web: tabla «H2H y cuotas» debajo de la de etapas en la pestaña Procesamiento;
       tipos y test de vitest.
-- [ ] Compilar (`mvnw package`), desplegar API y web y comprobar UPrFb0b5 en el navegador.
-- [ ] Evidencia en `docs/VERIFICACION-SDD.md`, `basket verificar` en verde y a `main`.
+- [x] Compilar (`mvnw package`), desplegar API y web y comprobar UPrFb0b5 en el navegador.
+- [x] Evidencia en `docs/VERIFICACION-SDD.md`, `basket verificar` en verde y a `main`.

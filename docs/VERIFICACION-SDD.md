@@ -580,3 +580,22 @@ salía «Extrayendo ahora 0» con los lotes en marcha). Plan: `docs/PLAN-h2h-cuo
   `test_si_falla_la_carga_el_paso_queda_failed`).
 - `basket verificar`: VERDE.
 - Comprobado en Grafana (Procesamiento en vivo, Euroliga): «Extrayendo ahora 1» y fila «EN CURSO europe/euroleague H2H+CUOTAS EZya2rat».
+
+## CSV de H2H y cuotas en la pestaña Procesamiento del partido (2026-11-24)
+
+Petición: en http://localhost:8083/matches/UPrFb0b5, pestaña Procesamiento, ver también
+los CSV de H2H y cuotas. Plan: `docs/PLAN-procesamiento-h2h-cuotas.md`.
+
+- API `8e1ef79`: `GET /api/v1/matches/{id}/processing` devuelve `extraSteps` (H2H, CUOTAS
+  GANADOR, CUOTAS 1X2, CUOTAS TOTAL, CUOTAS HANDICAP) con el CSV más reciente de
+  `public.batch_launch_request` por prefijo, su estado y filas en `h2h.h2h` / `odds.odds`
+  (por `market_type`); sin esquema cuenta 0. Las 4 etapas de siempre no cambian, así que
+  no activa «Relanzar procesamiento». Tests: 75 OK (nuevo
+  `reports_h2h_and_odds_csvs_apart_from_the_four_stages`).
+- Web `49e3b7a`: tabla «H2H y cuotas» debajo de las etapas. vitest: 85 OK (nuevo
+  `ProcessingTable.test.tsx`); `tsc --noEmit` sin errores.
+- Desplegado desde el checkout principal (`mvnw package` + `docker compose build/up` de
+  API y web). API: los 5 CSV de UPrFb0b5 COMPLETED con 15 / 10 / 6 / 98 / 74 filas.
+  Navegador: la pestaña muestra la tabla «H2H Y CUOTAS» con esos 5 CSV, «Completado» y
+  sus horas (24/11/26 12:06–12:07).
+- `basket verificar`: VERDE.

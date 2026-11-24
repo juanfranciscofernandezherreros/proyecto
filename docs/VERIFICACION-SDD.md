@@ -526,3 +526,15 @@ Evidencia por paso. Ningún paso cambia el flujo del SDD §4 ni los puertos.
 | 4 | Web: `TeamLink` en las tres páginas | web `a389b40` en `main`: enlaza con el nombre completo y deja como texto una abreviatura sin resolver; `TeamLink.test.tsx` (4); vitest 71 OK, `typecheck` y `build` OK | ✅ |
 | 5 | Desplegada y comprobada en el navegador (8083) | Imágenes reconstruidas desde el worktree y `docker compose up --no-build`. `/performances`: 100/100 equipos enlazados («SAS» → `/teams/San Antonio Spurs`, ficha con partidos); `/comebacks`: ganador 56/56 y rival 56/56; `/curiosities`: Partidos (equipo 15/15, ganador 40/40), Marcadores (20/20), Jugadores (equipo 30/30, equipo junto al jugador 51/51) | ✅ |
 | 6 | Gate | `basket verificar` VERDE el 24/11 | ✅ |
+
+## H2H y cuotas desde los CSV existentes (`docs/PLAN-h2h.md`, 2026-11-24)
+
+| # | Requisito | Evidencia | Estado |
+|---|---|---|---|
+| 1 | Diagnóstico del flujo | `2026-11-24_1010_h2h-estado.sql`: schema `h2h` inexistente; Mongo 0/3533 partidos con `h2h`; projector sin código de H2H ni de cuotas; web con tablas en bruto | ✅ |
+| 2 | Carga en Postgres de los CSV existentes | `csv-extra-batch` `02f2e8c` en `main`: `--files-from` (1969 CSV en 9 s, 0 fallos; antes ~10 s por CSV) y `market_type` completo; tests del importador 4 OK. `2026-11-24_1100_cuotas-estado.sql`: H2H 3924 filas, 292 CSV con contenido distinto, 217 partidos (de 394: 79 vacíos y 23 copias); cuotas 38063 filas (home_away 272 partidos, 1x2 186, over_under 274, asian_handicap 274). `2026-11-24_1110_…` (ESCRITURA): mercado corregido en lo ya cargado, mismas filas | ✅ |
+| 3 | Projector: H2H y cuotas de Postgres a Mongo | projector `19fb92f` en `main`: datasources `h2h` y `odds`, último CSV por partido (y mercado), `H2hRows` corrige eliminatorias y prórrogas; sin tabla → aviso y proyección sin esa sección; `mvn verify` 21 tests OK. Consultas del lector probadas: `2026-11-24_1030_…` (ABQKswin, 15 filas en orden) y `2026-11-24_1130_…` (0fAJZWz1) | ✅ |
+| 4 | Mongo y API | Desplegado: 217 partidos con `h2h` y 275 con `odds` (= Postgres); `GET /api/v1/matches/ABQKswin` devuelve las 15 filas de H2H | ✅ |
+| 5 | Web: pestañas H2H y Cuotas legibles | web `6821102` en `main`: H2H por bloques (local, visitante, cara a cara con balance), V/D/E, notas en español y `TeamLink`; Cuotas: ganador y 1X2 con mejor cuota y probabilidad sin margen, total y hándicap con línea principal. vitest 83 OK, `typecheck` y `build` OK | ✅ |
+| 6 | Navegador (8083) | ABQKswin: «Últimos partidos de Trieste / de Venezia / Cara a cara», balance Trieste 0 – 5 Venezia, 34 enlaces a equipos. OCsaPYRs: 10 casas; Ganador Fenerbahce 81 % – Partizan 19 %; 1X2 77/5/18 %; total 162,5 (35 líneas); hándicap Fenerbahce -10,5 (30 líneas) | ✅ |
+| 7 | Gate | `basket verificar` VERDE el 24/11 | ✅ |

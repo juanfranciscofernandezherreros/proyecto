@@ -19,13 +19,18 @@ Euroliga y NBA y 125 jugados en 10 ligas).
 
 ## Backlog
 
-- [ ] `basket reextraer --dataset h2h-cuotas`: una sola sesión del navegador por partido
+- [x] `basket reextraer --dataset h2h-cuotas`: una sola sesión del navegador por partido
       para H2H y los 4 mercados; un CSV vacío de estos datasets cuenta como «sin datos»,
       no como fallo; tests en `tests/test_scripts_py.py`.
 - [ ] Checkout principal: `python-pyppeter` a `main` y puntero del superproyecto a `e7a7590`.
-- [ ] Extraer los 180 partidos en segundo plano con `--progreso` (se puede retomar).
-- [ ] Comprobar en Postgres, Mongo y en el navegador un partido próximo y uno jugado.
-- [ ] Evidencia en `docs/VERIFICACION-SDD.md`, `basket verificar` en verde y todo en `main`.
+      **No se hace**: `KAN-341` tiene 8 commits que no están en su `main` y de los que depende
+      el ciclo diario; en su lugar se corrigió `KAN-341` (`da33093` URL de jugadores, `ea8b6c5`
+      cuotas solo de casas de apuestas).
+- [x] Extraer en segundo plano con `--progreso`: sustituido por el alcance final de la
+      ampliación (Euroliga, dos últimas semanas, 30 partidos).
+- [x] Comprobar en Postgres, Mongo y en el navegador: A19WzKdM, Aw3RhVRq, UPrFb0b5 y los 30
+      de Euroliga (30/30 en Postgres y Mongo).
+- [x] Evidencia en `docs/VERIFICACION-SDD.md`, `basket verificar` en verde y todo en `main`.
 
 ## Ampliación: todos los partidos
 

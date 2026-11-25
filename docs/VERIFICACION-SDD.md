@@ -623,3 +623,17 @@ Euroliga de los próximos 7 días (6 hoy y 4 mañana; 9 no tenían nada), Paso 3
 - Mongo: los 10 con `h2h` y `odds` (Monitor «mongo 10/10»). API de jyeyBUmS: h2h 15, odds 193.
 - Navegador, Valencia–Panathinaikos (jyeyBUmS, hoy 19:30 UTC): pestaña Cuotas con 10 casas,
   ganador 52 % / 48 %, total 175,5 y hándicap Valencia -1,5.
+
+## Sin «Procesamiento incompleto» en partidos sin jugar (2026-11-25)
+
+Petición: ocultar el aviso y el botón «Relanzar procesamiento» en partidos que aún no se
+han jugado. Plan: `docs/PLAN-procesamiento-h2h-cuotas.md` (ampliación).
+
+- Web `be1f410`: `utils/processing.ts` (`puedeRelanzarProcesamiento`) exige que el partido
+  esté finalizado (`isMatchFinished`). vitest: 90 OK (nuevo `utils/processing.test.ts`);
+  `tsc --noEmit` sin errores.
+- Desplegada la web (bundle `index-DQtQXGMQ.js`). Navegador:
+  - 8fz9PT2L (Real Madrid–Zalgiris, PROGRAMADO): sin aviso ni botón.
+  - 04eWZk4U (FINALIZADO, le falta PLAY_BY_PLAY): «Procesamiento incompleto: PLAY_BY_PLAY»
+    y el botón siguen apareciendo.
+- `basket verificar`: VERDE.

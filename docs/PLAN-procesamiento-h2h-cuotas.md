@@ -35,5 +35,5 @@ jugadas porque no se han jugado, y el botón «Relanzar procesamiento» no tiene
 
 - [x] Web: `puedeRelanzarProcesamiento` (función pura en `utils/processing.ts`) exige que
       el partido esté finalizado (`isMatchFinished`); test de vitest.
-- [ ] Desplegar la web y comprobar jyeyBUmS (sin aviso) y un partido jugado incompleto.
-- [ ] Evidencia, `basket verificar` en verde y a `main`.
+- [x] Desplegar la web y comprobar un partido sin jugar (8fz9PT2L: jyeyBUmS ya se había jugado) sin aviso y un partido jugado incompleto.
+- [x] Evidencia, `basket verificar` en verde y a `main`.

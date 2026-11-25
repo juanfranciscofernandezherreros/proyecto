@@ -26,3 +26,14 @@ activar «Relanzar procesamiento» ni el aviso de orden en partidos sin H2H ni c
       tipos y test de vitest.
 - [x] Compilar (`mvnw package`), desplegar API y web y comprobar UPrFb0b5 en el navegador.
 - [x] Evidencia en `docs/VERIFICACION-SDD.md`, `basket verificar` en verde y a `main`.
+
+## Ampliación: sin «Procesamiento incompleto» en partidos sin jugar
+
+Petición: ocultarlo en los partidos que aún no se han jugado (p. ej. jyeyBUmS,
+Valencia–Panathinaikos, PROGRAMADO): no tienen resumen, estadísticas, jugadores ni
+jugadas porque no se han jugado, y el botón «Relanzar procesamiento» no tiene sentido.
+
+- [x] Web: `puedeRelanzarProcesamiento` (función pura en `utils/processing.ts`) exige que
+      el partido esté finalizado (`isMatchFinished`); test de vitest.
+- [ ] Desplegar la web y comprobar jyeyBUmS (sin aviso) y un partido jugado incompleto.
+- [ ] Evidencia, `basket verificar` en verde y a `main`.
